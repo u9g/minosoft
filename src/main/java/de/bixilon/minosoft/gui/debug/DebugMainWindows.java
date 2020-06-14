@@ -11,10 +11,19 @@
  *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
-package de.bixilon.minosoft;
+package de.bixilon.minosoft.gui.debug;
 
-public class Config {
-    public static String homeDir;
-    public static String configFileName = "game.yml";
-    public static boolean skipAuthentication = true; // only for offline development
+import javafx.application.Application;
+import javafx.stage.Stage;
+
+public class DebugMainWindows extends Application {
+
+    public static void run() {
+        launch();
+    }
+
+    @Override
+    public void start(Stage stage) {
+
+    }
 }

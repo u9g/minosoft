@@ -22,22 +22,23 @@ import de.bixilon.minosoft.protocol.packets.serverbound.login.PacketLoginStart;
 import de.bixilon.minosoft.protocol.packets.serverbound.play.PacketChatMessage;
 import de.bixilon.minosoft.protocol.packets.serverbound.status.PacketStatusPing;
 import de.bixilon.minosoft.protocol.packets.serverbound.status.PacketStatusRequest;
+import de.bixilon.minosoft.protocol.protocol.ConnectionHandler;
 import de.bixilon.minosoft.protocol.protocol.ConnectionState;
 import de.bixilon.minosoft.protocol.protocol.PacketHandler;
 import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Connection {
     private final String host;
     private final int port;
     private final Network network;
-    private final PacketHandler handler;
+    private final List<PacketHandler> handlers;
     private final ArrayList<ClientboundPacket> handlingQueue;
+    Thread handleThread;
     private Player player;
     private ConnectionState state = ConnectionState.DISCONNECTED;
-    Thread handleThread;
-
     private boolean onlyPing;
 
     public Connection(String host, int port) {
@@ -45,7 +46,8 @@ public class Connection {
         this.port = port;
         network = new Network(this);
         handlingQueue = new ArrayList<>();
-        handler = new PacketHandler(this);
+        handlers = new ArrayList<>();
+        handlers.add(new ConnectionHandler(this));
     }
 
     /**
@@ -109,8 +111,8 @@ public class Connection {
         return ProtocolVersion.VERSION_1_7_10;
     }
 
-    public PacketHandler getHandler() {
-        return this.handler;
+    public List<PacketHandler> getHandlers() {
+        return this.handlers;
     }
 
     public void handle(ClientboundPacket p) {
@@ -130,6 +132,10 @@ public class Connection {
         return player;
     }
 
+    public void setPlayer(Player player) {
+        this.player = player;
+    }
+
     public void sendPacket(ServerboundPacket p) {
         network.sendPacket(p);
     }
@@ -140,7 +146,9 @@ public class Connection {
                 while (handlingQueue.size() > 0) {
                     try {
                         handlingQueue.get(0).log();
-                        handlingQueue.get(0).handle(getHandler());
+                        for (PacketHandler handler : getHandlers()) {
+                            handlingQueue.get(0).handle(handler);
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -156,11 +164,11 @@ public class Connection {
         handleThread.start();
     }
 
-    public void setPlayer(Player player) {
-        this.player = player;
-    }
-
     public void sendChatMessage(String message) {
         sendPacket(new PacketChatMessage(message));
+    }
+
+    public void addHandler(PacketHandler handler) {
+        handlers.add(handler);
     }
 }
