@@ -11,19 +11,22 @@
  *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
-package de.bixilon.minosoft.gui.debug;
+package de.bixilon.minosoft.debug.handling;
 
-import javafx.application.Application;
-import javafx.stage.Stage;
+import de.bixilon.minosoft.debug.DebugWindow;
+import de.bixilon.minosoft.protocol.packets.clientbound.play.PacketChatMessage;
+import de.bixilon.minosoft.protocol.protocol.PacketHandler;
 
-public class DebugMainWindows extends Application {
+public class DebugUIPacketHandler extends PacketHandler {
+    DebugWindow window;
 
-    public static void run() {
-        launch();
+    public DebugUIPacketHandler(DebugWindow window) {
+        this.window = window;
     }
 
     @Override
-    public void start(Stage stage) {
-
+    public void handle(PacketChatMessage pkg) {
+        window.getUIHandler().printText(pkg.getChatComponent());
     }
+
 }

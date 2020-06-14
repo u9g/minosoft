@@ -13,6 +13,9 @@
 
 package de.bixilon.minosoft.protocol.network;
 
+import de.bixilon.minosoft.Minosoft;
+import de.bixilon.minosoft.config.GameConfiguration;
+import de.bixilon.minosoft.debug.DebugWindow;
 import de.bixilon.minosoft.game.datatypes.Player;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.packets.ClientboundPacket;
@@ -40,6 +43,7 @@ public class Connection {
     private Player player;
     private ConnectionState state = ConnectionState.DISCONNECTED;
     private boolean onlyPing;
+    private DebugWindow debugWindow;
 
     public Connection(String host, int port) {
         this.host = host;
@@ -102,6 +106,14 @@ public class Connection {
                 break;
             case LOGIN:
                 network.sendPacket(new PacketLoginStart(player));
+                break;
+            case PLAY:
+                // connected, start debug UI if enabled
+                if (Minosoft.getConfig().getBoolean(GameConfiguration.DEBUG_UI)) {
+                    // nice dude, start
+                    debugWindow = new DebugWindow(this);
+                    debugWindow.run();
+                }
                 break;
         }
     }

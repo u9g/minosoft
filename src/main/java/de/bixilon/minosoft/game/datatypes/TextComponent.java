@@ -53,7 +53,6 @@ public class TextComponent {
                 }
                 buffer.append(object.getString("text"));
             }
-            buffer.append(ChatAttributes.RESET);
             return buffer.toString();
         }
         return "";
