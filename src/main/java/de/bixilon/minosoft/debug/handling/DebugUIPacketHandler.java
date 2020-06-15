@@ -15,6 +15,9 @@ package de.bixilon.minosoft.debug.handling;
 
 import de.bixilon.minosoft.debug.DebugWindow;
 import de.bixilon.minosoft.protocol.packets.clientbound.play.PacketChatMessage;
+import de.bixilon.minosoft.protocol.packets.clientbound.play.PacketDestroyEntity;
+import de.bixilon.minosoft.protocol.packets.clientbound.play.PacketSpawnMob;
+import de.bixilon.minosoft.protocol.packets.clientbound.play.PacketSpawnObject;
 import de.bixilon.minosoft.protocol.protocol.PacketHandler;
 
 public class DebugUIPacketHandler extends PacketHandler {
@@ -27,6 +30,21 @@ public class DebugUIPacketHandler extends PacketHandler {
     @Override
     public void handle(PacketChatMessage pkg) {
         window.getUIHandler().printText(pkg.getTextComponent());
+    }
+
+    @Override
+    public void handle(PacketSpawnMob pkg) {
+        window.getUIHandler().addEntity(pkg.getMob());
+    }
+
+    @Override
+    public void handle(PacketSpawnObject pkg) {
+        window.getUIHandler().addEntity(pkg.getObject());
+    }
+
+    @Override
+    public void handle(PacketDestroyEntity pkg) {
+        window.getUIHandler().removeEntities(pkg.getEntityIds());
     }
 
 }
