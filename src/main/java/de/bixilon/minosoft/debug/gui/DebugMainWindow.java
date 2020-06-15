@@ -21,6 +21,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -60,6 +61,7 @@ public class DebugMainWindow extends Application {
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.setTitle("Minosoft DebugUI");
+        stage.getIcons().add(new Image(DebugMainWindow.class.getResourceAsStream("/icons/windowIcon.png")));
         stage.show();
 
         // autoscroll for chat
