@@ -14,9 +14,12 @@
 package de.bixilon.minosoft.render;
 
 import javafx.application.Application;
-import javafx.scene.Parent;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+
+import java.io.IOException;
 
 public class StartMenu extends Application {
 
@@ -25,10 +28,16 @@ public class StartMenu extends Application {
     }
 
     @Override
-    public void start(Stage primaryStage) {
-        Parent root = FXMLLoader.load(getClass().getResource("StartMenu.fxml"));
-        primaryStage.setTitle("FXML");
-        primaryStage.setScene(new Scene(root, 100, 57));
-        primaryStage.show();
+    public void start(Stage stage) throws IOException {
+        VBox root = FXMLLoader.load(getClass().getResource("/layout/main/StartMenu.fxml"));
+        Scene scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setTitle("Minosoft DebugUI");
+
+        stage.show();
+        // bring to front
+        stage.setAlwaysOnTop(true);
+        stage.setAlwaysOnTop(false);
+
     }
 }
