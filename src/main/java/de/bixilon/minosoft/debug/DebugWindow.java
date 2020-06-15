@@ -37,6 +37,7 @@ public class DebugWindow {
         // start gui
         uiThread = new Thread(() -> {
             DebugMainWindow.setHandler(handler);
+            DebugMainWindow.setConnection(connection);
             DebugMainWindow.initAndShow();
         });
         uiThread.start();

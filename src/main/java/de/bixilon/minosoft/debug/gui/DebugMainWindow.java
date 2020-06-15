@@ -14,12 +14,14 @@
 package de.bixilon.minosoft.debug.gui;
 
 import de.bixilon.minosoft.debug.handling.DebugUIHandler;
+import de.bixilon.minosoft.protocol.network.Connection;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -29,6 +31,7 @@ public class DebugMainWindow extends Application {
     static DebugUIHandler handler;
     static Stage stage;
     static boolean initialized = false;
+    private static Connection connection;
 
     public static void initAndShow() {
         launch();
@@ -46,6 +49,10 @@ public class DebugMainWindow extends Application {
         return initialized;
     }
 
+    public static void setConnection(Connection connection) {
+        DebugMainWindow.connection = connection;
+    }
+
     @Override
     public void start(Stage stage) throws IOException {
 
@@ -56,14 +63,16 @@ public class DebugMainWindow extends Application {
         stage.show();
 
         // autoscroll for chat
-        ((TextArea) scene.lookup("#chat")).textProperty().addListener(new ChangeListener<Object>() {
-            @Override
-            public void changed(ObservableValue<?> observableValue, Object o, Object t1) {
-                ((TextArea) scene.lookup("#chat")).setScrollTop(Double.MAX_VALUE); //this will scroll to the bottom
-
+        ((TextArea) scene.lookup("#chat")).textProperty().addListener((ChangeListener<Object>) (observableValue, o, t1) -> ((TextArea) scene.lookup("#chat")).setScrollTop(Double.MAX_VALUE));
+        // listen for enter in text field
+        TextField chatToSend = ((TextField) scene.lookup("#chatToSend"));
+        chatToSend.setOnKeyPressed(event -> {
+            if (event.getCode().equals(KeyCode.ENTER)) {
+                // send chat message
+                connection.sendChatMessage(chatToSend.getText());
+                chatToSend.setText("");
             }
         });
-
 
         DebugMainWindow.stage = stage;
         initialized = true;
