@@ -115,6 +115,10 @@ public class Connection {
                     debugWindow.run();
                 }
                 break;
+            case DISCONNECTED:
+                if (Minosoft.getConfig().getBoolean(GameConfiguration.DEBUG_UI)) {
+                    debugWindow.disconnect();
+                }
         }
     }
 
@@ -182,5 +186,9 @@ public class Connection {
 
     public void addHandler(PacketHandler handler) {
         handlers.add(handler);
+    }
+
+    public boolean isConnected() {
+        return network.isConnected();
     }
 }

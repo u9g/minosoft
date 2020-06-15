@@ -14,11 +14,10 @@
 package de.bixilon.minosoft.debug.handling;
 
 import de.bixilon.minosoft.debug.DebugWindow;
-import de.bixilon.minosoft.protocol.packets.clientbound.play.PacketChatMessage;
-import de.bixilon.minosoft.protocol.packets.clientbound.play.PacketDestroyEntity;
-import de.bixilon.minosoft.protocol.packets.clientbound.play.PacketSpawnMob;
-import de.bixilon.minosoft.protocol.packets.clientbound.play.PacketSpawnObject;
+import de.bixilon.minosoft.protocol.packets.clientbound.play.*;
 import de.bixilon.minosoft.protocol.protocol.PacketHandler;
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
 
 public class DebugUIPacketHandler extends PacketHandler {
     DebugWindow window;
@@ -45,6 +44,17 @@ public class DebugUIPacketHandler extends PacketHandler {
     @Override
     public void handle(PacketDestroyEntity pkg) {
         window.getUIHandler().removeEntities(pkg.getEntityIds());
+    }
+
+    @Override
+    public void handle(PacketDisconnect pkg) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Disconnected!");
+            alert.setHeaderText("You have been disconnected from the server");
+            alert.setContentText(pkg.getReason().getRawMessage());
+            alert.show();
+        });
     }
 
 }

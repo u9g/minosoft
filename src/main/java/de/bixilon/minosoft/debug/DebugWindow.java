@@ -46,4 +46,8 @@ public class DebugWindow {
     public DebugUIHandler getUIHandler() {
         return handler;
     }
+
+    public void disconnect() {
+        DebugMainWindow.disconnect();
+    }
 }

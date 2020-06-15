@@ -58,6 +58,11 @@ public class DebugMainWindow extends Application {
     }
 
     private static void showCloseConfirmation() {
+        if (!connection.isConnected()) {
+            // already disconnected
+            stage.close();
+            return;
+        }
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Disconnect?");
         alert.setHeaderText("Do you want to disconnect from the server?");
@@ -82,6 +87,20 @@ public class DebugMainWindow extends Application {
             stage.close();
         }
         // else return
+    }
+
+    public static void disconnect() {
+        Platform.runLater(() -> {
+            // disable all gui parts (interactable nodes)
+
+            Text statusBarServerAddress = (Text) stage.getScene().lookup("#statusBarServerAddress");
+            statusBarServerAddress.setText("Disconnected");
+            statusBarServerAddress.setDisable(true);
+
+
+            TextField chatToSend = ((TextField) stage.getScene().lookup("#chatToSend"));
+            chatToSend.setDisable(true);
+        });
     }
 
     @Override
