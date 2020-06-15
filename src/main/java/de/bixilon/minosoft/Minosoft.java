@@ -51,7 +51,6 @@ public class Minosoft {
 
         checkClientToken();
 
-        Connection c = new Connection(config.getString("debug.host"), config.getInteger("debug.port"));
         accountList = config.getMojangAccounts();
         if (accountList.size() == 0) {
             /*
@@ -66,8 +65,10 @@ public class Minosoft {
             System.exit(1);
         }
         account.saveToConfig();
-        c.setPlayer(new Player(account));
-        c.connect();
+
+        Connection connection = new Connection(config.getString("debug.host"), config.getInteger("debug.port"));
+        connection.setPlayer(new Player(account));
+        connection.connect();
     }
 
     /**
