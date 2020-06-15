@@ -5,23 +5,33 @@
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
 <?import javafx.scene.text.TextFlow?>
 <VBox xmlns:fx="http://javafx.com/fxml/1" prefHeight="400.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/8.0.171">
     <AnchorPane prefHeight="666.0" prefWidth="998.0" VBox.vgrow="ALWAYS">
-        <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0"
+        <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="20.0"
                  AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <Tab text="Chat">
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                     <ScrollPane layoutX="441.0" layoutY="184.0" AnchorPane.bottomAnchor="28.0"
                                 AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                        <content>
-                            <TextFlow id="chat" prefWidth="635.0"/>
-                        </content>
+                        <TextFlow id="chat" prefWidth="635.0"/>
                     </ScrollPane>
                     <TextField id="chatToSend" promptText="&lt;Enter Chat Message&gt;" AnchorPane.bottomAnchor="0.0"
-                               AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="339.0"/>
+                               AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"/>
                 </AnchorPane>
             </Tab>
         </TabPane>
+        <AnchorPane prefHeight="20.0" prefWidth="640.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                    AnchorPane.rightAnchor="0.0">
+            <Text id="statusBarServerAddress" layoutX="408.0" layoutY="15.0" strokeType="OUTSIDE" strokeWidth="0.0"
+                  text="Connected to %s:%d" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                  AnchorPane.topAnchor="0.0">
+                <font>
+                    <Font size="12.0"/>
+                </font>
+            </Text>
+        </AnchorPane>
     </AnchorPane>
 </VBox>

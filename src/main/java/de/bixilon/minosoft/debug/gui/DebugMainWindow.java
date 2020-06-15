@@ -16,15 +16,20 @@ package de.bixilon.minosoft.debug.gui;
 import de.bixilon.minosoft.debug.handling.DebugUIHandler;
 import de.bixilon.minosoft.protocol.network.Connection;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.Optional;
 
 public class DebugMainWindow extends Application {
     static DebugUIHandler handler;
@@ -52,6 +57,33 @@ public class DebugMainWindow extends Application {
         DebugMainWindow.connection = connection;
     }
 
+    private static void showCloseConfirmation() {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Disconnect?");
+        alert.setHeaderText("Do you want to disconnect from the server?");
+
+        ButtonType yes = new ButtonType("Yes");
+        ButtonType no = new ButtonType("No");
+        ButtonType cancel = new ButtonType("Cancel");
+
+        alert.getButtonTypes().clear();
+
+        alert.getButtonTypes().addAll(yes, no, cancel);
+
+        Optional<ButtonType> option = alert.showAndWait();
+        if (option.isEmpty()) {
+            // no selection
+            return;
+        }
+        if (option.get() == no) {
+            stage.close();
+        } else if (option.get() == yes) {
+            connection.disconnect();
+            stage.close();
+        }
+        // else return
+    }
+
     @Override
     public void start(Stage stage) throws IOException {
 
@@ -60,7 +92,6 @@ public class DebugMainWindow extends Application {
         stage.setScene(scene);
         stage.setTitle("Minosoft DebugUI");
         stage.getIcons().add(new Image(DebugMainWindow.class.getResourceAsStream("/icons/windowIcon.png")));
-        stage.show();
 
         // listen for enter in text field
         TextField chatToSend = ((TextField) scene.lookup("#chatToSend"));
@@ -72,6 +103,18 @@ public class DebugMainWindow extends Application {
             }
         });
 
+        Text statusBarServerAddress = (Text) scene.lookup("#statusBarServerAddress");
+        statusBarServerAddress.setText(String.format(statusBarServerAddress.getText(), connection.getHost(), connection.getPort()));
+
+
+        stage.setOnCloseRequest(event -> {
+            event.consume();
+            showCloseConfirmation();
+        });
+
+
+        Platform.setImplicitExit(false);
+        stage.show();
         DebugMainWindow.stage = stage;
         initialized = true;
         handler.initializedCallback();
