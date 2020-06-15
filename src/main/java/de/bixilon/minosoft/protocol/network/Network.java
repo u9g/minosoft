@@ -105,6 +105,7 @@ public class Network {
                     Util.sleep(1);
 
                 }
+                socket.close();
                 connection.setConnectionState(ConnectionState.DISCONNECTED);
             } catch (IOException e) {
                 // Could not connect
