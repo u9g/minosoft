@@ -26,7 +26,7 @@ public class DebugUIPacketHandler extends PacketHandler {
 
     @Override
     public void handle(PacketChatMessage pkg) {
-        window.getUIHandler().printText(pkg.getChatComponent());
+        window.getUIHandler().printText(pkg.getTextComponent());
     }
 
 }

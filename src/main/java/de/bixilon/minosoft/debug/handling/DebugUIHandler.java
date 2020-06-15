@@ -15,7 +15,9 @@ package de.bixilon.minosoft.debug.handling;
 
 import de.bixilon.minosoft.debug.gui.DebugMainWindow;
 import de.bixilon.minosoft.game.datatypes.TextComponent;
-import javafx.scene.control.TextArea;
+import javafx.application.Platform;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,19 +27,21 @@ public class DebugUIHandler {
 
     public void printText(TextComponent component) {
         if (DebugMainWindow.isInitialized()) {
-            TextArea chat = ((TextArea) DebugMainWindow.getStage().getScene().lookup("#chat"));
-            chat.appendText((chat.getText().isBlank() ? "" : "\n") + component.getRawMessage());
+            TextFlow chat = ((TextFlow) DebugMainWindow.getStage().getScene().lookup("#chat"));
+            Platform.runLater(
+                    () -> chat.getChildren().add(new Text(component.getRawMessage() + "\n"))
+            );
         } else {
             toPrint.add(component);
         }
     }
 
     public void printTextLeft() {
-        TextArea chat = ((TextArea) DebugMainWindow.getStage().getScene().lookup("#chat"));
+        TextFlow chat = ((TextFlow) DebugMainWindow.getStage().getScene().lookup("#chat"));
         if (toPrint != null) {
             // append here
             for (TextComponent toDoComponent : toPrint) {
-                chat.appendText((chat.getText().isBlank() ? "" : "\n") + toDoComponent.getRawMessage());
+                chat.getChildren().add(new Text(toDoComponent.getRawMessage() + "\n"));
             }
             toPrint = null;
         }

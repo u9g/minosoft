@@ -28,7 +28,7 @@ public class PacketChatMessage implements ClientboundPacket {
     public void read(InPacketBuffer buffer, ProtocolVersion v) {
         switch (v) {
             case VERSION_1_7_10:
-                c = buffer.readChatComponent();
+                c = buffer.readTextComponent();
                 break;
         }
     }
@@ -38,7 +38,7 @@ public class PacketChatMessage implements ClientboundPacket {
         Log.game(String.format("[CHAT] %s", c.getColoredMessage()));
     }
 
-    public TextComponent getChatComponent() {
+    public TextComponent getTextComponent() {
         return c;
     }
 

@@ -13,15 +13,15 @@
 
 package de.bixilon.minosoft.protocol.protocol;
 
-import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
-import de.bixilon.minosoft.game.datatypes.TextComponent;
 import de.bixilon.minosoft.game.datatypes.Direction;
 import de.bixilon.minosoft.game.datatypes.Slot;
+import de.bixilon.minosoft.game.datatypes.TextComponent;
 import de.bixilon.minosoft.game.datatypes.entities.Pose;
 import de.bixilon.minosoft.game.datatypes.particle.BlockParticle;
 import de.bixilon.minosoft.game.datatypes.particle.OtherParticles;
 import de.bixilon.minosoft.game.datatypes.particle.Particle;
 import de.bixilon.minosoft.game.datatypes.particle.Particles;
+import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
 import de.bixilon.minosoft.nbt.tag.CompoundTag;
 import de.bixilon.minosoft.nbt.tag.TagTypes;
 import de.bixilon.minosoft.util.Util;
@@ -187,7 +187,7 @@ public class InByteBuffer {
         return "dataLen: " + bytes.length + "; pos: " + pos;
     }
 
-    public TextComponent readChatComponent() {
+    public TextComponent readTextComponent() {
         return new TextComponent(readString());
     }
 

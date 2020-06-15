@@ -16,10 +16,8 @@ package de.bixilon.minosoft.debug.gui;
 import de.bixilon.minosoft.debug.handling.DebugUIHandler;
 import de.bixilon.minosoft.protocol.network.Connection;
 import javafx.application.Application;
-import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
@@ -64,8 +62,6 @@ public class DebugMainWindow extends Application {
         stage.getIcons().add(new Image(DebugMainWindow.class.getResourceAsStream("/icons/windowIcon.png")));
         stage.show();
 
-        // autoscroll for chat
-        ((TextArea) scene.lookup("#chat")).textProperty().addListener((ChangeListener<Object>) (observableValue, o, t1) -> ((TextArea) scene.lookup("#chat")).setScrollTop(Double.MAX_VALUE));
         // listen for enter in text field
         TextField chatToSend = ((TextField) scene.lookup("#chatToSend"));
         chatToSend.setOnKeyPressed(event -> {

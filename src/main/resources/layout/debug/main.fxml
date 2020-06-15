@@ -1,23 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.TextFlow?>
 <VBox xmlns:fx="http://javafx.com/fxml/1" prefHeight="400.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/8.0.171">
-    <children>
-        <AnchorPane maxHeight="-1.0" maxWidth="-1.0" prefHeight="666.0" prefWidth="998.0" VBox.vgrow="ALWAYS">
-            <children>
-                <ScrollPane layoutX="112.0" layoutY="85.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0">
-                    <content>
-                        <TextArea id="chat" editable="false" maxHeight="-Infinity" maxWidth="-Infinity"
-                                  wrapText="true"/>
-                    </content>
-                </ScrollPane>
-                <TextField id="chatToSend" layoutX="112.0" layoutY="358.0" prefHeight="28.0" prefWidth="520.0"
-                           promptText="&lt;Enter Chat Message&gt;" AnchorPane.bottomAnchor="0.0"
-                           AnchorPane.rightAnchor="0.0"/>
-            </children>
-        </AnchorPane>
-    </children>
+    <AnchorPane prefHeight="666.0" prefWidth="998.0" VBox.vgrow="ALWAYS">
+        <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0"
+                 AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <Tab text="Chat">
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                    <ScrollPane layoutX="441.0" layoutY="184.0" AnchorPane.bottomAnchor="28.0"
+                                AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <content>
+                            <TextFlow id="chat" prefWidth="635.0"/>
+                        </content>
+                    </ScrollPane>
+                    <TextField id="chatToSend" promptText="&lt;Enter Chat Message&gt;" AnchorPane.bottomAnchor="0.0"
+                               AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="339.0"/>
+                </AnchorPane>
+            </Tab>
+        </TabPane>
+    </AnchorPane>
 </VBox>

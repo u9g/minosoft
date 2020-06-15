@@ -28,7 +28,7 @@ public class PacketDisconnect implements ClientboundPacket {
     public void read(InPacketBuffer buffer, ProtocolVersion v) {
         switch (v) {
             case VERSION_1_7_10:
-                reason = buffer.readChatComponent();
+                reason = buffer.readTextComponent();
                 break;
         }
     }
