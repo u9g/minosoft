@@ -20,6 +20,7 @@ import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.logging.LogLevel;
 import de.bixilon.minosoft.mojang.api.MojangAccount;
 import de.bixilon.minosoft.protocol.network.Connection;
+import de.bixilon.minosoft.render.MainWindow;
 import de.bixilon.minosoft.util.OSUtil;
 
 import java.io.File;
@@ -66,9 +67,11 @@ public class Minosoft {
         }
         account.saveToConfig();
 
+
         Connection connection = new Connection(config.getString("debug.host"), config.getInteger("debug.port"));
         connection.setPlayer(new Player(account));
-        connection.connect();
+
+        MainWindow.start(connection);
     }
 
     /**

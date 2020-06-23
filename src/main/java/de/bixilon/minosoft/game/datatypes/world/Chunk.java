@@ -28,6 +28,10 @@ public class Chunk {
         this.nibbles = chunks;
     }
 
+    public HashMap<Byte, ChunkNibble> getNibbles() {
+        return nibbles;
+    }
+
     public Block getBlock(int x, int y, int z) {
         if (x > 16 || y > 255 || z > 16 || x < 0 || y < 0 || z < 0) {
             throw new IllegalArgumentException(String.format("Invalid chunk location %s %s %s", x, y, z));

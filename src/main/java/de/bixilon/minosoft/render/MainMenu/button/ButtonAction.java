@@ -11,33 +11,8 @@
  *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
-package de.bixilon.minosoft.render;
+package de.bixilon.minosoft.render.MainMenu.button;
 
-import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
-
-import java.io.IOException;
-
-public class StartMenu extends Application {
-
-    public static void main(String[] args) {
-        launch(args);
-    }
-
-    @Override
-    public void start(Stage stage) throws IOException {
-        VBox root = FXMLLoader.load(getClass().getResource("/layout/main/StartMenu.fxml"));
-        Scene scene = new Scene(root);
-        stage.setScene(scene);
-        stage.setTitle("Minosoft DebugUI");
-
-        stage.show();
-        // bring to front
-        stage.setAlwaysOnTop(true);
-        stage.setAlwaysOnTop(false);
-
-    }
+public interface ButtonAction {
+    void onClick();
 }
