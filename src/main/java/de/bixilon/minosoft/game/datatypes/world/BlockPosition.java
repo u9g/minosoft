@@ -60,4 +60,10 @@ public class BlockPosition {
     public int hashCode() {
         return x * y * z;
     }
+
+    public BlockPosition add(int[] faceDir) {
+        if (faceDir.length != 3) throw new IllegalArgumentException("Can only accept 3 directions");
+        return new BlockPosition(x + faceDir[0],
+                (short) (y + faceDir[1]), z + faceDir[2]);
+    }
 }

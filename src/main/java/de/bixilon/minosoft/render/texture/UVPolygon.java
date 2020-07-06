@@ -11,25 +11,20 @@
  *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
-package de.bixilon.minosoft.render.MainMenu;
+package de.bixilon.minosoft.render.texture;
 
-import de.bixilon.minosoft.render.MainMenu.button.Button;
-import de.bixilon.minosoft.render.MainMenu.button.ButtonAction;
-import de.bixilon.minosoft.render.MainMenu.button.PlayButtonAction;
-import de.bixilon.minosoft.render.MainWindow;
+import java.util.ArrayList;
 
-public class MainMenu {
-    Button play;
-    long window;
+public class UVPolygon {
+    UVCoordinate[] coords;
 
-    public MainMenu(int width, int height) {
-        this.window = MainWindow.getOpenGLWindow().getWindow();
-        ButtonAction action = new PlayButtonAction();
-        play = new Button(width / 3, height / 3, width / 3, height / 3, "PLAY",
-                1f, 1f, 0f, MainWindow.getOpenGLWindow().getWindow(), action);
+    public UVPolygon(UVCoordinate[] coords) {
+        this.coords = coords;
     }
 
-    public void draw(float mouseX, float mouseY) {
-        play.loop(mouseX, mouseY);
+    public void addCoords(ArrayList verts) {
+        for (UVCoordinate uv : coords) {
+            uv.addUV(verts);
+        }
     }
 }

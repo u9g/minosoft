@@ -1,6 +1,6 @@
 /*
  * Codename Minosoft
- * Copyright (C) 2020 Lukas Eisenhauer
+ * Copyright (C) 2020 Moritz Zwerger
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -11,7 +11,7 @@
  *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
-package de.bixilon.minosoft.render;
+package de.bixilon.minosoft.render.face;
 
 public class RenderConstants {
     public static final float[][][] FACE_VERTEX = new float[][][]{
@@ -53,10 +53,19 @@ public class RenderConstants {
             },
     };
 
-    public static final float[][] UV = new float[][]{
-            {0.0f, 0.0f},
-            {0.0f, 1.0f},
-            {1.0f, 1.0f},
-            {1.0f, 0.0f},
+    public static final int[][] faceDir = new int[][]{
+            {1, 0, 0},
+            {-1, 0, 0},
+            {0, 1, 0},
+            {0, -1, 0},
+            {0, 0, 1},
+            {0, 0, -1}
+    };
+
+    public static final int[][] UV = new int[][]{
+            {0, 0},
+            {0, 1},
+            {1, 1},
+            {1, 0},
     };
 }

@@ -101,7 +101,10 @@ public class OpenGLWindow {
 
         createCapabilities();
 
-        glClearColor(0f, 0f, 0f, 0f);
+        glClearColor(.1f, .1f, .1f, .1f);
+
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     }
 
     public long getWindow() {

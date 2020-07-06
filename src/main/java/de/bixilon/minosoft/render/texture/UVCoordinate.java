@@ -11,25 +11,28 @@
  *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
-package de.bixilon.minosoft.render.MainMenu;
+package de.bixilon.minosoft.render.texture;
 
-import de.bixilon.minosoft.render.MainMenu.button.Button;
-import de.bixilon.minosoft.render.MainMenu.button.ButtonAction;
-import de.bixilon.minosoft.render.MainMenu.button.PlayButtonAction;
-import de.bixilon.minosoft.render.MainWindow;
+import java.util.List;
 
-public class MainMenu {
-    Button play;
-    long window;
+public class UVCoordinate {
+    float u, v;
 
-    public MainMenu(int width, int height) {
-        this.window = MainWindow.getOpenGLWindow().getWindow();
-        ButtonAction action = new PlayButtonAction();
-        play = new Button(width / 3, height / 3, width / 3, height / 3, "PLAY",
-                1f, 1f, 0f, MainWindow.getOpenGLWindow().getWindow(), action);
+    public UVCoordinate(float u, float v) {
+        this.u = u;
+        this.v = v;
     }
 
-    public void draw(float mouseX, float mouseY) {
-        play.loop(mouseX, mouseY);
+    public float getU() {
+        return u;
+    }
+
+    public float getV() {
+        return v;
+    }
+
+    public void addUV(@org.jetbrains.annotations.NotNull List verts) {
+        verts.add(u);
+        verts.add(v);
     }
 }

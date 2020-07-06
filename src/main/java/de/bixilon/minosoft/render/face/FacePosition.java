@@ -14,6 +14,8 @@
 package de.bixilon.minosoft.render.face;
 
 import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
+import javafx.util.Pair;
+import org.apache.commons.collections.primitives.ArrayFloatList;
 
 public class FacePosition {
     private final BlockPosition blockPosition;
@@ -35,5 +37,18 @@ public class FacePosition {
     @Override
     public int hashCode() {
         return blockPosition.hashCode() * faceOrientation.hashCode();
+    }
+
+    public void addVertecies(ArrayFloatList vertPos, ArrayFloatList textPos, Pair<Float, Float> texture) {
+        float[][] vertPositions = RenderConstants.FACE_VERTEX[faceOrientation.getId()];
+        for (int vert = 0; vert < 4; vert++) {
+            vertPos.add(vertPositions[vert][0] + this.getBlockPosition().getX());
+            vertPos.add(vertPositions[vert][1] + this.getBlockPosition().getY());
+            vertPos.add(vertPositions[vert][2] + this.getBlockPosition().getZ());
+
+
+            textPos.add(texture.getKey());
+            textPos.add(texture.getValue());
+        }
     }
 }

@@ -32,6 +32,10 @@ public class ChunkNibble {
         this.blocks = new HashMap<>();
     }
 
+    public HashMap<ChunkNibbleLocation, Block> getBlocks() {
+        return blocks;
+    }
+
     public Block getBlock(ChunkNibbleLocation loc) {
         return blocks.get(loc);
     }

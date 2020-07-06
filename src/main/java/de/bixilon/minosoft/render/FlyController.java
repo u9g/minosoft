@@ -26,7 +26,7 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class FlyController {
     private final long window;
-    Vec3 cameraPos = new Vec3(0.0f, 10.0f, 0.0f);
+    Vec3 cameraPos = new Vec3(0.0f, 0.0f, 0.0f);
     Vec3 cameraFront = new Vec3(0.0f, 0.0f, -1.0f);
     Vec3 cameraUp = new Vec3(0.0f, 1.0f, 0.0f);
     float lastX;
@@ -35,7 +35,7 @@ public class FlyController {
     float yaw = 0f;
     float pitch = 0f;
 
-    float flySpeed = 0.01f;
+    float flySpeed = 0.1f;
     private boolean firstMouse = true;
 
     public FlyController(long window) {
@@ -49,29 +49,29 @@ public class FlyController {
             MainWindow.pause();
         }
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-            cameraPos.add(mul(cameraFront, cameraSpeed));
+            cameraPos.add(mul(cameraFront, cameraSpeed * deltaTime));
         }
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-            cameraPos.add(mul(cameraFront, -cameraSpeed));
+            cameraPos.add(mul(cameraFront, -cameraSpeed * deltaTime));
         }
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-            cameraPos.add(mul(cross(cameraUp, cameraFront), cameraSpeed));
+            cameraPos.add(mul(cross(cameraUp, cameraFront), cameraSpeed * deltaTime));
         }
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-            cameraPos.add(mul(cross(cameraUp, cameraFront), -cameraSpeed));
+            cameraPos.add(mul(cross(cameraUp, cameraFront), -cameraSpeed * deltaTime));
         }
 
         if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-            cameraPos.add(0, cameraSpeed, 0);
+            cameraPos.add(0, cameraSpeed * deltaTime, 0);
         }
         if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-            cameraPos.add(0, -cameraSpeed, 0);
+            cameraPos.add(0, -cameraSpeed * deltaTime, 0);
         }
     }
 
     public void loop(float deltaTime) {
         processInput(window, deltaTime);
-        glLoadIdentity();
+        //glLoadIdentity();
         //glTranslatef(cameraPos.x, cameraPos.y, cameraPos.z);
         //glPushMatrix();
         //glTranslatef(-cameraPos.x, -cameraPos.y, -cameraPos.z);

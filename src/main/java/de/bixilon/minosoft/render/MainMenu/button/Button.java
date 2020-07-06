@@ -61,7 +61,7 @@ public class Button {
 
     public void draw() {
         glBegin(GL_QUADS);
-        glColor3f(trueR, trueG, trueB);
+        //glColor3f(trueR, trueG, trueB);
         glVertex2f(x, y);
         glVertex2f(x + width, y);
         glVertex2f(x + width, y + height);

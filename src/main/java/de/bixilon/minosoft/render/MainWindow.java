@@ -20,8 +20,7 @@ import de.bixilon.minosoft.render.utility.RenderMode;
 import static de.bixilon.minosoft.render.utility.RenderMode.MAIN_MENU;
 import static de.bixilon.minosoft.render.utility.RenderMode.PLAY;
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.glLoadIdentity;
-import static org.lwjgl.opengl.GL11.glOrtho;
+import static org.lwjgl.opengl.GL11.*;
 
 public class MainWindow {
 
@@ -52,8 +51,69 @@ public class MainWindow {
         guiThread.start();
     }
 
+    private static void runWindow1() {
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+
+        glMatrixMode(GL_MODELVIEW);
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
+        glEnable(GL_TEXTURE_2D);
+
+        OpenGLWindow.gluPerspective(45, 1, 0.1f, 100f);
+
+        while (!glfwWindowShouldClose(openGLWindow.getWindow())) {
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glLoadIdentity();
+            glPushMatrix();
+
+            glTranslatef(0f, 0.0f, -7f);
+            glRotatef(45f, 0.0f, 1.0f, 0.0f);
+            glColor3f(0.5f, 0.5f, 1.0f);
+
+            glBegin(GL_QUADS);
+            glColor3f(1.0f, 1.0f, 0.0f);
+            glVertex3f(1.0f, 1.0f, -1.0f);
+            glVertex3f(-1.0f, 1.0f, -1.0f);
+            glVertex3f(-1.0f, 1.0f, 1.0f);
+            glVertex3f(1.0f, 1.0f, 1.0f);
+            glColor3f(1.0f, 0.5f, 0.0f);
+            glVertex3f(1.0f, -1.0f, 1.0f);
+            glVertex3f(-1.0f, -1.0f, 1.0f);
+            glVertex3f(-1.0f, -1.0f, -1.0f);
+            glVertex3f(1.0f, -1.0f, -1.0f);
+            glColor3f(1.0f, 0.0f, 0.0f);
+            glVertex3f(1.0f, 1.0f, 1.0f);
+            glVertex3f(-1.0f, 1.0f, 1.0f);
+            glVertex3f(-1.0f, -1.0f, 1.0f);
+            glVertex3f(1.0f, -1.0f, 1.0f);
+            glColor3f(1.0f, 1.0f, 0.0f);
+            glVertex3f(1.0f, -1.0f, -1.0f);
+            glVertex3f(-1.0f, -1.0f, -1.0f);
+            glVertex3f(-1.0f, 1.0f, -1.0f);
+            glVertex3f(1.0f, 1.0f, -1.0f);
+            glColor3f(0.0f, 0.0f, 1.0f);
+            glVertex3f(-1.0f, 1.0f, 1.0f);
+            glVertex3f(-1.0f, 1.0f, -1.0f);
+            glVertex3f(-1.0f, -1.0f, -1.0f);
+            glVertex3f(-1.0f, -1.0f, 1.0f);
+            glColor3f(1.0f, 0.0f, 1.0f);
+            glVertex3f(1.0f, 1.0f, -1.0f);
+            glVertex3f(1.0f, 1.0f, 1.0f);
+            glVertex3f(1.0f, -1.0f, 1.0f);
+            glVertex3f(1.0f, -1.0f, -1.0f);
+            glEnd();
+            glPopMatrix();
+            glfwSwapBuffers(openGLWindow.getWindow());
+            glfwPollEvents();
+        }
+    }
+
     private static void runWindow() {
         while (!glfwWindowShouldClose(openGLWindow.getWindow())) {
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glLoadIdentity();
+            glfwPollEvents();
             float deltaTime = openGLWindow.loop();
             mouseX = (float) openGLWindow.getMouseX();
             mouseY = (float) openGLWindow.getMouseY();
@@ -65,13 +125,14 @@ public class MainWindow {
                     mainMenu.draw(mouseX, mouseY);
                     break;
                 case PLAY:
+                    OpenGLWindow.gluPerspective(45, 1, 0.1f, 500f);
                     flyController.loop(deltaTime);
                     renderer.draw();
+                    glPopMatrix();
                     break;
             }
-            glLoadIdentity();
-            glfwPollEvents();
 
+            glPopMatrix();
             glfwSwapBuffers(openGLWindow.getWindow());
         }
     }
@@ -94,8 +155,17 @@ public class MainWindow {
 
     public static void play() {
         renderMode = PLAY;
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
+        glfwSetCursorPosCallback(openGLWindow.getWindow(), flyController::mouseCallback);
         glfwSetInputMode(openGLWindow.getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        OpenGLWindow.gluPerspective(45, WIDTH / HEIGHT, 0.1f, 100f);
+        glEnable(GL_TEXTURE_2D);
+
+        /*
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glMatrixMode(GL_MODELVIEW);
+         */
         connection.connect();
     }
 
@@ -103,6 +173,10 @@ public class MainWindow {
         renderMode = MAIN_MENU;
         glfwSetInputMode(openGLWindow.getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         connection.disconnect();
+    }
+
+    public static Connection getConnection() {
+        return connection;
     }
 
     public static void close() {

@@ -69,6 +69,16 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.joda</groupId>
+            <artifactId>joda-primitives</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-primitives</groupId>
+            <artifactId>commons-primitives</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
             <groupId>org.l33tlabs.twl</groupId>
             <artifactId>pngdecoder</artifactId>
             <version>1.0</version>
@@ -404,6 +414,12 @@
             <groupId>org.lwjgl</groupId>
             <artifactId>lwjgl-zstd</artifactId>
             <classifier>${lwjgl.natives}</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>18.0.0</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>
