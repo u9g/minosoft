@@ -14,9 +14,10 @@
 package de.bixilon.minosoft.game.datatypes.world;
 
 import de.bixilon.minosoft.game.datatypes.Dimension;
-import de.bixilon.minosoft.game.datatypes.blocks.Block;
+import de.bixilon.minosoft.game.datatypes.TextComponent;
+import de.bixilon.minosoft.game.datatypes.blocks.Blocks;
 import de.bixilon.minosoft.game.datatypes.entities.Entity;
-import de.bixilon.minosoft.render.MainWindow;
+import de.bixilon.minosoft.nbt.tag.CompoundTag;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +29,8 @@ public class World {
     final HashMap<ChunkLocation, Chunk> chunks;
     final HashMap<Integer, Entity> entities;
     final String name;
+    final HashMap<BlockPosition, TextComponent[]> signs;
+    final HashMap<BlockPosition, CompoundTag> blockEntityMeta;
     boolean hardcore;
     boolean raining;
     Dimension dimension; // used for sky color, etc
@@ -36,6 +39,8 @@ public class World {
         this.name = name;
         chunks = new HashMap<>();
         entities = new HashMap<>();
+        signs = new HashMap<>();
+        blockEntityMeta = new HashMap<>();
     }
 
     public String getName() {
@@ -50,18 +55,17 @@ public class World {
         return chunks;
     }
 
-    public Block getBlock(BlockPosition pos) {
+    public Blocks getBlock(BlockPosition pos) {
         ChunkLocation loc = pos.getChunkLocation();
         if (getChunk(loc) != null) {
-            return getChunk(loc).getBlock(pos.getX() % 16, pos.getY(), pos.getZ() % 16);
+            return getChunk(loc).getBlock(pos.getInChunkLocation());
         }
-        return Block.AIR;
+        return Blocks.AIR;
     }
 
-    public void setBlock(BlockPosition pos, Block block) {
+    public void setBlock(BlockPosition pos, Blocks block) {
         if (getChunk(pos.getChunkLocation()) != null) {
-            getChunk(pos.getChunkLocation()).setBlock(pos.getX() % 16, pos.getY(), pos.getZ() % 16, block);
-            MainWindow.getRenderer().prepareBlock(pos, block);
+            getChunk(pos.getChunkLocation()).setBlock(pos.getInChunkLocation(), block);
         }
         // do nothing if chunk is unloaded
     }
@@ -72,14 +76,12 @@ public class World {
 
     public void setChunk(ChunkLocation location, Chunk chunk) {
         chunks.put(location, chunk);
-        MainWindow.getRenderer().prepareChunk(location, chunk);
     }
 
     public void setChunks(HashMap<ChunkLocation, Chunk> chunkMap) {
         for (Map.Entry<ChunkLocation, Chunk> set : chunkMap.entrySet()) {
             chunks.put(set.getKey(), set.getValue());
         }
-        MainWindow.getRenderer().prepareChunkBulk(chunkMap);
     }
 
     public boolean isHardcore() {
@@ -99,7 +101,7 @@ public class World {
     }
 
     public void addEntity(Entity entity) {
-        this.entities.put(entity.getId(), entity);
+        this.entities.put(entity.getEntityId(), entity);
     }
 
     public Entity getEntity(int id) {
@@ -107,7 +109,7 @@ public class World {
     }
 
     public void removeEntity(Entity entity) {
-        removeEntity(entity.getId());
+        removeEntity(entity.getEntityId());
     }
 
     public void removeEntity(int entityId) {
@@ -120,5 +122,29 @@ public class World {
 
     public void setDimension(Dimension dimension) {
         this.dimension = dimension;
+    }
+
+    public void updateSign(BlockPosition position, TextComponent[] lines) {
+        //ToDo check if block is really a sign
+        signs.put(position, lines);
+    }
+
+    public TextComponent[] getSignText(BlockPosition position) {
+        return signs.get(position);
+    }
+
+    public void setBlockEntityData(BlockPosition position, CompoundTag nbt) {
+        //ToDo check if block is really a block entity (command block, spawner, skull, flower pot)
+        blockEntityMeta.put(position, nbt);
+    }
+
+    public CompoundTag getBlockEntityData(BlockPosition position) {
+        return blockEntityMeta.get(position);
+    }
+
+    public void setBlockEntityData(HashMap<BlockPosition, CompoundTag> blockEntities) {
+        for (Map.Entry<BlockPosition, CompoundTag> entrySet : blockEntities.entrySet()) {
+            blockEntityMeta.put(entrySet.getKey(), entrySet.getValue());
+        }
     }
 }

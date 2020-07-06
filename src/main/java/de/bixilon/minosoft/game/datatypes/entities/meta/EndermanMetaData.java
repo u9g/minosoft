@@ -10,32 +10,42 @@
  *
  *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
-
 package de.bixilon.minosoft.game.datatypes.entities.meta;
 
-import de.bixilon.minosoft.game.datatypes.blocks.Block;
-import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
+import de.bixilon.minosoft.game.datatypes.blocks.Blocks;
 import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
+
+import java.util.HashMap;
 
 public class EndermanMetaData extends MobMetaData {
 
-    public EndermanMetaData(InByteBuffer buffer, ProtocolVersion v) {
-        super(buffer, v);
+    public EndermanMetaData(HashMap<Integer, MetaDataSet> sets, ProtocolVersion version) {
+        super(sets, version);
     }
 
 
-    public Block getCarriedBlock() {
+    public Blocks getCarriedBlock() {
         switch (version) {
             case VERSION_1_7_10:
-                return Block.byLegacy((short) sets.get(16).getData(), (byte) sets.get(17).getData());
+            case VERSION_1_8:
+                return Blocks.byId((short) sets.get(16).getData(), (byte) sets.get(17).getData());
+            case VERSION_1_9_4:
+                return (Blocks) sets.get(11).getData();
+            case VERSION_1_10:
+                return (Blocks) sets.get(12).getData();
         }
-        return Block.AIR;
+        return Blocks.AIR;
     }
 
     public boolean isScreaming() {
         switch (version) {
             case VERSION_1_7_10:
-                return (byte) sets.get(17).getData() == 0x01;
+            case VERSION_1_8:
+                return (byte) sets.get(18).getData() == 0x01;
+            case VERSION_1_9_4:
+                return (boolean) sets.get(12).getData();
+            case VERSION_1_10:
+                return (boolean) sets.get(13).getData();
         }
         return false;
     }

@@ -17,26 +17,33 @@ import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.packets.ClientboundPacket;
 import de.bixilon.minosoft.protocol.protocol.InPacketBuffer;
 import de.bixilon.minosoft.protocol.protocol.PacketHandler;
-import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
 
 
 public class PacketEntityHeadRotation implements ClientboundPacket {
     int entityId;
-    int headYaw;
+    short headYaw;
 
     @Override
-    public void read(InPacketBuffer buffer, ProtocolVersion v) {
-        switch (v) {
+    public boolean read(InPacketBuffer buffer) {
+        switch (buffer.getVersion()) {
             case VERSION_1_7_10:
-                this.entityId = buffer.readInteger();
-                this.headYaw = buffer.readByte();
-                break;
+                this.entityId = buffer.readInt();
+                this.headYaw = buffer.readAngle();
+                return true;
+            case VERSION_1_8:
+            case VERSION_1_9_4:
+            case VERSION_1_10:
+                this.entityId = buffer.readVarInt();
+                this.headYaw = buffer.readAngle();
+                return true;
         }
+
+        return false;
     }
 
     @Override
     public void log() {
-        Log.protocol(String.format("Entity %d moved head %s", entityId, headYaw));
+        Log.protocol(String.format("Entity %d moved head (yaw=%s)", entityId, headYaw));
     }
 
     public int getEntityId() {
@@ -44,7 +51,7 @@ public class PacketEntityHeadRotation implements ClientboundPacket {
     }
 
 
-    public int getHeadYaw() {
+    public short getHeadYaw() {
         return headYaw;
     }
 

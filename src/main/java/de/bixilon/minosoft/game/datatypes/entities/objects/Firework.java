@@ -13,21 +13,20 @@
 
 package de.bixilon.minosoft.game.datatypes.entities.objects;
 
-import de.bixilon.minosoft.game.datatypes.entities.EntityObject;
-import de.bixilon.minosoft.game.datatypes.entities.Location;
-import de.bixilon.minosoft.game.datatypes.entities.ObjectInterface;
-import de.bixilon.minosoft.game.datatypes.entities.Objects;
+import de.bixilon.minosoft.game.datatypes.entities.*;
 import de.bixilon.minosoft.game.datatypes.entities.meta.EntityMetaData;
 import de.bixilon.minosoft.game.datatypes.entities.meta.FireworkMetaData;
-import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
 
 public class Firework extends EntityObject implements ObjectInterface {
     FireworkMetaData metaData;
 
-    public Firework(int id, Location location, int yaw, int pitch, int additionalInt, ProtocolVersion v) {
-        super(id, location, yaw, pitch, null);
+    public Firework(int entityId, Location location, short yaw, short pitch, int additionalInt) {
+        super(entityId, location, yaw, pitch, null);
         // objects do not spawn with metadata... reading additional info from the following int
-        // tnt does not have any additional info
+    }
+
+    public Firework(int entityId, Location location, short yaw, short pitch, int additionalInt, Velocity velocity) {
+        super(entityId, location, yaw, pitch, velocity);
     }
 
     @Override

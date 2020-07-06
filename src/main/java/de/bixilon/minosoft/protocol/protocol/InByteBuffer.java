@@ -13,17 +13,16 @@
 
 package de.bixilon.minosoft.protocol.protocol;
 
-import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
-import de.bixilon.minosoft.game.datatypes.TextComponent;
 import de.bixilon.minosoft.game.datatypes.Direction;
-import de.bixilon.minosoft.game.datatypes.Slot;
+import de.bixilon.minosoft.game.datatypes.TextComponent;
+import de.bixilon.minosoft.game.datatypes.entities.Location;
 import de.bixilon.minosoft.game.datatypes.entities.Pose;
-import de.bixilon.minosoft.game.datatypes.particle.BlockParticle;
-import de.bixilon.minosoft.game.datatypes.particle.OtherParticles;
-import de.bixilon.minosoft.game.datatypes.particle.Particle;
-import de.bixilon.minosoft.game.datatypes.particle.Particles;
+import de.bixilon.minosoft.game.datatypes.entities.meta.EntityMetaData;
+import de.bixilon.minosoft.game.datatypes.inventory.Slot;
+import de.bixilon.minosoft.game.datatypes.particle.*;
+import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
 import de.bixilon.minosoft.nbt.tag.CompoundTag;
-import de.bixilon.minosoft.nbt.tag.TagTypes;
+import de.bixilon.minosoft.util.BitByte;
 import de.bixilon.minosoft.util.Util;
 import org.json.JSONObject;
 
@@ -32,14 +31,17 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.UUID;
 
 public class InByteBuffer {
-    private final byte[] bytes;
-    private int pos;
+    final ProtocolVersion version;
+    final byte[] bytes;
+    int pos;
 
-    public InByteBuffer(byte[] bytes) {
+    public InByteBuffer(byte[] bytes, ProtocolVersion version) {
         this.bytes = bytes;
+        this.version = version;
     }
 
     public byte readByte() {
@@ -57,7 +59,7 @@ public class InByteBuffer {
     }
 
 
-    private byte[] readBytes(int pos, int count) {
+    byte[] readBytes(int pos, int count) {
         byte[] ret = new byte[count];
         System.arraycopy(bytes, pos, ret, 0, count);
         return ret;
@@ -85,7 +87,7 @@ public class InByteBuffer {
         return ret;
     }
 
-    public int readInteger() {
+    public int readInt() {
         ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES);
         buffer.put(readBytes(Integer.BYTES));
         return buffer.getInt(0);
@@ -111,9 +113,6 @@ public class InByteBuffer {
 
     public String readString() {
         int length = readVarInt();
-        if (length > ProtocolDefinition.STRING_MAX_LEN) {
-            return null;
-        }
         return new String(readBytes(length), StandardCharsets.UTF_8);
     }
 
@@ -123,9 +122,7 @@ public class InByteBuffer {
 
 
     public UUID readUUID() {
-        ByteBuffer buffer = ByteBuffer.allocate(16); // UUID.BYTES
-        buffer.put(readBytes(16));
-        return new UUID(buffer.getLong(0), buffer.getLong(1));
+        return new UUID(readLong(), readLong());
     }
 
     public int readVarInt() {
@@ -166,33 +163,43 @@ public class InByteBuffer {
     }
 
     public double readFixedPointNumberInteger() {
-        return readInteger() / 32.0D;
+        return readInt() / 32.0D;
     }
 
     public double readFixedPointNumberByte() {
         return readByte() / 32.0D;
     }
 
-    public JSONObject readJson() {
+    public JSONObject readJSON() {
         return new JSONObject(readString());
     }
 
-    public BlockPosition readBlockPosition() {
+    public BlockPosition readPosition() {
+        if (version.getVersion() >= ProtocolVersion.VERSION_1_14_4.getVersion()) {
+            // changed in 1.14, thanks for the explanation @Sainan
+            Long raw = readLong();
+            int x = (int) (raw >> 38);
+            short y = (short) (raw & 0xFFF);
+            int z = (int) (raw << 26 >> 38);
+            return new BlockPosition(x, y, z);
+        }
         Long raw = readLong();
-        return new BlockPosition(Long.valueOf(raw >> 38).intValue(), Long.valueOf(raw & 0xFFF).shortValue(), Long.valueOf(raw << 26 >> 38).intValue());
+        int x = (int) (raw >> 38);
+        short y = (short) ((raw >> 26) & 0xFFF);
+        int z = (int) (raw & 0x3FFFFFF);
+        return new BlockPosition(x, y, z);
     }
 
-    @Override
-    public String toString() {
-        return "dataLen: " + bytes.length + "; pos: " + pos;
-    }
-
-    public TextComponent readChatComponent() {
+    public TextComponent readTextComponent() {
         return new TextComponent(readString());
     }
 
     public int getPosition() {
         return this.pos;
+    }
+
+    public void setPosition(int pos) {
+        this.pos = pos;
     }
 
     public int getLength() {
@@ -202,7 +209,6 @@ public class InByteBuffer {
     public int getBytesLeft() {
         return bytes.length - pos;
     }
-
 
     public Direction readDirection() {
         return Direction.byId(readVarInt());
@@ -219,30 +225,28 @@ public class InByteBuffer {
                 return type.getClazz().getConstructor(Particles.class).newInstance(type);
             } else if (type.getClazz() == BlockParticle.class) {
                 return type.getClazz().getConstructor(int.class).newInstance(readVarInt());
+            } else if (type.getClazz() == DustParticle.class) {
+                return type.getClazz().getConstructor(float.class, float.class, float.class, float.class).newInstance(readFloat(), readFloat(), readFloat(), readFloat());
+            } else if (type.getClazz() == FallingDustParticle.class) {
+                return type.getClazz().getConstructor(int.class).newInstance(readVarInt());
+            } else if (type.getClazz() == ItemParticle.class) {
+                return type.getClazz().getConstructor(Slot.class).newInstance(readSlot());
             }
-            //ToDo
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    public void setPosition(int pos) {
-        this.pos = pos;
-    }
-
-    public CompoundTag readNBT() {
-
-        if (readByte() != TagTypes.COMPOUND.getId()) { // will be a Compound Tag
-            // maybe compressed
-            setPosition(getPosition() - 1);
+    public CompoundTag readNBT(boolean compressed) {
+        if (compressed) {
             short length = readShort();
             if (length == -1) {
                 // no nbt data here...
-                return null;
+                return new CompoundTag();
             }
             try {
-                return new CompoundTag(new InByteBuffer(Util.decompressGzip(readBytes(length))));
+                return new CompoundTag(new InByteBuffer(Util.decompressGzip(readBytes(length)), version));
             } catch (IOException e) {
                 // oh no
                 e.printStackTrace();
@@ -250,18 +254,31 @@ public class InByteBuffer {
             }
             // try again
         }
-        setPosition(getPosition() - 1);
         return new CompoundTag(this);
     }
 
-    public Slot readSlot(ProtocolVersion v) {
-        switch (v) {
-            case VERSION_1_7_10:
+    public CompoundTag readNBT() {
+        return readNBT(false);
+    }
+
+    public Slot readSlot() {
+        switch (version) {
+            case VERSION_1_7_10: {
                 short id = readShort();
                 if (id != -1) {
-                    return new Slot(id, readByte(), readShort(), readNBT());
+                    return new Slot(id, readByte(), readShort(), readNBT(true));
                 }
-                return null;
+                break;
+            }
+            case VERSION_1_8:
+            case VERSION_1_9_4:
+            case VERSION_1_10: {
+                short id = readShort();
+                if (id == -1) {
+                    return null;
+                }
+                return new Slot(id, readByte(), readShort(), readNBT());
+            }
                 /*
 
         if (readBoolean()) {
@@ -280,5 +297,91 @@ public class InByteBuffer {
 
     public String getBase64() {
         return getBase64(getPosition(), getBytesLeft());
+    }
+
+    public short readAngle() {
+        return (short) (readByte() * ProtocolDefinition.ANGLE_CALCULATION_CONSTANT);
+    }
+
+    public Location readLocation() {
+        return new Location(readDouble(), readDouble(), readDouble());
+    }
+
+    public BlockPosition readBlockPosition() {
+        return new BlockPosition(readInt(), BitByte.byteToUShort(readByte()), readInt());
+    }
+
+    public BlockPosition readBlockPositionInteger() {
+        return new BlockPosition(readInt(), (short) (readInt()), readInt());
+    }
+
+    public BlockPosition readBlockPositionShort() {
+        return new BlockPosition(readInt(), readShort(), readInt());
+    }
+
+    public InPacketBuffer getPacketBuffer() {
+        return new InPacketBuffer(this, getVersion());
+    }
+
+    public byte[] readBytesLeft() {
+        return readBytes(getBytesLeft());
+    }
+
+    public int[] readInts(int length) {
+        int[] ret = new int[length];
+        for (int i = 0; i < length; i++) {
+            ret[i] = readInt();
+        }
+        return ret;
+    }
+
+    public long[] readLongs(int length) {
+        long[] ret = new long[length];
+        for (int i = 0; i < length; i++) {
+            ret[i] = readLong();
+        }
+        return ret;
+    }
+
+    public ProtocolVersion getVersion() {
+        return version;
+    }
+
+    public HashMap<Integer, EntityMetaData.MetaDataSet> readMetaData() {
+        HashMap<Integer, EntityMetaData.MetaDataSet> sets = new HashMap<>();
+
+        switch (version) {
+            case VERSION_1_7_10:
+            case VERSION_1_8: {
+                byte item = readByte();
+
+                while (item != 0x7F) {
+                    byte index = (byte) (item & 0x1F);
+                    EntityMetaData.Types type = EntityMetaData.Types.byId((item & 0xFF) >> 5, version);
+                    sets.put((int) index, new EntityMetaData.MetaDataSet(index, EntityMetaData.getData(type, this)));
+                    item = readByte();
+                }
+                break;
+            }
+            case VERSION_1_9_4:
+            case VERSION_1_10:
+                byte index = readByte();
+                while (index != (byte) 0xFF) {
+                    EntityMetaData.Types type = EntityMetaData.Types.byId(readByte(), version);
+                    sets.put((int) index, new EntityMetaData.MetaDataSet(index, EntityMetaData.getData(type, this)));
+                    index = readByte();
+                }
+                break;
+        }
+        return sets;
+    }
+
+    @Override
+    public String toString() {
+        return "dataLen: " + bytes.length + "; pos: " + pos;
+    }
+
+    public byte[] getBytes() {
+        return bytes;
     }
 }

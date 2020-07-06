@@ -13,7 +13,7 @@
 
 package de.bixilon.minosoft.game.datatypes.world;
 
-import de.bixilon.minosoft.game.datatypes.blocks.Block;
+import de.bixilon.minosoft.game.datatypes.blocks.Blocks;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,45 +22,45 @@ import java.util.Map;
  * Collection of 16 chunks nibbles
  */
 public class Chunk {
-    private final HashMap<Byte, ChunkNibble> nibbles;
+    final HashMap<Byte, ChunkNibble> nibbles;
 
     public Chunk(HashMap<Byte, ChunkNibble> chunks) {
         this.nibbles = chunks;
     }
 
-    public HashMap<Byte, ChunkNibble> getNibbles() {
-        return nibbles;
-    }
-
-    public Block getBlock(int x, int y, int z) {
-        if (x > 16 || y > 255 || z > 16 || x < 0 || y < 0 || z < 0) {
+    public Blocks getBlock(int x, int y, int z) {
+        if (x > 15 || y > 255 || z > 15 || x < 0 || y < 0 || z < 0) {
             throw new IllegalArgumentException(String.format("Invalid chunk location %s %s %s", x, y, z));
         }
         byte section = (byte) (y / 16);
         return nibbles.get(section).getBlock(x, y % 16, z);
     }
 
-    public void setBlock(int x, int y, int z, Block block) {
+    public Blocks getBlock(InChunkLocation location) {
+        return getBlock(location.getX(), location.getY(), location.getZ());
+    }
+
+    public void setBlock(int x, int y, int z, Blocks block) {
         byte section = (byte) (y / 16);
         createSection(section);
         nibbles.get(section).setBlock(x, y % 16, z, block);
     }
 
-    public void setBlock(InChunkLocation location, Block block) {
+    public void setBlock(InChunkLocation location, Blocks block) {
         byte section = (byte) (location.getY() / 16);
         createSection(section);
         nibbles.get(section).setBlock(location.getChunkNibbleLocation(), block);
     }
 
-    private void createSection(byte section) {
+    void createSection(byte section) {
         if (nibbles.get(section) == null) {
             // nibble was empty before, creating it
             nibbles.put(section, new ChunkNibble());
         }
     }
 
-    public void setBlocks(HashMap<InChunkLocation, Block> blocks) {
-        for (Map.Entry<InChunkLocation, Block> set : blocks.entrySet()) {
+    public void setBlocks(HashMap<InChunkLocation, Blocks> blocks) {
+        for (Map.Entry<InChunkLocation, Blocks> set : blocks.entrySet()) {
             setBlock(set.getKey(), set.getValue());
         }
     }

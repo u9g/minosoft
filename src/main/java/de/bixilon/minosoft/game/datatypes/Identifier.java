@@ -13,45 +13,27 @@
 
 package de.bixilon.minosoft.game.datatypes;
 
-public class Identifier {
-    final String legacy;
-    String mod = "minecraft"; // by default minecraft
-    String water;
+import de.bixilon.minosoft.protocol.protocol.Protocol;
+import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
 
-    public Identifier(String mod, String legacy, String water) { // water for water update name (post 1.13.x)
-        this.mod = mod;
-        this.legacy = legacy;
-        this.water = water;
-    }
+import java.util.HashMap;
+
+public class Identifier extends VersionValueMap<String> {
 
     public Identifier(String legacy, String water) {
-        this.legacy = legacy;
-        this.water = water;
+        values.put(Protocol.getLowestVersionSupported(), legacy);
+        values.put(ProtocolVersion.VERSION_1_13_2, water);
+    }
+
+    public Identifier(HashMap<ProtocolVersion, String> names) {
+        this.values = names;
+    }
+
+    public Identifier(IdentifierSet... sets) {
+        super(sets, true);
     }
 
     public Identifier(String name) {
-        // legacy and water are the same
-        this.legacy = name;
-    }
-
-    public String getMod() {
-        return mod;
-    }
-
-    public String getLegacy() {
-        return legacy;
-    }
-
-    public String getWaterUpdateName() {
-        return ((water == null) ? legacy : water);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (super.equals(obj)) {
-            return true;
-        }
-        Identifier that = (Identifier) obj;
-        return that.getLegacy().equals(getLegacy()) || that.getWaterUpdateName().equals(getWaterUpdateName());
+        super(name);
     }
 }

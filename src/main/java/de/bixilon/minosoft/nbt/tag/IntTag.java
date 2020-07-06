@@ -14,6 +14,7 @@
 package de.bixilon.minosoft.nbt.tag;
 
 import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
+import de.bixilon.minosoft.protocol.protocol.OutByteBuffer;
 
 public class IntTag implements Tag {
     final int value;
@@ -23,7 +24,7 @@ public class IntTag implements Tag {
     }
 
     public IntTag(InByteBuffer buffer) {
-        this.value = buffer.readInteger();
+        this.value = buffer.readInt();
     }
 
     @Override
@@ -31,7 +32,17 @@ public class IntTag implements Tag {
         return TagTypes.INT;
     }
 
+    @Override
+    public void writeBytes(OutByteBuffer buffer) {
+        buffer.writeInt(value);
+    }
+
     public int getValue() {
         return value;
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(value);
     }
 }

@@ -14,6 +14,7 @@
 package de.bixilon.minosoft.nbt.tag;
 
 import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
+import de.bixilon.minosoft.protocol.protocol.OutByteBuffer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,10 +71,35 @@ public class ListTag implements Tag {
 
     @Override
     public TagTypes getType() {
-        return TagTypes.BYTE_ARRAY;
+        return TagTypes.LIST;
+    }
+
+    @Override
+    public void writeBytes(OutByteBuffer buffer) {
+        new ByteTag((byte) type.getId()).writeBytes(buffer);
+
+        new IntTag(list.size()).writeBytes(buffer);
+
+        for (Tag tag : list) {
+            tag.writeBytes(buffer);
+        }
     }
 
     public List<Tag> getValue() {
         return list;
+    }
+
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("[");
+        for (Tag tag : list) {
+            builder.append(tag);
+        }
+        builder.delete(builder.length() - 1, builder.length()); // delete last comma
+        builder.append("]");
+
+        return builder.toString();
     }
 }

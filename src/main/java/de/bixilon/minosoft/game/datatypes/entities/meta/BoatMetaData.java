@@ -10,22 +10,27 @@
  *
  *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
-
 package de.bixilon.minosoft.game.datatypes.entities.meta;
 
-import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
 import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
+
+import java.util.HashMap;
 
 public class BoatMetaData extends EntityMetaData {
 
-    public BoatMetaData(InByteBuffer buffer, ProtocolVersion v) {
-        super(buffer, v);
+    public BoatMetaData(HashMap<Integer, MetaDataSet> sets, ProtocolVersion version) {
+        super(sets, version);
     }
 
     public int getTimeSinceHit() {
         switch (version) {
             case VERSION_1_7_10:
+            case VERSION_1_8:
                 return (int) sets.get(17).getData();
+            case VERSION_1_9_4:
+                return (int) sets.get(5).getData();
+            case VERSION_1_10:
+                return (int) sets.get(6).getData();
         }
         return 0;
     }
@@ -33,7 +38,12 @@ public class BoatMetaData extends EntityMetaData {
     public int getForwardDirection() {
         switch (version) {
             case VERSION_1_7_10:
+            case VERSION_1_8:
                 return (int) sets.get(18).getData();
+            case VERSION_1_9_4:
+                return (int) sets.get(6).getData();
+            case VERSION_1_10:
+                return (int) sets.get(7).getData();
         }
         return 0;
     }
@@ -41,9 +51,44 @@ public class BoatMetaData extends EntityMetaData {
     public float getDamageTaken() {
         switch (version) {
             case VERSION_1_7_10:
+            case VERSION_1_8:
                 return (float) sets.get(19).getData();
+            case VERSION_1_9_4:
+                return (float) sets.get(7).getData();
+            case VERSION_1_10:
+                return (float) sets.get(8).getData();
         }
         return 0;
+    }
+
+    public int getType() {
+        switch (version) {
+            case VERSION_1_9_4:
+                return (int) sets.get(8).getData();
+            case VERSION_1_10:
+                return (int) sets.get(9).getData();
+        }
+        return 0;
+    }
+
+    public boolean isRightPaddleTurning() {
+        switch (version) {
+            case VERSION_1_9_4:
+                return (boolean) sets.get(9).getData();
+            case VERSION_1_10:
+                return (boolean) sets.get(10).getData();
+        }
+        return false;
+    }
+
+    public boolean isLeftPaddleTurning() {
+        switch (version) {
+            case VERSION_1_9_4:
+                return (boolean) sets.get(10).getData();
+            case VERSION_1_10:
+                return (boolean) sets.get(11).getData();
+        }
+        return false;
     }
 
 }

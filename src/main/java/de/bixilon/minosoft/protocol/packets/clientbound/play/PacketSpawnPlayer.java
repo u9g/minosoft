@@ -21,7 +21,6 @@ import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.packets.ClientboundPacket;
 import de.bixilon.minosoft.protocol.protocol.InPacketBuffer;
 import de.bixilon.minosoft.protocol.protocol.PacketHandler;
-import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
 
 import java.util.UUID;
 
@@ -31,9 +30,9 @@ public class PacketSpawnPlayer implements ClientboundPacket {
     OtherPlayer player;
 
     @Override
-    public void read(InPacketBuffer buffer, ProtocolVersion v) {
-        switch (v) {
-            case VERSION_1_7_10:
+    public boolean read(InPacketBuffer buffer) {
+        switch (buffer.getVersion()) {
+            case VERSION_1_7_10: {
                 this.entityId = buffer.readVarInt();
                 UUID uuid = UUID.fromString(buffer.readString());
                 String name = buffer.readString();
@@ -42,20 +41,49 @@ public class PacketSpawnPlayer implements ClientboundPacket {
                     properties[i] = new PlayerPropertyData(buffer.readString(), buffer.readString(), buffer.readString());
                 }
                 Location location = new Location(buffer.readFixedPointNumberInteger(), buffer.readFixedPointNumberInteger(), buffer.readFixedPointNumberInteger());
-                int yaw = buffer.readByte();
-                int pitch = buffer.readByte();
+                short yaw = buffer.readAngle();
+                short pitch = buffer.readAngle();
 
                 short currentItem = buffer.readShort();
-                HumanMetaData metaData = new HumanMetaData(buffer, v);
+                HumanMetaData metaData = new HumanMetaData(buffer.readMetaData(), buffer.getVersion());
 
                 this.player = new OtherPlayer(entityId, name, uuid, properties, location, null, yaw, pitch, currentItem, metaData);
-                break;
+                return true;
+            }
+            case VERSION_1_8: {
+                this.entityId = buffer.readVarInt();
+                UUID uuid = buffer.readUUID();
+                Location location = new Location(buffer.readFixedPointNumberInteger(), buffer.readFixedPointNumberInteger(), buffer.readFixedPointNumberInteger());
+                short yaw = buffer.readAngle();
+                short pitch = buffer.readAngle();
+
+                short currentItem = buffer.readShort();
+                HumanMetaData metaData = new HumanMetaData(buffer.readMetaData(), buffer.getVersion());
+
+                this.player = new OtherPlayer(entityId, null, uuid, null, location, null, yaw, pitch, currentItem, metaData);
+                return true;
+            }
+            case VERSION_1_9_4:
+            case VERSION_1_10: {
+                this.entityId = buffer.readVarInt();
+                UUID uuid = buffer.readUUID();
+                Location location = new Location(buffer.readDouble(), buffer.readDouble(), buffer.readDouble());
+                short yaw = buffer.readAngle();
+                short pitch = buffer.readAngle();
+
+                HumanMetaData metaData = new HumanMetaData(buffer.readMetaData(), buffer.getVersion());
+
+                this.player = new OtherPlayer(entityId, null, uuid, null, location, null, yaw, pitch, (short) 0, metaData);
+                return true;
+            }
         }
+
+        return false;
     }
 
     @Override
     public void log() {
-        Log.protocol(String.format("Player spawned (name=%s, uuid=%s, location=%s)", player.getName(), player.getUUID(), player.getLocation().toString()));
+        Log.protocol(String.format("Player spawned at %s (name=%s, uuid=%s)", player.getLocation().toString(), player.getName(), player.getUUID()));
     }
 
     public int getEntityId() {

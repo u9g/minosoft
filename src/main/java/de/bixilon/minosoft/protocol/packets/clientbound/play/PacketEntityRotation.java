@@ -17,28 +17,38 @@ import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.packets.ClientboundPacket;
 import de.bixilon.minosoft.protocol.protocol.InPacketBuffer;
 import de.bixilon.minosoft.protocol.protocol.PacketHandler;
-import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
 
 
 public class PacketEntityRotation implements ClientboundPacket {
     int entityId;
-    int yaw;
-    int pitch;
+    short yaw;
+    short pitch;
+    boolean onGround;
 
     @Override
-    public void read(InPacketBuffer buffer, ProtocolVersion v) {
-        switch (v) {
+    public boolean read(InPacketBuffer buffer) {
+        switch (buffer.getVersion()) {
             case VERSION_1_7_10:
-                this.entityId = buffer.readInteger();
-                this.yaw = buffer.readByte();
-                this.pitch = buffer.readByte();
-                break;
+                this.entityId = buffer.readInt();
+                this.yaw = buffer.readAngle();
+                this.pitch = buffer.readAngle();
+                return true;
+            case VERSION_1_8:
+            case VERSION_1_9_4:
+            case VERSION_1_10:
+                this.entityId = buffer.readVarInt();
+                this.yaw = buffer.readAngle();
+                this.pitch = buffer.readAngle();
+                onGround = buffer.readBoolean();
+                return true;
         }
+
+        return false;
     }
 
     @Override
     public void log() {
-        Log.protocol(String.format("Entity %d moved relative %s %s", entityId, yaw, pitch));
+        Log.protocol(String.format("Entity %d moved relative (yaw=%s, pitch=%s)", entityId, yaw, pitch));
     }
 
     public int getEntityId() {
@@ -46,11 +56,11 @@ public class PacketEntityRotation implements ClientboundPacket {
     }
 
 
-    public int getYaw() {
+    public short getYaw() {
         return yaw;
     }
 
-    public int getPitch() {
+    public short getPitch() {
         return pitch;
     }
 

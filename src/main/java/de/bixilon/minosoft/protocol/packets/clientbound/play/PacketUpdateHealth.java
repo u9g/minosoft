@@ -17,28 +17,36 @@ import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.packets.ClientboundPacket;
 import de.bixilon.minosoft.protocol.protocol.InPacketBuffer;
 import de.bixilon.minosoft.protocol.protocol.PacketHandler;
-import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
 
 public class PacketUpdateHealth implements ClientboundPacket {
     float health;
-    short food;
+    int food;
     float saturation;
 
 
     @Override
-    public void read(InPacketBuffer buffer, ProtocolVersion v) {
-        switch (v) {
+    public boolean read(InPacketBuffer buffer) {
+        switch (buffer.getVersion()) {
             case VERSION_1_7_10:
-                health = (float) (Math.round(buffer.readFloat() * 10) / 10.0);
+                health = buffer.readFloat();
                 food = buffer.readShort();
-                saturation = (float) (Math.round(buffer.readFloat() * 10) / 10.0);
-                break;
+                saturation = buffer.readFloat();
+                return true;
+            case VERSION_1_8:
+            case VERSION_1_9_4:
+            case VERSION_1_10:
+                health = buffer.readFloat();
+                food = buffer.readVarInt();
+                saturation = buffer.readFloat();
+                return true;
         }
+
+        return false;
     }
 
     @Override
     public void log() {
-        Log.protocol(String.format("Health update. Now at %s hearts and %s food level and %s saturation", health, food, saturation));
+        Log.protocol(String.format("Health update. Now at %s hearts and %s food level and %s saturation", (Math.round(health * 10) / 10.0), (Math.round(food * 10) / 10.0), saturation));
     }
 
     @Override
@@ -46,7 +54,7 @@ public class PacketUpdateHealth implements ClientboundPacket {
         h.handle(this);
     }
 
-    public short getFood() {
+    public int getFood() {
         return food;
     }
 

@@ -14,6 +14,7 @@
 package de.bixilon.minosoft.nbt.tag;
 
 import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
+import de.bixilon.minosoft.protocol.protocol.OutByteBuffer;
 
 public class DoubleTag implements Tag {
     final double value;
@@ -31,7 +32,17 @@ public class DoubleTag implements Tag {
         return TagTypes.DOUBLE;
     }
 
+    @Override
+    public void writeBytes(OutByteBuffer buffer) {
+        buffer.writeDouble(value);
+    }
+
     public double getValue() {
         return value;
+    }
+
+    @Override
+    public String toString() {
+        return value + "D";
     }
 }

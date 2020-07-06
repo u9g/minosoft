@@ -16,40 +16,33 @@ package de.bixilon.minosoft.protocol.packets.clientbound.play;
 import de.bixilon.minosoft.game.datatypes.entities.EntityObject;
 import de.bixilon.minosoft.game.datatypes.entities.Location;
 import de.bixilon.minosoft.game.datatypes.entities.Objects;
+import de.bixilon.minosoft.game.datatypes.entities.Velocity;
+import de.bixilon.minosoft.game.datatypes.entities.meta.EntityMetaData;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.packets.ClientboundPacket;
+import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
 import de.bixilon.minosoft.protocol.protocol.InPacketBuffer;
 import de.bixilon.minosoft.protocol.protocol.PacketHandler;
 import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.UUID;
 
 public class PacketSpawnObject implements ClientboundPacket {
     EntityObject object;
 
-    @Override
-    public void read(InPacketBuffer buffer, ProtocolVersion v) {
-        switch (v) {
-            case VERSION_1_7_10:
-                int entityId = buffer.readVarInt();
-                Objects type = Objects.byType(buffer.readByte());
-                Location location = new Location(buffer.readFixedPointNumberInteger(), buffer.readFixedPointNumberInteger(), buffer.readFixedPointNumberInteger());
-                int pitch = buffer.readByte();
-                int yaw = buffer.readByte();
-
-                assert type != null;
-                try {
-                    object = type.getClazz().getConstructor(int.class, Location.class, int.class, int.class, int.class, ProtocolVersion.class).newInstance(entityId, location, yaw, pitch, buffer.readInteger(), v);
-                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                    e.printStackTrace();
-                }
-                break;
+    public static EntityMetaData getEntityData(Class<? extends EntityMetaData> clazz, InByteBuffer buffer, ProtocolVersion v) {
+        try {
+            return clazz.getConstructor(InByteBuffer.class, ProtocolVersion.class).newInstance(buffer, v);
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            e.printStackTrace();
         }
+        return null;
     }
 
     @Override
     public void log() {
-        Log.protocol(String.format("Object spawned (entityId=%d, type=%s, at %s)", object.getId(), object.getEntityType().name(), object.getLocation().toString()));
+        Log.protocol(String.format("Object spawned at %s (entityId=%d, type=%s)", object.getLocation().toString(), object.getEntityId(), object.getEntityType().name()));
     }
 
     public EntityObject getObject() {
@@ -59,5 +52,58 @@ public class PacketSpawnObject implements ClientboundPacket {
     @Override
     public void handle(PacketHandler h) {
         h.handle(this);
+    }
+
+    @Override
+    public boolean read(InPacketBuffer buffer) {
+        switch (buffer.getVersion()) {
+            case VERSION_1_7_10:
+            case VERSION_1_8: {
+                int entityId = buffer.readVarInt();
+                Objects type = Objects.byType(buffer.readByte());
+                Location location = new Location(buffer.readFixedPointNumberInteger(), buffer.readFixedPointNumberInteger(), buffer.readFixedPointNumberInteger());
+                short pitch = buffer.readAngle();
+                short yaw = buffer.readAngle();
+                int data = buffer.readInt();
+
+                try {
+                    if (buffer.getVersion().getVersion() >= ProtocolVersion.VERSION_1_8.getVersion()) {
+                        // velocity present AND metadata
+
+                        Velocity velocity = null;
+                        if (data != 0) {
+                            velocity = new Velocity(buffer.readShort(), buffer.readShort(), buffer.readShort());
+                        }
+                        object = type.getClazz().getConstructor(int.class, Location.class, short.class, short.class, int.class, Velocity.class).newInstance(entityId, location, yaw, pitch, data, velocity);
+                        return true;
+                    } else {
+                        object = type.getClazz().getConstructor(int.class, Location.class, short.class, short.class, int.class).newInstance(entityId, location, yaw, pitch, data);
+                        return true;
+                    }
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                    e.printStackTrace();
+                }
+            }
+            case VERSION_1_9_4:
+            case VERSION_1_10: {
+                int entityId = buffer.readVarInt();
+                UUID uuid = buffer.readUUID();
+                Objects type = Objects.byType(buffer.readByte());
+                Location location = new Location(buffer.readDouble(), buffer.readDouble(), buffer.readDouble());
+                short pitch = buffer.readAngle();
+                short yaw = buffer.readAngle();
+                int data = buffer.readInt();
+
+                try {
+                    // velocity present AND metadata
+                    Velocity velocity = new Velocity(buffer.readShort(), buffer.readShort(), buffer.readShort());
+                    object = type.getClazz().getConstructor(int.class, Location.class, short.class, short.class, int.class, Velocity.class).newInstance(entityId, location, yaw, pitch, data, velocity);
+                    return true;
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return false;
     }
 }

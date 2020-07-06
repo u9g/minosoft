@@ -13,36 +13,39 @@
 
 package de.bixilon.minosoft.protocol.packets.clientbound.play;
 
-import de.bixilon.minosoft.game.datatypes.entities.Location;
+import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.packets.ClientboundPacket;
 import de.bixilon.minosoft.protocol.protocol.InPacketBuffer;
 import de.bixilon.minosoft.protocol.protocol.PacketHandler;
-import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
 
 public class PacketSpawnLocation implements ClientboundPacket {
-    Location loc;
+    BlockPosition location;
 
 
     @Override
-    public void read(InPacketBuffer buffer, ProtocolVersion v) {
-        switch (v) {
+    public boolean read(InPacketBuffer buffer) {
+        switch (buffer.getVersion()) {
             case VERSION_1_7_10:
-                int x = buffer.readInteger();
-                int y = buffer.readInteger();
-                int z = buffer.readInteger();
-                loc = new Location(x, y, z);
-                break;
+                location = new BlockPosition(buffer.readInt(), (short) buffer.readInt(), buffer.readInt());
+                return true;
+            case VERSION_1_8:
+            case VERSION_1_9_4:
+            case VERSION_1_10:
+                location = buffer.readPosition();
+                return true;
         }
+
+        return false;
     }
 
     @Override
     public void log() {
-        Log.protocol(String.format("Received spawn location %s", loc.toString()));
+        Log.protocol(String.format("Received spawn location %s", location.toString()));
     }
 
-    public Location getSpawnLocation() {
-        return loc;
+    public BlockPosition getSpawnLocation() {
+        return location;
     }
 
     @Override

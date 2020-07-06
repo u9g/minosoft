@@ -13,32 +13,47 @@
 
 package de.bixilon.minosoft.game.datatypes;
 
-import de.bixilon.minosoft.game.datatypes.entities.Location;
-import de.bixilon.minosoft.game.datatypes.entities.meta.HumanMetaData;
+import de.bixilon.minosoft.game.datatypes.entities.mob.OtherPlayer;
+import de.bixilon.minosoft.game.datatypes.inventory.Inventory;
+import de.bixilon.minosoft.game.datatypes.inventory.InventoryProperties;
+import de.bixilon.minosoft.game.datatypes.inventory.InventorySlots;
+import de.bixilon.minosoft.game.datatypes.inventory.Slot;
+import de.bixilon.minosoft.game.datatypes.player.PlayerInfo;
+import de.bixilon.minosoft.game.datatypes.scoreboard.ScoreboardManager;
+import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
 import de.bixilon.minosoft.game.datatypes.world.World;
 import de.bixilon.minosoft.mojang.api.MojangAccount;
+import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
 
 import java.util.HashMap;
 import java.util.UUID;
 
+import static de.bixilon.minosoft.protocol.protocol.ProtocolDefinition.PLAYER_INVENTORY_ID;
+
 public class Player {
     final MojangAccount acc;
+    final ScoreboardManager scoreboardManager = new ScoreboardManager();
+    public HashMap<UUID, PlayerInfo> playerInfos = new HashMap<>();
     float health;
-    short food;
+    int food;
     float saturation;
-    Location spawnLocation;
-    int entityId;
+    BlockPosition spawnLocation;
     GameMode gameMode;
     World world = new World("world");
     byte selectedSlot;
-    short level;
-    short totalExperience;
-    HumanMetaData metaData;
-    HashMap<Slots.Inventory, Slot> inventory = new HashMap<>();
+    int level;
+    int totalExperience;
+    OtherPlayer player;
+    HashMap<Integer, Inventory> inventories = new HashMap<>();
     boolean spawnConfirmed = false;
+
+    TextComponent tabHeader;
+    TextComponent tabFooter;
 
     public Player(MojangAccount acc) {
         this.acc = acc;
+        // create our own inventory without any properties
+        inventories.put(PLAYER_INVENTORY_ID, new Inventory(null));
     }
 
     public String getPlayerName() {
@@ -61,27 +76,27 @@ public class Player {
         this.health = health;
     }
 
-    public short getFood() {
+    public int getFood() {
         return food;
     }
 
-    public void setFood(short food) {
+    public void setFood(int food) {
         this.food = food;
-    }
-
-    public void setSaturation(float saturation) {
-        this.saturation = saturation;
     }
 
     public float getSaturation() {
         return saturation;
     }
 
-    public Location getSpawnLocation() {
+    public void setSaturation(float saturation) {
+        this.saturation = saturation;
+    }
+
+    public BlockPosition getSpawnLocation() {
         return spawnLocation;
     }
 
-    public void setSpawnLocation(Location spawnLocation) {
+    public void setSpawnLocation(BlockPosition spawnLocation) {
         this.spawnLocation = spawnLocation;
     }
 
@@ -91,14 +106,6 @@ public class Player {
 
     public void setGameMode(GameMode gameMode) {
         this.gameMode = gameMode;
-    }
-
-    public int getEntityId() {
-        return entityId;
-    }
-
-    public void setEntityId(int entityId) {
-        this.entityId = entityId;
     }
 
     public World getWorld() {
@@ -113,50 +120,62 @@ public class Player {
         this.selectedSlot = selectedSlot;
     }
 
-    public short getLevel() {
+    public int getLevel() {
         return level;
     }
 
-    public void setLevel(short level) {
+    public void setLevel(int level) {
         this.level = level;
     }
 
-    public short getTotalExperience() {
+    public int getTotalExperience() {
         return totalExperience;
     }
 
-    public void setTotalExperience(short totalExperience) {
+    public void setTotalExperience(int totalExperience) {
         this.totalExperience = totalExperience;
     }
 
-    public HumanMetaData getMetaData() {
-        return metaData;
+    public Inventory getPlayerInventory() {
+        return getInventory(PLAYER_INVENTORY_ID);
     }
 
-    public void setMetaData(HumanMetaData metaData) {
-        this.metaData = metaData;
+    public void setPlayerInventory(Slot[] data) {
+        setInventory(PLAYER_INVENTORY_ID, data);
     }
 
-    public HashMap<Slots.Inventory, Slot> getInventory() {
-        return inventory;
+    public Inventory getInventory(int id) {
+        return inventories.get(id);
     }
 
-    public void setInventory(HashMap<Slots.Inventory, Slot> inventory) {
-        this.inventory = inventory;
-    }
-
-    public void setInventory(Slot[] data) {
+    public void setInventory(int windowId, Slot[] data) {
         for (int i = 0; i < data.length; i++) {
-            setSlot(Slots.Inventory.byId(i), data[i]);
+            setSlot(windowId, i, data[i]);
         }
     }
 
-    public Slot getSlot(Slots.Inventory slot) {
-        return inventory.get(slot);
+    public Slot getSlot(int windowId, InventorySlots.InventoryInterface slot, ProtocolVersion version) {
+        return getSlot(windowId, slot.getId(version));
     }
 
-    public void setSlot(Slots.Inventory slot, Slot data) {
-        inventory.put(slot, data);
+    public Slot getSlot(int windowId, int slot) {
+        return inventories.get(windowId).getSlot(slot);
+    }
+
+    public void setSlot(int windowId, InventorySlots.InventoryInterface slot, ProtocolVersion version, Slot data) {
+        setSlot(windowId, slot.getId(version), data);
+    }
+
+    public void setSlot(int windowId, int slot, Slot data) {
+        inventories.get(windowId).setSlot(slot, data);
+    }
+
+    public void createInventory(InventoryProperties properties) {
+        inventories.put(properties.getWindowId(), new Inventory(properties));
+    }
+
+    public void deleteInventory(int windowId) {
+        inventories.remove(windowId);
     }
 
     public boolean isSpawnConfirmed() {
@@ -165,5 +184,47 @@ public class Player {
 
     public void setSpawnConfirmed(boolean spawnConfirmed) {
         this.spawnConfirmed = spawnConfirmed;
+    }
+
+    public ScoreboardManager getScoreboardManager() {
+        return scoreboardManager;
+    }
+
+    public HashMap<UUID, PlayerInfo> getPlayerInfos() {
+        return playerInfos;
+    }
+
+    public PlayerInfo getPlayerInfo(String name) {
+        // only legacy
+        for (PlayerInfo info : playerInfos.values()) {
+            if (info.getName().equals(name)) {
+                return info;
+            }
+        }
+        return null;
+    }
+
+    public TextComponent getTabHeader() {
+        return tabHeader;
+    }
+
+    public void setTabHeader(TextComponent tabHeader) {
+        this.tabHeader = tabHeader;
+    }
+
+    public TextComponent getTabFooter() {
+        return tabFooter;
+    }
+
+    public void setTabFooter(TextComponent tabFooter) {
+        this.tabFooter = tabFooter;
+    }
+
+    public OtherPlayer getPlayer() {
+        return player;
+    }
+
+    public void setPlayer(OtherPlayer player) {
+        this.player = player;
     }
 }

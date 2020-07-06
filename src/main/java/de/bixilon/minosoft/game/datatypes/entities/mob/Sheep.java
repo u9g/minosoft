@@ -14,18 +14,18 @@
 package de.bixilon.minosoft.game.datatypes.entities.mob;
 
 import de.bixilon.minosoft.game.datatypes.entities.*;
-import de.bixilon.minosoft.game.datatypes.entities.meta.AgeableMetaData;
 import de.bixilon.minosoft.game.datatypes.entities.meta.EntityMetaData;
 import de.bixilon.minosoft.game.datatypes.entities.meta.SheepMetaData;
-import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
 import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
+
+import java.util.HashMap;
 
 public class Sheep extends Mob implements MobInterface {
     SheepMetaData metaData;
 
-    public Sheep(int id, Location location, int yaw, int pitch, Velocity velocity, InByteBuffer buffer, ProtocolVersion v) {
-        super(id, location, yaw, pitch, velocity);
-        this.metaData = new SheepMetaData(buffer, v);
+    public Sheep(int entityId, Location location, short yaw, short pitch, Velocity velocity, HashMap<Integer, EntityMetaData.MetaDataSet> sets, ProtocolVersion version) {
+        super(entityId, location, yaw, pitch, velocity);
+        this.metaData = new SheepMetaData(sets, version);
     }
 
     @Override
@@ -66,6 +66,6 @@ public class Sheep extends Mob implements MobInterface {
 
     @Override
     public Class<? extends EntityMetaData> getMetaDataClass() {
-        return AgeableMetaData.class;
+        return SheepMetaData.class;
     }
 }

@@ -10,23 +10,28 @@
  *
  *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
-
 package de.bixilon.minosoft.game.datatypes.entities.meta;
 
-import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
 import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
+
+import java.util.HashMap;
 
 public class PigMetaData extends AgeableMetaData {
 
-    public PigMetaData(InByteBuffer buffer, ProtocolVersion v) {
-        super(buffer, v);
+    public PigMetaData(HashMap<Integer, MetaDataSet> sets, ProtocolVersion version) {
+        super(sets, version);
     }
 
 
     public boolean hasSaddle() {
         switch (version) {
             case VERSION_1_7_10:
+            case VERSION_1_8:
                 return (byte) sets.get(16).getData() == 0x01;
+            case VERSION_1_9_4:
+                return (boolean) sets.get(12).getData();
+            case VERSION_1_10:
+                return (boolean) sets.get(13).getData();
         }
         return false;
     }

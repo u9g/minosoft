@@ -13,21 +13,21 @@
 
 package de.bixilon.minosoft.game.datatypes.entities.objects;
 
-import de.bixilon.minosoft.game.datatypes.entities.EntityObject;
-import de.bixilon.minosoft.game.datatypes.entities.Location;
-import de.bixilon.minosoft.game.datatypes.entities.ObjectInterface;
-import de.bixilon.minosoft.game.datatypes.entities.Objects;
+import de.bixilon.minosoft.game.datatypes.entities.*;
 import de.bixilon.minosoft.game.datatypes.entities.meta.EntityMetaData;
-import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
 
 public class Egg extends EntityObject implements ObjectInterface {
     EntityMetaData metaData;
-    int thrower;
+    final int thrower;
 
-    public Egg(int id, Location location, int yaw, int pitch, int additionalInt, ProtocolVersion v) {
-        super(id, location, yaw, pitch, null);
+    public Egg(int entityId, Location location, short yaw, short pitch, int additionalInt) {
+        super(entityId, location, yaw, pitch, null);
         // objects do not spawn with metadata... reading additional info from the following int
-        // tnt does not have any additional info
+        this.thrower = additionalInt;
+    }
+
+    public Egg(int entityId, Location location, short yaw, short pitch, int additionalInt, Velocity velocity) {
+        super(entityId, location, yaw, pitch, velocity);
         this.thrower = additionalInt;
     }
 
@@ -54,11 +54,6 @@ public class Egg extends EntityObject implements ObjectInterface {
     @Override
     public float getHeight() {
         return 0.25F;
-    }
-
-    @Override
-    public Class<? extends EntityMetaData> getMetaDataClass() {
-        return EntityMetaData.class;
     }
 
     public int getThrower() {

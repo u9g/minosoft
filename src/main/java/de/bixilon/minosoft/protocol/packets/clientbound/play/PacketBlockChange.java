@@ -13,33 +13,40 @@
 
 package de.bixilon.minosoft.protocol.packets.clientbound.play;
 
+import de.bixilon.minosoft.game.datatypes.blocks.Blocks;
 import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
-import de.bixilon.minosoft.game.datatypes.blocks.Block;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.packets.ClientboundPacket;
 import de.bixilon.minosoft.protocol.protocol.InPacketBuffer;
 import de.bixilon.minosoft.protocol.protocol.PacketHandler;
-import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
-import de.bixilon.minosoft.util.BitByte;
 
 public class PacketBlockChange implements ClientboundPacket {
     BlockPosition position;
-    Block block;
+    Blocks block;
 
 
     @Override
-    public void read(InPacketBuffer buffer, ProtocolVersion v) {
-        switch (v) {
+    public boolean read(InPacketBuffer buffer) {
+        switch (buffer.getVersion()) {
             case VERSION_1_7_10:
-                position = new BlockPosition(buffer.readInteger(), BitByte.byteToUShort(buffer.readByte()), buffer.readInteger());
-                block = Block.byLegacy(buffer.readVarInt(), buffer.readByte());
-                break;
+                position = buffer.readBlockPosition();
+                block = Blocks.byId(buffer.readVarInt(), buffer.readByte());
+                return true;
+            case VERSION_1_8:
+            case VERSION_1_9_4:
+            case VERSION_1_10:
+                position = buffer.readPosition();
+                int blockId = buffer.readVarInt();
+                block = Blocks.byId(blockId >>> 4, blockId & 0xF);
+                return true;
         }
+
+        return false;
     }
 
     @Override
     public void log() {
-        Log.protocol(String.format("Block change received: %s %s", position.toString(), block.name()));
+        Log.protocol(String.format("Block change received at %s (block=%s)", position.toString(), block.name()));
     }
 
     @Override
@@ -51,7 +58,7 @@ public class PacketBlockChange implements ClientboundPacket {
         return position;
     }
 
-    public Block getBlock() {
+    public Blocks getBlock() {
         return block;
     }
 }

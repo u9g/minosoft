@@ -13,20 +13,20 @@
 
 package de.bixilon.minosoft.game.datatypes.entities.objects;
 
-import de.bixilon.minosoft.game.datatypes.entities.EntityObject;
-import de.bixilon.minosoft.game.datatypes.entities.Location;
-import de.bixilon.minosoft.game.datatypes.entities.ObjectInterface;
-import de.bixilon.minosoft.game.datatypes.entities.Objects;
+import de.bixilon.minosoft.game.datatypes.entities.*;
 import de.bixilon.minosoft.game.datatypes.entities.meta.EntityMetaData;
-import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
+import de.bixilon.minosoft.game.datatypes.entities.meta.FishingHookMetaData;
 
 public class LeashKnot extends EntityObject implements ObjectInterface {
-    EntityMetaData metaData;
+    FishingHookMetaData metaData;
 
-    public LeashKnot(int id, Location location, int yaw, int pitch, int additionalInt, ProtocolVersion v) {
-        super(id, location, yaw, pitch, null);
+    public LeashKnot(int entityId, Location location, short yaw, short pitch, int additionalInt) {
+        super(entityId, location, yaw, pitch, null);
         // objects do not spawn with metadata... reading additional info from the following int
-        // tnt does not have any additional info
+    }
+
+    public LeashKnot(int entityId, Location location, short yaw, short pitch, int additionalInt, Velocity velocity) {
+        super(entityId, location, yaw, pitch, velocity);
     }
 
     @Override
@@ -35,13 +35,13 @@ public class LeashKnot extends EntityObject implements ObjectInterface {
     }
 
     @Override
-    public EntityMetaData getMetaData() {
+    public FishingHookMetaData getMetaData() {
         return metaData;
     }
 
     @Override
     public void setMetaData(EntityMetaData metaData) {
-        this.metaData = metaData;
+        this.metaData = (FishingHookMetaData) metaData;
     }
 
     @Override
@@ -56,7 +56,6 @@ public class LeashKnot extends EntityObject implements ObjectInterface {
 
     @Override
     public Class<? extends EntityMetaData> getMetaDataClass() {
-        return EntityMetaData.class;
+        return FishingHookMetaData.class;
     }
-
 }

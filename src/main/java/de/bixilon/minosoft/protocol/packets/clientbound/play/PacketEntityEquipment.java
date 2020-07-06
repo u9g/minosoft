@@ -13,29 +13,41 @@
 
 package de.bixilon.minosoft.protocol.packets.clientbound.play;
 
-import de.bixilon.minosoft.game.datatypes.Slot;
-import de.bixilon.minosoft.game.datatypes.Slots;
+import de.bixilon.minosoft.game.datatypes.inventory.InventorySlots;
+import de.bixilon.minosoft.game.datatypes.inventory.Slot;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.packets.ClientboundPacket;
 import de.bixilon.minosoft.protocol.protocol.InPacketBuffer;
 import de.bixilon.minosoft.protocol.protocol.PacketHandler;
-import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
 
 public class PacketEntityEquipment implements ClientboundPacket {
     int entityId;
-    Slots.Entity slot;
+    InventorySlots.EntityInventory slot;
     Slot data;
 
 
     @Override
-    public void read(InPacketBuffer buffer, ProtocolVersion v) {
-        switch (v) {
+    public boolean read(InPacketBuffer buffer) {
+        switch (buffer.getVersion()) {
             case VERSION_1_7_10:
-                entityId = buffer.readInteger();
-                this.slot = Slots.Entity.byId(buffer.readShort());
-                this.data = buffer.readSlot(v);
-                break;
+                entityId = buffer.readInt();
+                this.slot = InventorySlots.EntityInventory.byId(buffer.readShort(), buffer.getVersion());
+                this.data = buffer.readSlot();
+                return true;
+            case VERSION_1_8:
+                entityId = buffer.readVarInt();
+                this.slot = InventorySlots.EntityInventory.byId(buffer.readShort(), buffer.getVersion());
+                this.data = buffer.readSlot();
+                return true;
+            case VERSION_1_9_4:
+            case VERSION_1_10:
+                entityId = buffer.readVarInt();
+                this.slot = InventorySlots.EntityInventory.byId(buffer.readVarInt(), buffer.getVersion());
+                this.data = buffer.readSlot();
+                return true;
         }
+
+        return false;
     }
 
     @Override
@@ -57,7 +69,7 @@ public class PacketEntityEquipment implements ClientboundPacket {
         return entityId;
     }
 
-    public Slots.Entity getSlot() {
+    public InventorySlots.EntityInventory getSlot() {
         return slot;
     }
 

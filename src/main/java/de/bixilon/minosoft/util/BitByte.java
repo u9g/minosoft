@@ -21,6 +21,12 @@ public class BitByte {
         return bitSet;
     }
 
+    public static boolean isBitMask(int in, int mask) {
+        boolean bitSet;
+        bitSet = ((in & mask) == mask);
+        return bitSet;
+    }
+
     public static boolean isBitSetShort(short in, int pos) {
         boolean bitSet;
         int mask = 1 << pos;
@@ -33,7 +39,7 @@ public class BitByte {
     }
 
     public static byte getHigh4Bits(byte input) {
-        return (byte) ((input) >> 4 & 0xF);
+        return (byte) ((input) >>> 4 & 0xF);
     }
 
     public static byte getBitCount(short input) {

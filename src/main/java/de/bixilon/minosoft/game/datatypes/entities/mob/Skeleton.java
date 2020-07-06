@@ -16,15 +16,16 @@ package de.bixilon.minosoft.game.datatypes.entities.mob;
 import de.bixilon.minosoft.game.datatypes.entities.*;
 import de.bixilon.minosoft.game.datatypes.entities.meta.EntityMetaData;
 import de.bixilon.minosoft.game.datatypes.entities.meta.SkeletonMetaData;
-import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
 import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
+
+import java.util.HashMap;
 
 public class Skeleton extends Mob implements MobInterface {
     SkeletonMetaData metaData;
 
-    public Skeleton(int id, Location location, int yaw, int pitch, Velocity velocity, InByteBuffer buffer, ProtocolVersion v) {
-        super(id, location, yaw, pitch, velocity);
-        this.metaData = new SkeletonMetaData(buffer, v);
+    public Skeleton(int entityId, Location location, short yaw, short pitch, Velocity velocity, HashMap<Integer, EntityMetaData.MetaDataSet> sets, ProtocolVersion version) {
+        super(entityId, location, yaw, pitch, velocity);
+        this.metaData = new SkeletonMetaData(sets, version);
     }
 
     @Override
@@ -44,18 +45,22 @@ public class Skeleton extends Mob implements MobInterface {
 
     @Override
     public float getWidth() {
-        if (metaData.isWitherSkeleton()) {
-            return 0.7F;
+        switch (metaData.getSkeletonType()) {
+            case WITHER:
+                return 0.7F;
+            default:
+                return 0.6F;
         }
-        return 0.6F;
     }
 
     @Override
     public float getHeight() {
-        if (metaData.isWitherSkeleton()) {
-            return 2.4F;
+        switch (metaData.getSkeletonType()) {
+            case WITHER:
+                return 2.4F;
+            default:
+                return 1.99F;
         }
-        return 1.99F;
     }
 
     @Override

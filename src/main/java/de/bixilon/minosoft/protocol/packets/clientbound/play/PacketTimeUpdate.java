@@ -17,7 +17,6 @@ import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.packets.ClientboundPacket;
 import de.bixilon.minosoft.protocol.protocol.InPacketBuffer;
 import de.bixilon.minosoft.protocol.protocol.PacketHandler;
-import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
 
 public class PacketTimeUpdate implements ClientboundPacket {
     long worldAge;
@@ -25,18 +24,23 @@ public class PacketTimeUpdate implements ClientboundPacket {
 
 
     @Override
-    public void read(InPacketBuffer buffer, ProtocolVersion v) {
-        switch (v) {
+    public boolean read(InPacketBuffer buffer) {
+        switch (buffer.getVersion()) {
             case VERSION_1_7_10:
+            case VERSION_1_8:
+            case VERSION_1_9_4:
+            case VERSION_1_10:
                 worldAge = buffer.readLong();
                 timeOfDay = buffer.readLong();
-                break;
+                return true;
         }
+
+        return false;
     }
 
     @Override
     public void log() {
-        Log.protocol(String.format("Time Update packet received. Time is now %st (total %st)", timeOfDay, worldAge));
+        Log.protocol(String.format("Time Update packet received. Time is now %st (total %st, moving=%s)", Math.abs(timeOfDay), worldAge, timeOfDay > 0));
     }
 
     @Override

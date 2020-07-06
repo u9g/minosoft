@@ -13,15 +13,51 @@
 
 package de.bixilon.minosoft.protocol.protocol;
 
-public enum ProtocolVersion {
-    VERSION_1_7_10(new Protocol_1_7_10());
+import java.util.TreeMap;
 
-    private final int version;
-    private final Protocol protocol;
+public enum ProtocolVersion {
+    VERSION_1_7_10(new Protocol_1_7_10()),
+    VERSION_1_8(new Protocol_1_8()),
+    VERSION_1_9_4(new Protocol_1_9_4()),
+    VERSION_1_10(new Protocol_1_10()),
+    VERSION_1_11_2(new Protocol_1_11_2()),
+    VERSION_1_12_2(new Protocol_1_12_2()),
+    VERSION_1_13_2(new Protocol_1_13_2()),
+    VERSION_1_14_4(new Protocol_1_14_4()),
+    VERSION_1_15_2(new Protocol_1_15_2());
+
+    public static final TreeMap<Integer, ProtocolVersion> versionMapping = new TreeMap<>();
+
+    public static final ProtocolVersion[] versionMappingArray;
+
+    static {
+        for (ProtocolVersion v : values()) {
+            versionMapping.put(v.getVersion(), v);
+        }
+        versionMappingArray = new ProtocolVersion[values().length];
+        int counter = 0;
+        for (ProtocolVersion v : versionMapping.values()) {
+            versionMappingArray[counter] = v;
+            counter++;
+        }
+    }
+
+
+    final int version;
+    final Protocol protocol;
 
     ProtocolVersion(Protocol protocol) {
         this.protocol = protocol;
         this.version = protocol.getProtocolVersion();
+    }
+
+    public static ProtocolVersion byId(int protocolNumber) {
+        for (ProtocolVersion v : values()) {
+            if (v.getVersion() == protocolNumber) {
+                return v;
+            }
+        }
+        return null;
     }
 
     public int getVersion() {

@@ -13,8 +13,10 @@
 
 package de.bixilon.minosoft.protocol.protocol;
 
-import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
 import de.bixilon.minosoft.game.datatypes.TextComponent;
+import de.bixilon.minosoft.game.datatypes.inventory.Slot;
+import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
+import de.bixilon.minosoft.nbt.tag.CompoundTag;
 import org.json.JSONObject;
 
 import java.nio.ByteBuffer;
@@ -24,16 +26,18 @@ import java.util.List;
 import java.util.UUID;
 
 public class OutByteBuffer {
-    private final List<Byte> bytes = new ArrayList<>();
+    final List<Byte> bytes = new ArrayList<>();
+    final ProtocolVersion version;
 
-    public OutByteBuffer() {
+    public OutByteBuffer(ProtocolVersion version) {
+        this.version = version;
     }
 
     public void writeByte(byte b) {
         bytes.add(b);
     }
 
-    public void writeByte(byte b, List<Byte> write) {
+    public static void writeByte(byte b, List<Byte> write) {
         write.add(b);
     }
 
@@ -55,12 +59,17 @@ public class OutByteBuffer {
         }
     }
 
-    public void writeInteger(int i) {
-        ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES);
-        buffer.putInt(i);
-        for (byte b : buffer.array()) {
-            bytes.add(b);
-        }
+    public static void writeVarInt(int value, List<Byte> write) {
+        // thanks https://wiki.vg/Protocol#VarInt_and_VarLong
+        do {
+            byte temp = (byte) (value & 0b01111111);
+            // Note: >>> means that the sign bit is shifted with the rest of the number rather than being left alone
+            value >>>= 7;
+            if (value != 0) {
+                temp |= 0b10000000;
+            }
+            writeByte(temp, write);
+        } while (value != 0);
     }
 
     public void writeLong(Long l) {
@@ -88,9 +97,6 @@ public class OutByteBuffer {
     }
 
     public void writeString(String s) {
-        if (s.length() > ProtocolDefinition.STRING_MAX_LEN) {
-            writeByte((byte) 0); // write length 0
-        }
         writeVarInt(s.length());
         for (byte b : s.getBytes(StandardCharsets.UTF_8)) {
             bytes.add(b);
@@ -106,17 +112,12 @@ public class OutByteBuffer {
         }
     }
 
-    public void writeVarInt(int value, List<Byte> write) {
-        // thanks https://wiki.vg/Protocol#VarInt_and_VarLong
-        do {
-            byte temp = (byte) (value & 0b01111111);
-            // Note: >>> means that the sign bit is shifted with the rest of the number rather than being left alone
-            value >>>= 7;
-            if (value != 0) {
-                temp |= 0b10000000;
-            }
-            writeByte(temp, write);
-        } while (value != 0);
+    public void writeInt(int i) {
+        ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES);
+        buffer.putInt(i);
+        for (byte b : buffer.array()) {
+            bytes.add(b);
+        }
     }
 
     public void writeVarInt(int value) {
@@ -136,26 +137,96 @@ public class OutByteBuffer {
     }
 
     public void writeFixedPointNumberInteger(double d) {
-        writeInteger((int) (d * 32.0D));
+        writeInt((int) (d * 32.0D));
     }
 
     public void writeFixedPointNumberByte(double d) {
-        writeInteger((int) (d * 32.0D));
+        writeInt((int) (d * 32.0D));
     }
 
     public List<Byte> getBytes() {
         return bytes;
     }
 
-    public void writeJson(JSONObject j) {
+    public void writeJSON(JSONObject j) {
         writeString(j.toString());
     }
 
-    public void writeBlockPosition(BlockPosition pos) {
-        writeLong((((long) pos.getX() & 0x3FFFFFF) << 38) | (((long) pos.getZ() & 0x3FFFFFF) << 12) | ((long) pos.getY() & 0xFFF));
+    public void writePosition(BlockPosition location) {
+        if (version.getVersion() >= ProtocolVersion.VERSION_1_14_4.getVersion()) {
+            writeLong((((long) (location.getX() & 0x3FFFFFF) << 38) | ((long) (location.getZ() & 0x3FFFFFF) << 12) | (long) (location.getY() & 0xFFF)));
+        } else {
+            writeLong((((long) location.getX() & 0x3FFFFFF) << 38) | (((long) location.getZ() & 0x3FFFFFF)) | ((long) location.getY() & 0xFFF) << 26);
+        }
     }
 
-    public void writeChatComponent(TextComponent c) {
-        writeJson(c.getRaw());
+    public void writeTextComponent(TextComponent component) {
+        writeJSON(component.getRaw());
+    }
+
+    public void writeSlot(Slot slot) {
+        switch (version) {
+            case VERSION_1_7_10:
+            case VERSION_1_8:
+            case VERSION_1_9_4:
+            case VERSION_1_10:
+                if (slot == null) {
+                    writeShort((short) -1);
+                    return;
+                }
+                writeShort((short) slot.getItemId());
+                writeByte((byte) slot.getItemCount());
+                writeShort(slot.getItemMetadata());
+                writeNBT(slot.getNbt());
+        }
+    }
+
+    void writeNBT(CompoundTag nbt) {
+        // ToDo: test
+        nbt.writeBytes(this);
+    }
+
+    public void writeStringNoLength(String s) {
+        for (byte b : s.getBytes(StandardCharsets.UTF_8)) {
+            bytes.add(b);
+        }
+    }
+
+    public void writeBlockPositionInteger(BlockPosition pos) {
+        writeInt(pos.getX());
+        writeInt(pos.getY());
+        writeInt(pos.getZ());
+    }
+
+    public void writeBlockPositionShort(BlockPosition pos) {
+        writeInt(pos.getX());
+        writeShort((short) pos.getY());
+        writeInt(pos.getZ());
+    }
+
+    public void writeBlockPositionByte(BlockPosition pos) {
+        writeInt(pos.getX());
+        writeByte((byte) pos.getY());
+        writeInt(pos.getZ());
+    }
+
+    public byte[] getOutBytes() {
+        byte[] ret = new byte[bytes.size()];
+        for (int i = 0; i < bytes.size(); i++) {
+            ret[i] = bytes.get(i);
+        }
+        return ret;
+    }
+
+    public void writeIntegers(int[] data) {
+        for (int integer : data) {
+            writeInt(integer);
+        }
+    }
+
+    public void writeLongs(long[] data) {
+        for (long long_long : data) {
+            writeLong(long_long);
+        }
     }
 }

@@ -10,23 +10,28 @@
  *
  *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
-
 package de.bixilon.minosoft.game.datatypes.entities.meta;
 
-import de.bixilon.minosoft.game.datatypes.blocks.Block;
-import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
+import de.bixilon.minosoft.game.datatypes.blocks.Blocks;
 import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
+
+import java.util.HashMap;
 
 public class MinecartMetaData extends EntityMetaData {
 
-    public MinecartMetaData(InByteBuffer buffer, ProtocolVersion v) {
-        super(buffer, v);
+    public MinecartMetaData(HashMap<Integer, MetaDataSet> sets, ProtocolVersion version) {
+        super(sets, version);
     }
 
     public int getShakingPower() {
         switch (version) {
             case VERSION_1_7_10:
+            case VERSION_1_8:
                 return (int) sets.get(17).getData();
+            case VERSION_1_9_4:
+                return (int) sets.get(5).getData();
+            case VERSION_1_10:
+                return (int) sets.get(6).getData();
         }
         return 0;
     }
@@ -34,25 +39,64 @@ public class MinecartMetaData extends EntityMetaData {
     public int getShakingDirection() {
         switch (version) {
             case VERSION_1_7_10:
+            case VERSION_1_8:
                 return (int) sets.get(18).getData();
+            case VERSION_1_9_4:
+                return (int) sets.get(6).getData();
+            case VERSION_1_10:
+                return (int) sets.get(7).getData();
         }
         return 0;
     }
 
-    public float getDamageTaken() {
+    public float getMultiplier() {
         switch (version) {
             case VERSION_1_7_10:
+            case VERSION_1_8:
                 return (float) sets.get(19).getData();
+            case VERSION_1_9_4:
+                return (float) sets.get(7).getData();
+            case VERSION_1_10:
+                return (float) sets.get(8).getData();
         }
         return 0;
     }
 
-    public Block getBlock() {
+    public Blocks getBlock() {
         switch (version) {
             case VERSION_1_7_10:
-                return Block.byLegacy((int) sets.get(20).getData() & 0xFF, (int) sets.get(20).getData() & 0xFF00);
+            case VERSION_1_8:
+                return Blocks.byId((int) sets.get(20).getData() & 0xFF, (int) sets.get(20).getData() >>> 4);
+            case VERSION_1_9_4:
+                return Blocks.byId((int) sets.get(8).getData() & 0xFF, (int) sets.get(8).getData() >>> 4);
+            case VERSION_1_10:
+                return Blocks.byId((int) sets.get(9).getData() & 0xFF, (int) sets.get(9).getData() >>> 4);
         }
-        return Block.AIR;
+        return Blocks.AIR;
+    }
+
+    public int getBlockYPosition() {
+        switch (version) {
+            case VERSION_1_8:
+                return (int) sets.get(21).getData();
+            case VERSION_1_9_4:
+                return (int) sets.get(9).getData();
+            case VERSION_1_10:
+                return (int) sets.get(10).getData();
+        }
+        return 0;
+    }
+
+    public boolean isShowingBlock() {
+        switch (version) {
+            case VERSION_1_8:
+                return (byte) sets.get(22).getData() == 0x01;
+            case VERSION_1_9_4:
+                return (boolean) sets.get(10).getData();
+            case VERSION_1_10:
+                return (boolean) sets.get(11).getData();
+        }
+        return false;
     }
 
 }

@@ -14,6 +14,7 @@
 package de.bixilon.minosoft.nbt.tag;
 
 import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
+import de.bixilon.minosoft.protocol.protocol.OutByteBuffer;
 
 public class ShortTag implements Tag {
     final short value;
@@ -31,7 +32,17 @@ public class ShortTag implements Tag {
         return TagTypes.SHORT;
     }
 
+    @Override
+    public void writeBytes(OutByteBuffer buffer) {
+        buffer.writeShort(value);
+    }
+
     public short getValue() {
         return value;
+    }
+
+    @Override
+    public String toString() {
+        return value + "s";
     }
 }

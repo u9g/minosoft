@@ -14,6 +14,7 @@
 package de.bixilon.minosoft.util;
 
 import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
+import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -24,11 +25,12 @@ import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.zip.DataFormatException;
+import java.util.zip.Deflater;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.Inflater;
 
 public class Util {
-    private static final Pattern UUID_FIX = Pattern.compile("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})");
+    static final Pattern UUID_FIX = Pattern.compile("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})");
     // thanks https://www.spigotmc.org/threads/free-code-easily-convert-between-trimmed-and-full-uuids.165615
 
     public static void sleep(int ms) {
@@ -43,26 +45,41 @@ public class Util {
         return UUID.fromString(UUID_FIX.matcher(uuid.replace("-", "")).replaceAll("$1-$2-$3-$4-$5"));
     }
 
-    public static InByteBuffer decompress(byte[] bytes) {
-        // decompressing chunk data
+    public static InByteBuffer decompress(byte[] bytes, ProtocolVersion version) {
+        return new InByteBuffer(decompress(bytes), version);
+    }
+
+    public static byte[] decompress(byte[] bytes) {
         Inflater inflater = new Inflater();
         inflater.setInput(bytes, 0, bytes.length);
-        byte[] result = new byte[4096];
+        byte[] buffer = new byte[4096];
         ByteArrayOutputStream stream = new ByteArrayOutputStream(bytes.length);
         try {
             while (!inflater.finished()) {
-                stream.write(result, 0, inflater.inflate(result));
+                stream.write(buffer, 0, inflater.inflate(buffer));
             }
-        } catch (DataFormatException e) {
+            stream.close();
+        } catch (IOException | DataFormatException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                stream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
-        return new InByteBuffer(stream.toByteArray());
+        return stream.toByteArray();
+    }
+
+    public static byte[] compress(byte[] bytes) {
+        Deflater deflater = new Deflater();
+        deflater.setInput(bytes);
+        deflater.finish();
+        byte[] buffer = new byte[4096];
+        ByteArrayOutputStream stream = new ByteArrayOutputStream(bytes.length);
+        while (!deflater.finished()) {
+            stream.write(buffer, 0, deflater.deflate(buffer));
+        }
+        try {
+            stream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return stream.toByteArray();
     }
 
     public static byte[] decompressGzip(byte[] raw) throws IOException {

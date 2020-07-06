@@ -13,23 +13,24 @@
 
 package de.bixilon.minosoft.game.datatypes.entities.objects;
 
-import de.bixilon.minosoft.game.datatypes.blocks.Block;
-import de.bixilon.minosoft.game.datatypes.entities.EntityObject;
-import de.bixilon.minosoft.game.datatypes.entities.Location;
-import de.bixilon.minosoft.game.datatypes.entities.ObjectInterface;
-import de.bixilon.minosoft.game.datatypes.entities.Objects;
+import de.bixilon.minosoft.game.datatypes.blocks.Blocks;
+import de.bixilon.minosoft.game.datatypes.entities.*;
 import de.bixilon.minosoft.game.datatypes.entities.meta.EntityMetaData;
-import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
+import de.bixilon.minosoft.game.datatypes.entities.meta.FallingBlockMetaData;
 
 public class FallingBlock extends EntityObject implements ObjectInterface {
-    EntityMetaData metaData;
-    Block block;
+    FallingBlockMetaData metaData;
+    final Blocks block;
 
-    public FallingBlock(int id, Location location, int yaw, int pitch, int additionalInt, ProtocolVersion v) {
-        super(id, location, yaw, pitch, null);
+    public FallingBlock(int entityId, Location location, short yaw, short pitch, int additionalInt) {
+        super(entityId, location, yaw, pitch, null);
         // objects do not spawn with metadata... reading additional info from the following int
-        // tnt does not have any additional info
-        block = Block.byLegacy(additionalInt & 0xFFF, additionalInt >> 12);
+        block = Blocks.byId(additionalInt & 0xFFF, additionalInt >>> 12);
+    }
+
+    public FallingBlock(int entityId, Location location, short yaw, short pitch, int additionalInt, Velocity velocity) {
+        super(entityId, location, yaw, pitch, velocity);
+        block = Blocks.byId(additionalInt & 0xFFF, additionalInt >>> 12);
     }
 
     @Override
@@ -38,13 +39,13 @@ public class FallingBlock extends EntityObject implements ObjectInterface {
     }
 
     @Override
-    public EntityMetaData getMetaData() {
+    public FallingBlockMetaData getMetaData() {
         return metaData;
     }
 
     @Override
     public void setMetaData(EntityMetaData metaData) {
-        this.metaData = metaData;
+        this.metaData = (FallingBlockMetaData) metaData;
     }
 
     @Override
@@ -57,12 +58,13 @@ public class FallingBlock extends EntityObject implements ObjectInterface {
         return 0.98F;
     }
 
-    @Override
-    public Class<? extends EntityMetaData> getMetaDataClass() {
-        return EntityMetaData.class;
+    public Blocks getBlock() {
+        //ToDo depends on protocol version
+        return block;
     }
 
-    public Block getBlock() {
-        return block;
+    @Override
+    public Class<? extends EntityMetaData> getMetaDataClass() {
+        return FallingBlockMetaData.class;
     }
 }

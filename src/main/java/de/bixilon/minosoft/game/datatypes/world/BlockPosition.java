@@ -20,7 +20,6 @@ public class BlockPosition {
 
     public BlockPosition(int x, short y, int z) {
         // y min -2048, max 2047
-        //ToDo check values
         this.x = x;
         this.y = y;
         this.z = z;
@@ -61,9 +60,15 @@ public class BlockPosition {
         return x * y * z;
     }
 
-    public BlockPosition add(int[] faceDir) {
-        if (faceDir.length != 3) throw new IllegalArgumentException("Can only accept 3 directions");
-        return new BlockPosition(x + faceDir[0],
-                (short) (y + faceDir[1]), z + faceDir[2]);
+    public InChunkLocation getInChunkLocation() {
+        int x = getX() % 16;
+        if (x < 0) {
+            x = 16 + x;
+        }
+        int z = getZ() % 16;
+        if (z < 0) {
+            z = 16 + z;
+        }
+        return new InChunkLocation(x, getY(), z);
     }
 }

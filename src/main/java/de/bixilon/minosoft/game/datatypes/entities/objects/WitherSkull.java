@@ -13,21 +13,22 @@
 
 package de.bixilon.minosoft.game.datatypes.entities.objects;
 
-import de.bixilon.minosoft.game.datatypes.entities.EntityObject;
-import de.bixilon.minosoft.game.datatypes.entities.Location;
-import de.bixilon.minosoft.game.datatypes.entities.ObjectInterface;
-import de.bixilon.minosoft.game.datatypes.entities.Objects;
+import de.bixilon.minosoft.game.datatypes.entities.*;
 import de.bixilon.minosoft.game.datatypes.entities.meta.EntityMetaData;
-import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
+import de.bixilon.minosoft.game.datatypes.entities.meta.WitherSkullMetaData;
 
 public class WitherSkull extends EntityObject implements ObjectInterface {
-    EntityMetaData metaData;
-    int thrower;
+    final int thrower;
+    WitherSkullMetaData metaData;
 
-    public WitherSkull(int id, Location location, int yaw, int pitch, int additionalInt, ProtocolVersion v) {
-        super(id, location, yaw, pitch, null);
+    public WitherSkull(int entityId, Location location, short yaw, short pitch, int additionalInt) {
+        super(entityId, location, yaw, pitch, null);
         // objects do not spawn with metadata... reading additional info from the following int
-        // tnt does not have any additional info
+        this.thrower = additionalInt;
+    }
+
+    public WitherSkull(int entityId, Location location, short yaw, short pitch, int additionalInt, Velocity velocity) {
+        super(entityId, location, yaw, pitch, velocity);
         this.thrower = additionalInt;
     }
 
@@ -37,13 +38,13 @@ public class WitherSkull extends EntityObject implements ObjectInterface {
     }
 
     @Override
-    public EntityMetaData getMetaData() {
+    public WitherSkullMetaData getMetaData() {
         return metaData;
     }
 
     @Override
     public void setMetaData(EntityMetaData metaData) {
-        this.metaData = metaData;
+        this.metaData = (WitherSkullMetaData) metaData;
     }
 
     @Override
@@ -56,12 +57,12 @@ public class WitherSkull extends EntityObject implements ObjectInterface {
         return 0.3125F;
     }
 
-    @Override
-    public Class<? extends EntityMetaData> getMetaDataClass() {
-        return EntityMetaData.class;
-    }
-
     public int getThrower() {
         return thrower;
+    }
+
+    @Override
+    public Class<? extends EntityMetaData> getMetaDataClass() {
+        return WitherSkullMetaData.class;
     }
 }

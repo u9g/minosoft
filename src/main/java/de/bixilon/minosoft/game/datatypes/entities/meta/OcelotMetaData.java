@@ -10,25 +10,56 @@
  *
  *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
-
 package de.bixilon.minosoft.game.datatypes.entities.meta;
 
-import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
 import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
+
+import java.util.HashMap;
 
 public class OcelotMetaData extends TameableMetaData {
 
-    public OcelotMetaData(InByteBuffer buffer, ProtocolVersion v) {
-        super(buffer, v);
+    public OcelotMetaData(HashMap<Integer, MetaDataSet> sets, ProtocolVersion version) {
+        super(sets, version);
     }
 
 
-    public byte getType() {
+    public OcelotTypes getType() {
         switch (version) {
             case VERSION_1_7_10:
-                return (byte) sets.get(18).getData();
+            case VERSION_1_8:
+                return OcelotTypes.byId((byte) sets.get(18).getData());
+            case VERSION_1_9_4:
+                return OcelotTypes.byId((int) sets.get(14).getData());
+            case VERSION_1_10:
+                return OcelotTypes.byId((int) sets.get(15).getData());
         }
-        return 0x00;
+        return null;
     }
 
+
+    public enum OcelotTypes {
+        UNTAMED(0),
+        TUXEDO(1),
+        TABBY(2),
+        SIAMESE(3);
+
+        final int id;
+
+        OcelotTypes(int id) {
+            this.id = id;
+        }
+
+        public static OcelotTypes byId(int id) {
+            for (OcelotTypes type : values()) {
+                if (type.getId() == id) {
+                    return type;
+                }
+            }
+            return null;
+        }
+
+        public int getId() {
+            return id;
+        }
+    }
 }

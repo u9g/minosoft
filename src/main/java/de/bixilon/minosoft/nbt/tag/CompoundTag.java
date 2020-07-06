@@ -14,8 +14,10 @@
 package de.bixilon.minosoft.nbt.tag;
 
 import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
+import de.bixilon.minosoft.protocol.protocol.OutByteBuffer;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class CompoundTag implements Tag {
     final String name;
@@ -27,6 +29,14 @@ public class CompoundTag implements Tag {
     }
 
     public CompoundTag(boolean subTag, InByteBuffer buffer) {
+        if (buffer.readByte() == 0) {
+            // no nbt
+            name = null;
+            data = new HashMap<>();
+            return;
+        } else {
+            buffer.setPosition(buffer.getPosition() - 1);
+        }
         if (!subTag) {
             if (buffer.readByte() != TagTypes.COMPOUND.getId()) { // will be a Compound Tag
                 // decompressed but still bad.... :(
@@ -39,7 +49,8 @@ public class CompoundTag implements Tag {
         }
         this.data = new HashMap<>();
         while (true) {
-            TagTypes tagType = TagTypes.getById(buffer.readByte());
+            byte tag = buffer.readByte();
+            TagTypes tagType = TagTypes.getById(tag);
             if (tagType == TagTypes.END) {
                 //end tag
                 break;
@@ -76,6 +87,12 @@ public class CompoundTag implements Tag {
                 case COMPOUND:
                     data.put(tagName, new CompoundTag(true, buffer));
                     break;
+                case INT_ARRAY:
+                    data.put(tagName, new IntArrayTag(buffer));
+                    break;
+                case LONG_ARRAY:
+                    data.put(tagName, new LongArrayTag(buffer));
+                    break;
             }
         }
     }
@@ -84,9 +101,41 @@ public class CompoundTag implements Tag {
         this(false, buffer);
     }
 
+    public CompoundTag() {
+        name = null;
+        data = new HashMap<>();
+    }
+
     @Override
     public TagTypes getType() {
         return TagTypes.COMPOUND;
+    }
+
+    @Override
+    public void writeBytes(OutByteBuffer buffer) {
+        buffer.writeByte((byte) TagTypes.COMPOUND.getId());
+        buffer.writeShort((short) name.length());
+        buffer.writeStringNoLength(name);
+        // now with prefixed name, etc it is technically the same as a subtag
+        writeBytesSubTag(buffer);
+    }
+
+    public void writeBytesSubTag(OutByteBuffer buffer) {
+        for (Map.Entry<String, Tag> set : data.entrySet()) {
+            buffer.writeByte((byte) set.getValue().getType().getId());
+            buffer.writeShort((short) set.getKey().length());
+            buffer.writeStringNoLength(set.getKey());
+
+            // write data
+            if (set.getValue() instanceof CompoundTag) {
+                // that's a subtag! special rule
+                CompoundTag compoundTag = (CompoundTag) set.getValue();
+                compoundTag.writeBytesSubTag(buffer);
+                continue;
+            }
+            set.getValue().writeBytes(buffer);
+
+        }
     }
 
     public boolean containsKey(String key) {
@@ -133,4 +182,22 @@ public class CompoundTag implements Tag {
         return (CompoundTag) data.get(key);
     }
 
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append(name);
+        builder.append("{");
+
+        for (Map.Entry<String, Tag> set : data.entrySet()) {
+            builder.append(set.getKey());
+            builder.append(":");
+            builder.append(set.getValue());
+            builder.append(",");
+        }
+        builder.delete(builder.length() - 1, builder.length()); // delete last comma
+
+        builder.append("}");
+        return builder.toString();
+    }
 }

@@ -33,7 +33,7 @@ public class Minosoft {
     static List<MojangAccount> accountList;
 
     public static void main(String[] args) {
-        // int log thread
+        // init log thread
         Log.initThread();
 
         Log.info("Starting...");
@@ -49,6 +49,7 @@ public class Minosoft {
         Log.info(String.format("Loaded config file (version=%s)", config.getInteger(GameConfiguration.CONFIG_VERSION)));
         // set log level from config
         Log.setLevel(LogLevel.byName(config.getString(GameConfiguration.GENERAL_LOG_LEVEL)));
+        Log.info(String.format("Logging info with level: %s", Log.getLevel().name()));
 
         checkClientToken();
 
@@ -89,7 +90,12 @@ public class Minosoft {
             case WINDOWS:
                 path += "AppData/Roaming/Minosoft/";
                 break;
-            //ToDo: Mac, Other
+            case MAC:
+                path += "Library/Application Support/Minosoft/";
+                break;
+            case OTHER:
+                path += ".minosoft/";
+                break;
         }
         File folder = new File(path);
         if (!folder.exists() && !folder.mkdirs()) {

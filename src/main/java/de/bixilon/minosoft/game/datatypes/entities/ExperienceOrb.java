@@ -17,11 +17,11 @@ import de.bixilon.minosoft.game.datatypes.entities.meta.EntityMetaData;
 
 public class ExperienceOrb extends Entity {
     EntityMetaData metaData;
-    short count;
+    final short count;
 
 
-    public ExperienceOrb(int id, Location location, short count) {
-        super(id, location, 0, 0, null);
+    public ExperienceOrb(int entityId, Location location, short count) {
+        super(entityId, location, 0, 0, null);
         this.count = count;
     }
 

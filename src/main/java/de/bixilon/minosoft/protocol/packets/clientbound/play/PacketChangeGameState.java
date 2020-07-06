@@ -18,20 +18,24 @@ import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.packets.ClientboundPacket;
 import de.bixilon.minosoft.protocol.protocol.InPacketBuffer;
 import de.bixilon.minosoft.protocol.protocol.PacketHandler;
-import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
 
 public class PacketChangeGameState implements ClientboundPacket {
     Reason reason;
     float value;
 
     @Override
-    public void read(InPacketBuffer buffer, ProtocolVersion v) {
-        switch (v) {
+    public boolean read(InPacketBuffer buffer) {
+        switch (buffer.getVersion()) {
             case VERSION_1_7_10:
+            case VERSION_1_8:
+            case VERSION_1_9_4:
+            case VERSION_1_10:
                 reason = Reason.byId(buffer.readByte());
                 value = buffer.readFloat();
-                break;
+                return true;
         }
+
+        return false;
     }
 
     @Override
@@ -74,13 +78,10 @@ public class PacketChangeGameState implements ClientboundPacket {
         DEMO_MESSAGES(5),
         ARROW_HITTING_PLAYER(6),
         FADE_VALUE(7),
-        FADE_TIME(8);
+        FADE_TIME(8),
+        PLAY_MOB_APPEARANCE(10);
 
         final byte id;
-
-        Reason(byte id) {
-            this.id = id;
-        }
 
         Reason(int id) {
             this.id = (byte) id;
@@ -95,7 +96,7 @@ public class PacketChangeGameState implements ClientboundPacket {
             return null;
         }
 
-        public int getId() {
+        public byte getId() {
             return id;
         }
     }

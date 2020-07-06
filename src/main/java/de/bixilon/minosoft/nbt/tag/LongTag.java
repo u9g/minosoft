@@ -14,6 +14,7 @@
 package de.bixilon.minosoft.nbt.tag;
 
 import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
+import de.bixilon.minosoft.protocol.protocol.OutByteBuffer;
 
 public class LongTag implements Tag {
     final long value;
@@ -31,7 +32,17 @@ public class LongTag implements Tag {
         return TagTypes.LONG;
     }
 
+    @Override
+    public void writeBytes(OutByteBuffer buffer) {
+        buffer.writeLong(value);
+    }
+
     public long getValue() {
         return value;
+    }
+
+    @Override
+    public String toString() {
+        return value + "L";
     }
 }
