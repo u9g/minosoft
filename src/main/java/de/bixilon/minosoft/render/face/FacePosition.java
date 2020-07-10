@@ -1,6 +1,6 @@
 /*
  * Codename Minosoft
- * Copyright (C) 2020 Moritz Zwerger
+ * Copyright (C) 2020 Lukas Eisenhauer
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -16,6 +16,8 @@ package de.bixilon.minosoft.render.face;
 import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
 import javafx.util.Pair;
 import org.apache.commons.collections.primitives.ArrayFloatList;
+
+import static de.bixilon.minosoft.render.face.RenderConstants.UV;
 
 public class FacePosition {
     private final BlockPosition blockPosition;
@@ -39,16 +41,27 @@ public class FacePosition {
         return blockPosition.hashCode() * faceOrientation.hashCode();
     }
 
-    public void addVertecies(ArrayFloatList vertPos, ArrayFloatList textPos, Pair<Float, Float> texture) {
+    public void addVertices(ArrayFloatList vertPos, ArrayFloatList textPos, Pair<Float, Float> texture) {
         float[][] vertPositions = RenderConstants.FACE_VERTEX[faceOrientation.getId()];
         for (int vert = 0; vert < 4; vert++) {
             vertPos.add(vertPositions[vert][0] + this.getBlockPosition().getX());
             vertPos.add(vertPositions[vert][1] + this.getBlockPosition().getY());
             vertPos.add(vertPositions[vert][2] + this.getBlockPosition().getZ());
 
+            float u;
+            switch (UV[vert][0]) {
+                case 0:
+                    u = texture.getKey();
+                    break;
+                case 1:
+                    u = texture.getValue();
+                    break;
+                default:
+                    u = 0;
+            }
 
-            textPos.add(texture.getKey());
-            textPos.add(texture.getValue());
+            textPos.add(u);
+            textPos.add(UV[vert][1]);
         }
     }
 }

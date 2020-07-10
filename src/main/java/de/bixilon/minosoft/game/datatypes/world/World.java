@@ -18,6 +18,7 @@ import de.bixilon.minosoft.game.datatypes.TextComponent;
 import de.bixilon.minosoft.game.datatypes.blocks.Blocks;
 import de.bixilon.minosoft.game.datatypes.entities.Entity;
 import de.bixilon.minosoft.nbt.tag.CompoundTag;
+import de.bixilon.minosoft.render.MainWindow;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -66,6 +67,7 @@ public class World {
     public void setBlock(BlockPosition pos, Blocks block) {
         if (getChunk(pos.getChunkLocation()) != null) {
             getChunk(pos.getChunkLocation()).setBlock(pos.getInChunkLocation(), block);
+            MainWindow.getRenderer().prepareBlock(pos, block);
         }
         // do nothing if chunk is unloaded
     }
@@ -76,12 +78,14 @@ public class World {
 
     public void setChunk(ChunkLocation location, Chunk chunk) {
         chunks.put(location, chunk);
+        MainWindow.getRenderer().prepareChunk(location, chunk);
     }
 
     public void setChunks(HashMap<ChunkLocation, Chunk> chunkMap) {
         for (Map.Entry<ChunkLocation, Chunk> set : chunkMap.entrySet()) {
             chunks.put(set.getKey(), set.getValue());
         }
+        MainWindow.getRenderer().prepareChunkBulk(chunkMap);
     }
 
     public boolean isHardcore() {

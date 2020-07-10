@@ -11,20 +11,12 @@
  *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
-package de.bixilon.minosoft.render.texture;
+package de.bixilon.minosoft.render.blockModels;
 
-import java.util.ArrayList;
-
-public class UVPolygon {
-    UVCoordinate[] coords;
-
-    public UVPolygon(UVCoordinate[] coords) {
-        this.coords = coords;
-    }
-
-    public void addCoords(ArrayList verts) {
-        for (UVCoordinate uv : coords) {
-            uv.addUV(verts);
-        }
-    }
+public enum BlockType {
+    FULL, // a full block
+    CUBE_ALL, // a full block but all the sides are the same
+    HEIGHT, // a full block with a custom y height
+    STAIRS, // a stairs block
+    CUSTOM // a unique model not worth having a own type
 }

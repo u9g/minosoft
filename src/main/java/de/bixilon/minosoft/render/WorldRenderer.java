@@ -1,6 +1,6 @@
 /*
  * Codename Minosoft
- * Copyright (C) 2020 Moritz Zwerger
+ * Copyright (C) 2020 Lukas Eisenhauer
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -13,36 +13,37 @@
 
 package de.bixilon.minosoft.render;
 
-import de.bixilon.minosoft.game.datatypes.blocks.Block;
+import de.bixilon.minosoft.game.datatypes.blocks.Blocks;
 import de.bixilon.minosoft.game.datatypes.world.*;
 import de.bixilon.minosoft.logging.Log;
+import de.bixilon.minosoft.render.blockModels.BlockModelLoader;
 import de.bixilon.minosoft.render.face.FaceOrientation;
 import de.bixilon.minosoft.render.face.FacePosition;
+import de.bixilon.minosoft.render.face.RenderConstants;
 import de.bixilon.minosoft.render.texture.TextureLoader;
-import org.apache.commons.collections.primitives.ArrayFloatList;
+import javafx.util.Pair;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static de.bixilon.minosoft.render.face.RenderConstants.UV;
 import static de.bixilon.minosoft.render.face.RenderConstants.faceDir;
-import static org.lwjgl.glfw.GLFW.glfwGetTime;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL15.glGenBuffers;
 
 public class WorldRenderer {
     private final TextureLoader textureLoader;
-
-    private final HashMap<FacePosition, String> faces;
-    private final int vbo;
-    private final ArrayFloatList vertPos;
-    private final ArrayFloatList textPos;
+    private final HashMap<FacePosition, Pair<Float, Float>> faces;
+    private final int faceCount = 0;
+    private BlockModelLoader modelLoader;
 
     public WorldRenderer() {
         textureLoader = new TextureLoader(MainWindow.getOpenGLWindow().getWindow());
-        faces = new HashMap<>();
-        vertPos = new ArrayFloatList();
-        textPos = new ArrayFloatList();
-        vbo = glGenBuffers();
+        faces = new HashMap<FacePosition, Pair<Float, Float>>();
+    }
+
+    public void init() {
+        modelLoader = new BlockModelLoader();
+        Log.info("finished loading textures");
     }
 
     public void prepareChunkBulk(HashMap<ChunkLocation, Chunk> chunks) {
@@ -52,82 +53,46 @@ public class WorldRenderer {
     }
 
     public void prepareChunk(ChunkLocation location, Chunk chunk) {
-        if (Math.abs(location.getX()) > 1 | Math.abs(location.getZ()) > 1) {
-            return;
-        }
         int xOffset = location.getX() * 16;
         int zOffset = location.getZ() * 16;
         for (Map.Entry<Byte, ChunkNibble> set : chunk.getNibbles().entrySet()) {
-            for (Map.Entry<ChunkNibbleLocation, Block> blockEntry : set.getValue().getBlocks().entrySet()) {
+            for (Map.Entry<ChunkNibbleLocation, Blocks> blockEntry : set.getValue().getBlocks().entrySet()) {
                 prepareBlock(new BlockPosition(blockEntry.getKey().getX() + xOffset,
-                                (short) (blockEntry.getKey().getY() + set.getKey() * 16), blockEntry.getKey().getZ() + zOffset),
+                                (short) (blockEntry.getKey().getY() + set.getKey() * 16),
+                                blockEntry.getKey().getZ() + zOffset),
                         blockEntry.getValue());
             }
-
-
-            // only gives nibbles with at least 1 block inside (not air)
-            /*
-            for (byte x = 0; x < 16; x++) {
-                for (byte y = 0; y < 16; y++) {
-                    for (byte z = 0; z < 16; z++) {
-                        Block block = set.getValue().getBlock(x, y, z);
-
-                        prepareBlock(new BlockPosition(xOffset + x,
-                                        (short) (set.getKey() * 16 + y), zOffset + z),
-                                        block);
-                    }
-                }
-            }
-             */
         }
     }
 
-    public void prepareBlock(BlockPosition position, Block block) {
-        if (block == Block.AIR)
+    public void prepareBlock(BlockPosition position, Blocks block) {
+        if (block == Blocks.AIR)
             return;
 
         for (FaceOrientation orientation : FaceOrientation.values()) {
-            BlockPosition neighbour = position.add(faceDir[orientation.getId()]);
+            BlockPosition neighbourPos = position.add(faceDir[orientation.getId()]);
 
-            if (neighbour.getY() >= 0)
-                if (MainWindow.getConnection().getPlayer().getWorld().getBlock(neighbour) != Block.AIR)
+            if (neighbourPos.getY() >= 0) {
+                Blocks neighbourBlock = MainWindow.getConnection().getPlayer().getWorld().getBlock(neighbourPos);
+                if (!(neighbourBlock == Blocks.AIR || neighbourBlock == null)) //!modelLoader.isFull(neighbourBlock))
+                    // if there is a block next to the current block
                     continue;
+                //TODO: fix buggy behavior
+            }
+
 
             FacePosition facePosition = new FacePosition(position, orientation);
+            Pair<Float, Float> texture = modelLoader.getDrawDescription(block).getTexture(orientation);
             if (!faces.containsKey(facePosition)) {
                 synchronized (faces) {
-                    faces.put(facePosition, "dirt");
-                    facePosition.addVertecies(vertPos, textPos,
-                            textureLoader.getTexture("dirt"));
+                    faces.put(facePosition, texture);
                 }
             }
         }
     }
-    /*
-    private void drawFullFace(FacePosition position, String textureName) {
-        int textureID = textureLoader.getTexture(textureName);
-        BlockPosition blockPosition = position.getBlockPosition();
-        glPushMatrix();
-        glTranslatef(blockPosition.getX(), blockPosition.getY(), blockPosition.getZ());
-        glBindTexture(GL_TEXTURE_2D, textureID);
-        glBegin(GL_QUADS);
-        float[][] vertex = FACE_VERTEX[position.getFaceOrientation().getId()];
-        for (int i = 0; i < 4; i++) {
-            glTexCoord2f(UV[i][0], UV[i][1]);
-            glVertex3f(vertex[i][0], vertex[i][1], vertex[i][2]);
-        }
-        glEnd();
-        glPopMatrix();
-        glFlush();
-    }
-     */
 
     public void draw() {
-        synchronized (faces) {
-            double start = glfwGetTime();
-            glPushMatrix();
-            //test();
-
+        glPushMatrix();
             /*
             glBindBuffer(GL_ARRAY_BUFFER, vbo);
             float[] floatArray = vertices.toArray();
@@ -140,25 +105,39 @@ public class WorldRenderer {
             glTexCoordPointer(2, GL_FLOAT,28, 0L);
             glDrawArrays(GL_QUADS, 0, floatArray.length);
              */
-            //glPushMatrix();
-            //glEnable(GL_TEXTURE_2D);
-            //glColor3f (1.0f, 0.0f, 0.0f);
-            //glEnable(GL_TEXTURE_2D);
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-            glBegin(GL_QUADS);
-            glBindTexture(GL_TEXTURE_2D, textureLoader.getTextureID());
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, textureLoader.getTextureID());
+        glBegin(GL_QUADS);
+        synchronized (faces) {
+            for (Map.Entry<FacePosition, Pair<Float, Float>> entry : faces.entrySet()) {
+                float[][] vertPositions = RenderConstants.FACE_VERTEX[entry.getKey().getFaceOrientation().getId()];
 
-            for (int i = 0; i < textPos.size() / 2; i++) {
-                glTexCoord2f(textPos.get(i * 2), textPos.get(i * 2 + 1));
-                glVertex3f(vertPos.get(i * 3), vertPos.get(i * 3 + 1),
-                        vertPos.get(i * 3 + 2));
-            }
-            glEnd();
+                for (int vert = 0; vert < 4; vert++) {
+                    float u;
+                    switch (UV[vert][0]) {
+                        case 0:
+                            u = entry.getValue().getKey();
+                            break;
+                        case 1:
+                            u = entry.getValue().getValue();
+                            break;
+                        default:
+                            u = 0;
+                    }
+                    float x = vertPositions[vert][0] + entry.getKey().getBlockPosition().getX();
+                    float y = vertPositions[vert][1] + entry.getKey().getBlockPosition().getY();
+                    float z = vertPositions[vert][2] + entry.getKey().getBlockPosition().getZ();
 
-            double time = glfwGetTime() - start;
-            if (time > 1) {
-                Log.warn(String.format("frame took: %s s amount of faces drawn: %d", time, faces.size()));
+                    glTexCoord2f(u, UV[vert][1]);
+                    glVertex3f(x, y, z);
+                }
             }
         }
+        glEnd();
+        glPopMatrix();
+    }
+
+    public TextureLoader getTextureLoader() {
+        return textureLoader;
     }
 }

@@ -64,4 +64,8 @@ public class Chunk {
             setBlock(set.getKey(), set.getValue());
         }
     }
+
+    public HashMap<Byte, ChunkNibble> getNibbles() {
+        return nibbles;
+    }
 }

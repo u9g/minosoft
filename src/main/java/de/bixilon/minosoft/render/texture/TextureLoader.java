@@ -27,18 +27,16 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 
 public class TextureLoader {
-    Map<String, UVPolygon> blockTextures = new HashMap<>();
     int textureID;
     int length; //describes the amount of loaded textures
-    int pow2Length = 1;
+    private final int TEXTURE_PACK_RES = 16;
     private HashMap<String, Integer> textureCoordinates;
-
+    int imageLength = 1;
 
     public TextureLoader(long window) {
         try {
@@ -51,11 +49,13 @@ public class TextureLoader {
         try {
             decoder = new PNGDecoder(new FileInputStream(
                     Config.homeDir + "assets/allTextures.png"));
+            ByteBuffer buf = ByteBuffer.allocateDirect(decoder.getWidth() * decoder.getHeight() * 4);
+            decoder.decode(buf, decoder.getWidth() * 4, PNGDecoder.Format.RGBA);
+            textureID = bindTexture(buf, decoder.getWidth(), decoder.getHeight());
         } catch (IOException e) {
             e.printStackTrace();
         }
-        ByteBuffer buf = ByteBuffer.allocateDirect(decoder.getWidth() * decoder.getHeight() * 4);
-        textureID = bindTexture(buf, decoder.getWidth(), decoder.getHeight());
+
     }
 
     private void loadTextures(String textureFolder) throws IOException {
@@ -80,19 +80,19 @@ public class TextureLoader {
 
         // CONVERT ALL THE IMAGES INTO A SINGLE, VERY LONG IMAGE
         // greatly improves performance in opengl
-        // 16x16 textures only
+        // TEXTURE_PACK_RESxTEXTURE_PACK_RES textures only
         length = allTextures.size();
 
-        while (length * 16 > pow2Length) pow2Length *= 2;
+        while (length * TEXTURE_PACK_RES > imageLength) imageLength *= 2; //figure out the right length for the image
 
-        BufferedImage totalImage = new BufferedImage(pow2Length * 16, 16, BufferedImage.TYPE_4BYTE_ABGR);
+        BufferedImage totalImage = new BufferedImage(imageLength, TEXTURE_PACK_RES, BufferedImage.TYPE_4BYTE_ABGR);
         for (int xPos = 0; xPos < length; xPos++) {
             //copy the image into a part of the long image
             BufferedImage img = allTextures.get(xPos).getKey();
-            for (int y = 0; y < 16; y++) {
-                for (int xPixel = 0; xPixel < 16; xPixel++) {
+            for (int y = 0; y < TEXTURE_PACK_RES; y++) {
+                for (int xPixel = 0; xPixel < TEXTURE_PACK_RES; xPixel++) {
                     int rgb = img.getRGB(xPixel, y);
-                    totalImage.setRGB(xPos * 16 + xPixel, y, rgb);
+                    totalImage.setRGB(xPos * TEXTURE_PACK_RES + xPixel, y, rgb);
                 }
             }
             String textureName = allTextures.get(xPos).getValue();
@@ -100,6 +100,7 @@ public class TextureLoader {
         }
 
         try {
+            // save our long image to reload it later
             File outputFile = new File(Config.homeDir + "assets/allTextures.png");
             ImageIO.write(totalImage, "png", outputFile);
         } catch (IOException e) {
@@ -112,7 +113,7 @@ public class TextureLoader {
         int textureID = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, textureID);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width,
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width,
                 height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buf);
         glGenerateMipmap(GL_TEXTURE_2D);
         //disable smoothing out of textures
@@ -122,10 +123,20 @@ public class TextureLoader {
     }
 
     public Pair<Float, Float> getTexture(String name) {
-        Integer pos = textureCoordinates.get(name);
+        // returns the start and end u-coordinate of a specific texture to access it
+        String textureName = name;
+        if (textureName.contains("block/"))
+            textureName = textureName.substring(textureName.lastIndexOf('/') + 1);
+
+        Integer pos = textureCoordinates.get(textureName);
+        if (pos == null) {
+            // the texture does not exist
+            throw new IllegalArgumentException(String.format("could not find texture %s", textureName));
+        }
+
         return new Pair<Float, Float>(
-                (float) pos / (float) pow2Length,
-                (float) (pos + 1) / (float) pow2Length
+                (float) pos / ((float) imageLength / (float) TEXTURE_PACK_RES),
+                (float) (pos + 1) / ((float) imageLength / (float) TEXTURE_PACK_RES)
         );
     }
 
