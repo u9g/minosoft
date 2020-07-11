@@ -105,7 +105,6 @@ public class WorldRenderer {
             glTexCoordPointer(2, GL_FLOAT,28, 0L);
             glDrawArrays(GL_QUADS, 0, floatArray.length);
              */
-        glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, textureLoader.getTextureID());
         glBegin(GL_QUADS);
         synchronized (faces) {
@@ -113,7 +112,7 @@ public class WorldRenderer {
                 float[][] vertPositions = RenderConstants.FACE_VERTEX[entry.getKey().getFaceOrientation().getId()];
 
                 for (int vert = 0; vert < 4; vert++) {
-                    float u;
+                    float u = 0;
                     switch (UV[vert][0]) {
                         case 0:
                             u = entry.getValue().getKey();
@@ -121,8 +120,6 @@ public class WorldRenderer {
                         case 1:
                             u = entry.getValue().getValue();
                             break;
-                        default:
-                            u = 0;
                     }
                     float x = vertPositions[vert][0] + entry.getKey().getBlockPosition().getX();
                     float y = vertPositions[vert][1] + entry.getKey().getBlockPosition().getY();

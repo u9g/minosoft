@@ -18,10 +18,21 @@ import de.bixilon.minosoft.render.face.FaceOrientation;
 import javafx.util.Pair;
 import org.json.JSONObject;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class DrawDescription {
+    private final FaceOrientation[] sideOrientations = new FaceOrientation[]{
+            FaceOrientation.EAST,
+            FaceOrientation.WEST,
+            FaceOrientation.SOUTH,
+            FaceOrientation.NORTH
+    };
+    private final FaceOrientation[] endOrientations = new FaceOrientation[]{
+            FaceOrientation.UP,
+            FaceOrientation.DOWN
+    };
+
+
     Map<FaceOrientation, Pair<Float, Float>> faces;
     boolean full; // is the block a completely filled block
 
@@ -30,58 +41,40 @@ public class DrawDescription {
 
         faces = new HashMap<>();
 
-        JSONObject textures = (JSONObject) json.get("textures");
-        if (json.get("parent").equals("block/cube_all")) {
-            // we have a full block and all sides are the same
-            Pair<Float, Float> texture = MainWindow.getRenderer().getTextureLoader().getTexture(
-                    (String) textures.get("all"));
+        JSONObject textures = json.getJSONObject("textures");
 
-            for (FaceOrientation orientation : FaceOrientation.values()) {
-                faces.put(orientation, texture);
-            }
-        } else if (json.get("parent").equals("block/cube_column")) {
-            Pair<Float, Float> sideTexture = MainWindow.getRenderer().getTextureLoader().getTexture(
-                    (String) textures.get("side"));
-            faces.put(FaceOrientation.EAST, sideTexture);
-            faces.put(FaceOrientation.WEST, sideTexture);
-            faces.put(FaceOrientation.SOUTH, sideTexture);
-            faces.put(FaceOrientation.NORTH, sideTexture);
+        for (Iterator<String> textureIterator = textures.keys(); textureIterator.hasNext(); ) {
+            String textureUse = textureIterator.next();
 
-            Pair<Float, Float> endTexture = MainWindow.getRenderer().getTextureLoader().getTexture(
-                    (String) textures.get("end"));
-            faces.put(FaceOrientation.UP, endTexture);
-            faces.put(FaceOrientation.DOWN, endTexture);
+            String textureName = textures.getString(textureUse);
+            Pair<Float, Float> texture;
 
-        } else if (json.get("parent").equals("block/block")) {
-            // top and bottom faces are different
-            if (textures.has("side")) {
-                Pair<Float, Float> sideTexture = MainWindow.getRenderer().getTextureLoader().getTexture(
-                        (String) textures.get("side"));
-                faces.put(FaceOrientation.EAST, sideTexture);
-                faces.put(FaceOrientation.WEST, sideTexture);
-                faces.put(FaceOrientation.SOUTH, sideTexture);
-                faces.put(FaceOrientation.NORTH, sideTexture);
-            }
-            if (textures.has("top")) {
-                Pair<Float, Float> topTexture = MainWindow.getRenderer().getTextureLoader().getTexture(
-                        (String) textures.get("top"));
-                faces.put(FaceOrientation.UP, topTexture);
-            }
-            if (textures.has("bottom")) {
-                Pair<Float, Float> bottomTexture = MainWindow.getRenderer().getTextureLoader().getTexture(
-                        (String) textures.get("bottom"));
-                faces.put(FaceOrientation.DOWN, bottomTexture);
+            try {
+                texture = MainWindow.getRenderer().getTextureLoader().getTexture(textureName);
+            } catch (Exception e) {
+                continue;
             }
 
-            if (textures.has("end")) {
-                Pair<Float, Float> endTexture = MainWindow.getRenderer().getTextureLoader().getTexture(
-                        (String) textures.get("end"));
-                faces.put(FaceOrientation.UP, endTexture);
-                faces.put(FaceOrientation.DOWN, endTexture);
+            List<FaceOrientation> faceOrientations = new ArrayList<>();
+
+            switch (textureUse) {
+                case "all":
+                    faceOrientations.addAll(Arrays.asList(FaceOrientation.values()));
+                case "side":
+                    faceOrientations.addAll(Arrays.asList(sideOrientations));
+                case "end":
+                    faceOrientations.addAll(Arrays.asList(endOrientations));
+                case "top":
+                    faceOrientations.add(FaceOrientation.UP);
+                case "bottom":
+                    faceOrientations.add(FaceOrientation.DOWN);
+            }
+
+            for (FaceOrientation faceOrientation : faceOrientations) {
+                faces.put(faceOrientation, texture);
             }
         }
-        full = json.get("parent").equals("block/block") |
-                json.get("parent").equals("block/cube_all");
+        full = true;
     }
 
     public boolean isFull() {

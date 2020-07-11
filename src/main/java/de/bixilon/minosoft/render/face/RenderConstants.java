@@ -17,16 +17,16 @@ public class RenderConstants {
     //TODO: fix rotated faces
     public static final float[][][] FACE_VERTEX = new float[][][]{
             {
-                    {0.5f, 0.5f, 0.5f},
                     {0.5f, 0.5f, -0.5f},
                     {0.5f, -0.5f, -0.5f},
                     {0.5f, -0.5f, 0.5f},
+                    {0.5f, 0.5f, 0.5f}
             },
             {
-                    {-0.5f, 0.5f, 0.5f},
                     {-0.5f, 0.5f, -0.5f},
                     {-0.5f, -0.5f, -0.5f},
                     {-0.5f, -0.5f, 0.5f},
+                    {-0.5f, 0.5f, 0.5f}
             },
             {
                     {0.5f, 0.5f, 0.5f},
