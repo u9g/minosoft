@@ -47,7 +47,15 @@ public class BlockPosition {
     }
 
     public ChunkLocation getChunkLocation() {
-        return new ChunkLocation(getX() / 16, getZ() / 16);
+        int x = getX() / 16;
+        int z = getZ() / 16;
+        if (getX() < 0) {
+            x--;
+        }
+        if (getZ() < 0) {
+            z--;
+        }
+        return new ChunkLocation(x, z);
     }
 
     @Override

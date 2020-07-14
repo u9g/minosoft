@@ -75,9 +75,9 @@ public class WorldRenderer {
             if (neighbourPos.getY() >= 0) {
                 Blocks neighbourBlock = MainWindow.getConnection().getPlayer().getWorld().getBlock(neighbourPos);
                 if (!(neighbourBlock == Blocks.AIR || neighbourBlock == null)) //!modelLoader.isFull(neighbourBlock))
-                    // if there is a block next to the current block
+                    // if there is a block next to the current block, don't draw the face
                     continue;
-                //TODO: fix buggy behavior
+                //TODO: fix buggy behavior, not always working correctly, probably a problem in the World or BlockPosition class
             }
 
 
