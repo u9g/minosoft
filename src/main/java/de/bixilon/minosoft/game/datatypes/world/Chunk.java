@@ -33,6 +33,9 @@ public class Chunk {
             throw new IllegalArgumentException(String.format("Invalid chunk location %s %s %s", x, y, z));
         }
         byte section = (byte) (y / 16);
+        if (nibbles.get(section) == null) {
+            return Blocks.AIR;
+        }
         return nibbles.get(section).getBlock(x, y % 16, z);
     }
 

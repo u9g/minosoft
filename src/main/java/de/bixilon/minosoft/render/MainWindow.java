@@ -13,6 +13,7 @@
 
 package de.bixilon.minosoft.render;
 
+import de.bixilon.minosoft.movement.PlayerController;
 import de.bixilon.minosoft.protocol.network.Connection;
 import de.bixilon.minosoft.render.MainMenu.MainMenu;
 import de.bixilon.minosoft.render.utility.RenderMode;
@@ -33,7 +34,8 @@ public class MainWindow {
     static MainMenu mainMenu;
     static WorldRenderer renderer;
     static Connection connection;
-    static FlyController flyController;
+    private static PlayerController playerMovement;
+
 
     public static void start(Connection serverConnection) {
         Thread guiThread = new Thread(() -> {
@@ -42,15 +44,15 @@ public class MainWindow {
             openGLWindow.init();
             renderer = new WorldRenderer();
             renderer.init();
-            flyController = new FlyController(openGLWindow.getWindow());
+            playerMovement = new PlayerController(openGLWindow.getWindow());
             renderMode = MAIN_MENU;
             mainMenu = new MainMenu(openGLWindow.getWidth(), openGLWindow.getHeight());
-            runWindow();
+            mainLoop();
         });
         guiThread.start();
     }
 
-    private static void runWindow() {
+    private static void mainLoop() {
         while (!glfwWindowShouldClose(openGLWindow.getWindow())) {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glLoadIdentity();
@@ -67,7 +69,7 @@ public class MainWindow {
                     break;
                 case PLAY:
                     OpenGLWindow.gluPerspective(FOVY, (float) WIDTH / (float) HEIGHT, 0.1f, 500f);
-                    flyController.loop(deltaTime);
+                    playerMovement.loop(deltaTime);
                     renderer.draw();
                     break;
             }
@@ -89,7 +91,7 @@ public class MainWindow {
         renderMode = PLAY;
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
-        glfwSetCursorPosCallback(openGLWindow.getWindow(), flyController::mouseCallback);
+        glfwSetCursorPosCallback(openGLWindow.getWindow(), playerMovement.getCameraMovement()::mouseCallback);
         glfwSetInputMode(openGLWindow.getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         glEnable(GL_TEXTURE_2D);
         connection.connect();
@@ -107,5 +109,9 @@ public class MainWindow {
 
     public static void close() {
         System.exit(1);
+    }
+
+    public static PlayerController getPlayerMovement() {
+        return playerMovement;
     }
 }

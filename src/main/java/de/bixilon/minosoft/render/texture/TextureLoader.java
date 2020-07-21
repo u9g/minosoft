@@ -109,7 +109,7 @@ public class TextureLoader {
                 BufferedImage img = ImageIO.read(textureInputStream);
                 allTextures.add(new Pair<>(img, textureName));
             }
-            //else we have a .mcmeta file
+            //else we have a .mcmeta file describing animated blocks
         }
 
         // CONVERT ALL THE IMAGES INTO A SINGLE, VERY LONG IMAGE

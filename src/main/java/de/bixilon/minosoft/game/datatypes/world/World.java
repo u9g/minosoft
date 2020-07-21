@@ -57,6 +57,9 @@ public class World {
     }
 
     public Blocks getBlock(BlockPosition pos) {
+        if (pos.y < 1) {
+            return Blocks.AIR;
+        }
         ChunkLocation loc = pos.getChunkLocation();
         if (getChunk(loc) != null) {
             return getChunk(loc).getBlock(pos.getInChunkLocation());

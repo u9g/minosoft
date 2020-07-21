@@ -35,6 +35,8 @@ import de.bixilon.minosoft.protocol.packets.serverbound.login.PacketEncryptionRe
 import de.bixilon.minosoft.protocol.packets.serverbound.play.PacketKeepAliveResponse;
 import de.bixilon.minosoft.protocol.packets.serverbound.play.PacketPlayerPositionAndRotationSending;
 import de.bixilon.minosoft.protocol.packets.serverbound.play.PacketResourcePackStatus;
+import de.bixilon.minosoft.render.MainWindow;
+import de.bixilon.minosoft.render.utility.Vec3;
 
 import javax.crypto.SecretKey;
 import java.math.BigInteger;
@@ -344,7 +346,10 @@ public class PacketHandler {
     }
 
     public void handle(PacketPlayerPositionAndRotation pkg) {
-        //ToDo handle with gui
+        MainWindow.getPlayerMovement().getCameraMovement().setRotation(pkg.getPitch(), pkg.getYaw());
+        MainWindow.getPlayerMovement().setPlayerPos(new Vec3(pkg.getLocation()));
+        //TODO: location
+
         if (!connection.getPlayer().isSpawnConfirmed()) {
             // oops, not spawned yet, confirming position
             //ToDo feet position

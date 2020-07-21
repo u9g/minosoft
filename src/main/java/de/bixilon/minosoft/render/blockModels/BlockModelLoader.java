@@ -16,7 +16,6 @@ package de.bixilon.minosoft.render.blockModels;
 import de.bixilon.minosoft.Config;
 import de.bixilon.minosoft.game.datatypes.blocks.Blocks;
 import org.json.JSONObject;
-import org.json.simple.parser.JSONParser;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,7 +40,6 @@ public class BlockModelLoader {
 
     private void loadModels(String path) throws IOException {
         File[] files = new File(path).listFiles();
-        JSONParser parser = new JSONParser();
 
         for (File file : files) {
             String fileName = file.getName().substring(0, file.getName().lastIndexOf('.'));
@@ -59,6 +57,9 @@ public class BlockModelLoader {
     }
 
     public boolean isFull(Blocks block) {
+        if (block == Blocks.AIR || block == null) {
+            return false;
+        }
         return drawDescriptionMap.get(block).isFull();
     }
 }

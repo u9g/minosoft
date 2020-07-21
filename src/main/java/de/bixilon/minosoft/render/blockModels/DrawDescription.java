@@ -34,7 +34,7 @@ public class DrawDescription {
 
 
     Map<FaceOrientation, Pair<Float, Float>> faces;
-    boolean full; // is the block a completely filled block
+    boolean full = false; // is the block a completely filled block?
 
     public DrawDescription(JSONObject json) {
         if (!(json.has("parent") && json.has("textures"))) return;

@@ -13,6 +13,8 @@
 
 package de.bixilon.minosoft.game.datatypes.world;
 
+import de.bixilon.minosoft.render.utility.Vec3;
+
 public class BlockPosition {
     final int x;
     final int y;
@@ -23,6 +25,12 @@ public class BlockPosition {
         this.x = x;
         this.y = y;
         this.z = z;
+    }
+
+    public BlockPosition(Vec3 testPosition) {
+        x = (int) testPosition.x;
+        y = (short) testPosition.y;
+        z = (int) testPosition.z;
     }
 
     public int getX() {

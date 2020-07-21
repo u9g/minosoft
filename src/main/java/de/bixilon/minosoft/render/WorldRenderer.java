@@ -137,4 +137,8 @@ public class WorldRenderer {
     public TextureLoader getTextureLoader() {
         return textureLoader;
     }
+
+    public BlockModelLoader getModelLoader() {
+        return modelLoader;
+    }
 }

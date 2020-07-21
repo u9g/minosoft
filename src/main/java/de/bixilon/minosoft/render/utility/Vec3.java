@@ -13,6 +13,8 @@
 
 package de.bixilon.minosoft.render.utility;
 
+import de.bixilon.minosoft.game.datatypes.entities.Location;
+
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 
@@ -27,6 +29,12 @@ public class Vec3 {
         x = x_;
         y = y_;
         z = z_;
+    }
+
+    public Vec3(Location location) {
+        x = (float) location.getX();
+        y = (float) location.getY();
+        z = (float) location.getZ();
     }
 
     public static Vec3 add(Vec3 v1, Vec3 v2) {
@@ -91,5 +99,22 @@ public class Vec3 {
         x /= l;
         y /= l;
         z /= l;
+    }
+
+    public Vec3 copy() {
+        return new Vec3(x, y, z);
+    }
+
+    public void zero() {
+        x = y = z = 0f;
+    }
+
+    public int getXNormalized() {
+        if (x == 0f) {
+            return 0;
+        } else if (x > 0) {
+            return 1;
+        }
+        return -1;
     }
 }

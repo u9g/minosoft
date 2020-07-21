@@ -11,23 +11,32 @@
  *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
-package de.bixilon.minosoft.render.face;
+package de.bixilon.minosoft.render.utility;
 
-public enum FaceOrientation {
-    EAST(0), WEST(1), UP(2), DOWN(3), SOUTH(4), NORTH(5);
-    private final int id;
+import static java.lang.Math.abs;
 
-    FaceOrientation(int id) {
-        this.id = id;
+public class AdditionalMath {
+    public static int[] valuesBetween(int x, int y) {
+        int[] result = new int[abs(x - y) + 1];
+        if (x > y) {
+            for (int z = y; z <= x; z++) {
+                result[x - z] = z;
+            }
+        } else if (y > x) {
+            for (int z = x; z <= y; z++) {
+                result[y - z] = z;
+            }
+        } else {
+            result[0] = x;
+        }
+
+        return result;
     }
 
-    public static FaceOrientation[] getNotVerticalValues() {
-        return new FaceOrientation[]{
-                EAST, WEST, SOUTH, NORTH
-        };
-    }
-
-    public int getId() {
-        return this.id;
+    public static int betterRound(double x) {
+        if (x >= 0) {
+            return (int) x;
+        }
+        return (int) x - 1;
     }
 }
