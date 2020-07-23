@@ -25,9 +25,6 @@ import static de.bixilon.minosoft.render.utility.AdditionalMath.betterRound;
 import static de.bixilon.minosoft.render.utility.AdditionalMath.valuesBetween;
 
 public class CollisionHandling {
-    private static Vec3 lastPosInverted;
-    private static Vec3 posDifference;
-
     public static void handleCollisions(World world, PlayerController controller, BlockModelLoader modelLoader, Vec3 deltaPos) {
 
         groundCollision(world, controller, modelLoader, deltaPos);
@@ -35,7 +32,53 @@ public class CollisionHandling {
             // if we are stuck in a block, just stay there, otherwise, we would fall through the world
             //topCollision(world, controller, modelLoader);
         }
-        //xAxisCollision(world, controller, modelLoader, deltaPos);
+        xAxisCollision(world, controller, modelLoader, deltaPos);
+        zAxisCollision(world, controller, modelLoader, deltaPos);
+    }
+
+    private static void zAxisCollision(World world, PlayerController controller, BlockModelLoader modelLoader, Vec3 deltaPos) {
+        Vec3 playerPos = controller.getPlayerPos();
+        int zVelocityDirection = deltaPos.getZNormalized();
+        if (zVelocityDirection == 0) {
+            return;
+        }
+
+        BlockPosition[] testPositions = getZAxisTestPositions(controller, playerPos);
+
+        for (BlockPosition position : testPositions) {
+            if (modelLoader.isFull(world.getBlock(position))) {
+                if (zVelocityDirection == 1) {
+                    playerPos.z = position.getZ() - controller.getPlayerWidth() * 0.5f;
+                } else {
+                    playerPos.z = position.getZ() + 1 + controller.getPlayerWidth() * 0.5f;
+                }
+                controller.playerVelocity.z = 0;
+                return;
+            }
+        }
+    }
+
+    private static BlockPosition[] getZAxisTestPositions(PlayerController controller, Vec3 testPos) {
+        List<BlockPosition> result = new ArrayList<>();
+        float width = controller.getPlayerWidth();
+
+        List<Integer> xPositions = new ArrayList<>();
+        for (int zCoordinate : valuesBetween(betterRound(testPos.x + 0.5 * width), betterRound(testPos.x - 0.5 * width))) {
+            xPositions.add(zCoordinate);
+        }
+
+        List<Integer> yPositions = new ArrayList<>();
+        for (int yCoordinate : valuesBetween(betterRound(testPos.y + 1), betterRound(testPos.y + controller.getPlayerHeight()))) {
+            yPositions.add(yCoordinate);
+        }
+
+        for (int xPos : xPositions) {
+            for (int yPos : yPositions) {
+                result.add(new BlockPosition(xPos, (short) yPos, betterRound(testPos.z)));
+            }
+        }
+
+        return result.toArray(new BlockPosition[0]);
     }
 
     private static void xAxisCollision(World world, PlayerController controller, BlockModelLoader modelLoader, Vec3 deltaPos) {
@@ -49,7 +92,11 @@ public class CollisionHandling {
 
         for (BlockPosition position : testPositions) {
             if (modelLoader.isFull(world.getBlock(position))) {
-                playerPos.x = position.getX() - xVelocityDirection * controller.getPlayerWidth();
+                if (xVelocityDirection == 1) {
+                    playerPos.x = position.getX() - controller.getPlayerWidth() * 0.5f;
+                } else {
+                    playerPos.x = position.getX() + 1 + controller.getPlayerWidth() * 0.5f;
+                }
                 controller.playerVelocity.x = 0;
                 return;
             }

@@ -117,4 +117,13 @@ public class Vec3 {
         }
         return -1;
     }
+
+    public int getZNormalized() {
+        if (z == 0f) {
+            return 0;
+        } else if (z > 0) {
+            return 1;
+        }
+        return -1;
+    }
 }
