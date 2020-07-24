@@ -39,4 +39,8 @@ public class AdditionalMath {
         }
         return (int) x - 1;
     }
+
+    public static boolean isBetween(double x, double a, double b) {
+        return x <= a && x >= b || x >= a && x <= b;
+    }
 }

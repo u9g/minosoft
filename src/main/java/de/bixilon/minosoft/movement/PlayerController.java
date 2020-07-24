@@ -1,6 +1,6 @@
 /*
  * Codename Minosoft
- * Copyright (C) 2020 Moritz Zwerger
+ * Copyright (C) 2020 Lukas Eisenhauer
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -19,6 +19,7 @@ import de.bixilon.minosoft.render.MainWindow;
 import de.bixilon.minosoft.render.blockModels.BlockModelLoader;
 import de.bixilon.minosoft.render.utility.Vec3;
 
+import static de.bixilon.minosoft.render.utility.Vec3.mul;
 import static org.lwjgl.opengl.GL11.glTranslatef;
 
 public class PlayerController {
@@ -31,13 +32,18 @@ public class PlayerController {
     float gravity = 9.81f;
     boolean onGround;
     private boolean enableGravity;
+    private final CollisionHandler collisionHandler;
+    public Vec3 oldPos;
 
     public PlayerController(long window) {
         cameraMovement = new CameraMovement();
         playerMovement = new PlayerMovement(window);
+        collisionHandler = new CollisionHandler(this);
     }
 
     public void loop(float deltaTime) {
+        oldPos = playerPos.copy();
+
         GameMode gameMode = MainWindow.getConnection().getPlayer().getGameMode();
         enableGravity = gameMode == GameMode.CREATIVE || gameMode == GameMode.SPECTATOR;
         handleGravity(deltaTime);
@@ -60,7 +66,7 @@ public class PlayerController {
             return;
         }
         BlockModelLoader modelLoader = MainWindow.getRenderer().getModelLoader();
-        CollisionHandling.handleCollisions(world, this, modelLoader, playerMovement.deltaPos);
+        collisionHandler.handleCollisions();
     }
 
     public boolean isEnableGravity() {
@@ -76,7 +82,7 @@ public class PlayerController {
     }
 
     private void applyVelocity(float deltaTime) {
-        playerPos.add(Vec3.mul(playerVelocity, deltaTime));
+        playerPos.add(mul(playerVelocity, deltaTime));
     }
 
     private void handleGravity(float deltaTime) {

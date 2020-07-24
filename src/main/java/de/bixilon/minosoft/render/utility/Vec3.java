@@ -25,10 +25,10 @@ public class Vec3 {
         x = y = z = 0;
     }
 
-    public Vec3(float x_, float y_, float z_) {
-        x = x_;
-        y = y_;
-        z = z_;
+    public Vec3(float x, float y, float z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
     }
 
     public Vec3(Location location) {
@@ -84,10 +84,11 @@ public class Vec3 {
         z += v.z;
     }
 
-    public void add(float x_, float y_, float z_) {
-        x += x_;
-        y += y_;
-        z += z_;
+    public Vec3 add(float x, float y, float z) {
+        this.x += x;
+        this.y += y;
+        this.z += z;
+        return this;
     }
 
     public float len() {
@@ -107,23 +108,5 @@ public class Vec3 {
 
     public void zero() {
         x = y = z = 0f;
-    }
-
-    public int getXNormalized() {
-        if (x == 0f) {
-            return 0;
-        } else if (x > 0) {
-            return 1;
-        }
-        return -1;
-    }
-
-    public int getZNormalized() {
-        if (z == 0f) {
-            return 0;
-        } else if (z > 0) {
-            return 1;
-        }
-        return -1;
     }
 }

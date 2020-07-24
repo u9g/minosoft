@@ -346,8 +346,8 @@ public class PacketHandler {
     }
 
     public void handle(PacketPlayerPositionAndRotation pkg) {
-        MainWindow.getPlayerMovement().getCameraMovement().setRotation(pkg.getPitch(), pkg.getYaw());
-        MainWindow.getPlayerMovement().setPlayerPos(new Vec3(pkg.getLocation()));
+        MainWindow.getPlayerController().getCameraMovement().setRotation(pkg.getPitch(), pkg.getYaw());
+        MainWindow.getPlayerController().setPlayerPos(new Vec3(pkg.getLocation()));
         //TODO: location
 
         if (!connection.getPlayer().isSpawnConfirmed()) {

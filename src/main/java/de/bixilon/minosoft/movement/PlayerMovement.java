@@ -1,6 +1,6 @@
 /*
  * Codename Minosoft
- * Copyright (C) 2020 Moritz Zwerger
+ * Copyright (C) 2020 Lukas Eisenhauer
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -20,7 +20,8 @@ package de.bixilon.minosoft.movement;
 import de.bixilon.minosoft.render.MainWindow;
 import de.bixilon.minosoft.render.utility.Vec3;
 
-import static de.bixilon.minosoft.render.utility.Vec3.*;
+import static de.bixilon.minosoft.render.utility.Vec3.cross;
+import static de.bixilon.minosoft.render.utility.Vec3.mul;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class PlayerMovement {
@@ -31,14 +32,12 @@ public class PlayerMovement {
     float flySpeed = 0.1f;
 
     Vec3 playerPos;
-    Vec3 deltaPos;
 
     public PlayerMovement(long window) {
         this.window = window;
     }
 
     private void processInput(float deltaTime) {
-        Vec3 posBefore = playerPos.copy();
         float cameraSpeed = flySpeed / deltaTime;
 
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
@@ -58,25 +57,23 @@ public class PlayerMovement {
         }
 
         if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-            if (!MainWindow.getPlayerMovement().isEnableGravity()) {
+            if (!MainWindow.getPlayerController().isEnableGravity()) {
                 playerPos.add(0, cameraSpeed * deltaTime, 0);
             }
         }
         if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-            if (!MainWindow.getPlayerMovement().isEnableGravity()) {
+            if (!MainWindow.getPlayerController().isEnableGravity()) {
                 playerPos.add(0, -cameraSpeed * deltaTime, 0);
             }
-            if (MainWindow.getPlayerMovement().isOnGround()) {
-
-                MainWindow.getPlayerMovement().jump();
+            if (MainWindow.getPlayerController().isOnGround()) {
+                MainWindow.getPlayerController().jump();
             }
         }
-        deltaPos = add(playerPos, mul(posBefore, -1));
     }
 
     public void loop(float deltaTime) {
-        cameraFront = MainWindow.getPlayerMovement().getCameraMovement().getCameraFront();
-        playerPos = MainWindow.getPlayerMovement().getPlayerPos();
+        cameraFront = MainWindow.getPlayerController().getCameraMovement().getCameraFront();
+        playerPos = MainWindow.getPlayerController().getPlayerPos();
         processInput(deltaTime);
     }
 }

@@ -34,7 +34,7 @@ public class MainWindow {
     static MainMenu mainMenu;
     static WorldRenderer renderer;
     static Connection connection;
-    private static PlayerController playerMovement;
+    private static PlayerController playerController;
 
 
     public static void start(Connection serverConnection) {
@@ -44,7 +44,7 @@ public class MainWindow {
             openGLWindow.init();
             renderer = new WorldRenderer();
             renderer.init();
-            playerMovement = new PlayerController(openGLWindow.getWindow());
+            playerController = new PlayerController(openGLWindow.getWindow());
             renderMode = MAIN_MENU;
             mainMenu = new MainMenu(openGLWindow.getWidth(), openGLWindow.getHeight());
             mainLoop();
@@ -69,7 +69,7 @@ public class MainWindow {
                     break;
                 case PLAY:
                     OpenGLWindow.gluPerspective(FOVY, (float) WIDTH / (float) HEIGHT, 0.1f, 500f);
-                    playerMovement.loop(deltaTime);
+                    playerController.loop(deltaTime);
                     renderer.draw();
                     break;
             }
@@ -91,7 +91,7 @@ public class MainWindow {
         renderMode = PLAY;
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
-        glfwSetCursorPosCallback(openGLWindow.getWindow(), playerMovement.getCameraMovement()::mouseCallback);
+        glfwSetCursorPosCallback(openGLWindow.getWindow(), playerController.getCameraMovement()::mouseCallback);
         glfwSetInputMode(openGLWindow.getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         glEnable(GL_TEXTURE_2D);
         connection.connect();
@@ -111,7 +111,7 @@ public class MainWindow {
         System.exit(1);
     }
 
-    public static PlayerController getPlayerMovement() {
-        return playerMovement;
+    public static PlayerController getPlayerController() {
+        return playerController;
     }
 }
