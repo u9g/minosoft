@@ -30,6 +30,9 @@ public class BoatMetaData extends EntityMetaData {
             case VERSION_1_9_4:
                 return (int) sets.get(5).getData();
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
                 return (int) sets.get(6).getData();
         }
         return 0;
@@ -43,9 +46,12 @@ public class BoatMetaData extends EntityMetaData {
             case VERSION_1_9_4:
                 return (int) sets.get(6).getData();
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
                 return (int) sets.get(7).getData();
         }
-        return 0;
+        return 1;
     }
 
     public float getDamageTaken() {
@@ -56,19 +62,25 @@ public class BoatMetaData extends EntityMetaData {
             case VERSION_1_9_4:
                 return (float) sets.get(7).getData();
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
                 return (float) sets.get(8).getData();
         }
         return 0;
     }
 
-    public int getType() {
+    public BoatMaterial getMaterial() {
         switch (version) {
             case VERSION_1_9_4:
-                return (int) sets.get(8).getData();
+                return BoatMaterial.byId((int) sets.get(8).getData());
             case VERSION_1_10:
-                return (int) sets.get(9).getData();
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
+                return BoatMaterial.byId((int) sets.get(9).getData());
         }
-        return 0;
+        return BoatMaterial.OAK;
     }
 
     public boolean isRightPaddleTurning() {
@@ -76,7 +88,11 @@ public class BoatMetaData extends EntityMetaData {
             case VERSION_1_9_4:
                 return (boolean) sets.get(9).getData();
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
                 return (boolean) sets.get(10).getData();
+            case VERSION_1_13_2:
+                return (boolean) sets.get(11).getData();
         }
         return false;
     }
@@ -84,11 +100,50 @@ public class BoatMetaData extends EntityMetaData {
     public boolean isLeftPaddleTurning() {
         switch (version) {
             case VERSION_1_9_4:
+            case VERSION_1_13_2:
                 return (boolean) sets.get(10).getData();
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
                 return (boolean) sets.get(11).getData();
         }
         return false;
+    }
+
+    public int getSplashTimer() {
+        switch (version) {
+            case VERSION_1_13_2:
+                return (int) sets.get(12).getData();
+        }
+        return 0;
+    }
+
+    public enum BoatMaterial {
+        OAK(0),
+        SPRUCE(1),
+        BIRCH(2),
+        JUNGLE(3),
+        ACACIA(4),
+        DARK_OAK(5);
+
+        final int id;
+
+        BoatMaterial(int id) {
+            this.id = id;
+        }
+
+        public static BoatMaterial byId(int id) {
+            for (BoatMaterial material : values()) {
+                if (material.getId() == id) {
+                    return material;
+                }
+            }
+            return OAK;
+        }
+
+        public int getId() {
+            return id;
+        }
     }
 
 }

@@ -31,6 +31,9 @@ public class IronGolemMetaData extends MobMetaData {
             case VERSION_1_9_4:
                 return BitByte.isBitMask((byte) sets.get(11).getData(), 0x01);
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
                 return BitByte.isBitMask((byte) sets.get(12).getData(), 0x01);
         }
         return false;

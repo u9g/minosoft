@@ -13,10 +13,13 @@
 
 package de.bixilon.minosoft.protocol.protocol;
 
+import de.bixilon.minosoft.Minosoft;
 import de.bixilon.minosoft.game.datatypes.GameMode;
 import de.bixilon.minosoft.game.datatypes.blocks.Blocks;
 import de.bixilon.minosoft.game.datatypes.entities.meta.HumanMetaData;
 import de.bixilon.minosoft.game.datatypes.entities.mob.OtherPlayer;
+import de.bixilon.minosoft.game.datatypes.entities.objects.Painting;
+import de.bixilon.minosoft.game.datatypes.player.PingBars;
 import de.bixilon.minosoft.game.datatypes.player.PlayerInfo;
 import de.bixilon.minosoft.game.datatypes.player.PlayerInfoBulk;
 import de.bixilon.minosoft.game.datatypes.scoreboard.ScoreboardObjective;
@@ -24,6 +27,8 @@ import de.bixilon.minosoft.game.datatypes.scoreboard.ScoreboardScore;
 import de.bixilon.minosoft.game.datatypes.scoreboard.Team;
 import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
 import de.bixilon.minosoft.logging.Log;
+import de.bixilon.minosoft.nbt.tag.CompoundTag;
+import de.bixilon.minosoft.nbt.tag.StringTag;
 import de.bixilon.minosoft.protocol.network.Connection;
 import de.bixilon.minosoft.protocol.packets.clientbound.login.PacketEncryptionRequest;
 import de.bixilon.minosoft.protocol.packets.clientbound.login.PacketLoginDisconnect;
@@ -53,14 +58,25 @@ public class PacketHandler {
 
     public void handle(PacketStatusResponse pkg) {
         if (connection.getReason() == ConnectionReason.GET_VERSION) {
-            // now we know the version, set it
-            connection.setVersion(ProtocolVersion.byId(pkg.getResponse().getProtocolNumber()));
+            // now we know the version, set it, if the config allows it
+            int version = Minosoft.getConfig().getInteger("debug.version");
+            if (version == -1) {
+                connection.setVersion(ProtocolVersion.byId(pkg.getResponse().getProtocolNumber()));
+            } else {
+                connection.setVersion(ProtocolVersion.byId(version));
+            }
         }
         Log.info(String.format("Status response received: %s/%s online. MotD: '%s'", pkg.getResponse().getPlayerOnline(), pkg.getResponse().getMaxPlayers(), pkg.getResponse().getMotd().getColoredMessage()));
     }
 
     public void handle(PacketStatusPong pkg) {
-        Log.debug("Pong: " + pkg.getID());
+        ConnectionPing ping = connection.getConnectionStatusPing();
+        if (ping.getPingId() != pkg.getID()) {
+            Log.warn(String.format("Server sent unknown ping answer (pingId=%d, expected=%d)", pkg.getID(), ping.getPingId()));
+            return;
+        }
+        long pingDifference = System.currentTimeMillis() - ping.getSendingTime();
+        Log.debug(String.format("Pong received (ping=%dms, pingBars=%s)", pingDifference, PingBars.byPing(pingDifference)));
         switch (connection.getReason()) {
             case PING:
                 // pong arrived, closing connection
@@ -69,7 +85,7 @@ public class PacketHandler {
             case GET_VERSION:
                 // reconnect...
                 connection.disconnect();
-                Log.info(String.format("Server is running on version %s, reconnecting...", connection.getVersion().getName()));
+                Log.info(String.format("Server is running on version %s, reconnecting...", connection.getVersion().getVersionString()));
                 break;
             case CONNECT:
                 // do nothing
@@ -97,6 +113,7 @@ public class PacketHandler {
         connection.getPlayer().setPlayer(new OtherPlayer(pkg.getEntityId(), connection.getPlayer().getPlayerName(), connection.getPlayer().getPlayerUUID(), null, null, null, (short) 0, (short) 0, (short) 0, null));
         connection.getPlayer().getWorld().setHardcore(pkg.isHardcore());
         connection.getPlayer().getWorld().setDimension(pkg.getDimension());
+        connection.getSender().sendChatMessage("I am alive! ~ Minosoft");
     }
 
     public void handle(PacketLoginDisconnect pkg) {
@@ -174,7 +191,7 @@ public class PacketHandler {
         connection.getPlayer().setSpawnLocation(pkg.getSpawnLocation());
     }
 
-    public void handle(PacketChatMessage pkg) {
+    public void handle(PacketChatMessageReceiving pkg) {
     }
 
     public void handle(PacketDisconnect pkg) {
@@ -202,7 +219,7 @@ public class PacketHandler {
             case CHANGE_GAMEMODE:
                 connection.getPlayer().setGameMode(GameMode.byId(pkg.getValue().intValue()));
                 break;
-            //ToDo: handle all updates
+            // ToDo: handle all updates
         }
     }
 
@@ -286,7 +303,7 @@ public class PacketHandler {
     }
 
     public void handle(PacketOpenSignEditor pkg) {
-        //ToDo
+        // ToDo
     }
 
     public void handle(PacketSpawnObject pkg) {
@@ -298,7 +315,7 @@ public class PacketHandler {
     }
 
     public void handle(PacketSpawnWeatherEntity pkg) {
-        //ToDo
+        // ToDo
     }
 
     public void handle(PacketChunkData pkg) {
@@ -326,23 +343,28 @@ public class PacketHandler {
     }
 
     public void handle(PacketUpdateSignReceiving pkg) {
-        connection.getPlayer().getWorld().updateSign(pkg.getPosition(), pkg.getLines());
+        CompoundTag nbt = new CompoundTag();
+        nbt.writeBlockPosition(pkg.getPosition());
+        nbt.writeTag("id", new StringTag("minecraft:sign"));
+        for (int i = 0; i < 4; i++) {
+            nbt.writeTag(String.format("Text%d", (i + 1)), new StringTag(pkg.getLines()[i].getRaw().toString()));
+        }
     }
 
     public void handle(PacketEntityAnimation pkg) {
-        //ToDo
+        // ToDo
     }
 
     public void handle(PacketEntityStatus pkg) {
-        //ToDo
+        // ToDo
     }
 
     public void handle(PacketNamedSoundEffect pkg) {
-        //ToDo
+        // ToDo
     }
 
     public void handle(PacketPlayerAbilitiesReceiving pkg) {
-        //ToDo: used to set fly abilities
+        // ToDo: used to set fly abilities
     }
 
     public void handle(PacketPlayerPositionAndRotation pkg) {
@@ -352,20 +374,20 @@ public class PacketHandler {
 
         if (!connection.getPlayer().isSpawnConfirmed()) {
             // oops, not spawned yet, confirming position
-            //ToDo feet position
+            // ToDo feet position
             connection.sendPacket(new PacketPlayerPositionAndRotationSending(pkg.getLocation().getX(), pkg.getLocation().getY() - 1.65F, pkg.getLocation().getY(), pkg.getLocation().getZ(), pkg.getYaw(), pkg.getPitch(), pkg.isOnGround()));
             connection.getPlayer().setSpawnConfirmed(true);
         }
     }
 
     public void handle(PacketAttachEntity pkg) {
-        //ToDo check if it is us
+        // ToDo check if it is us
         connection.getPlayer().getWorld().getEntity(pkg.getEntityId()).attachTo(pkg.getVehicleId());
-        //ToDo leash support
+        // ToDo leash support
     }
 
     public void handle(PacketUseBed pkg) {
-        //ToDo
+        // ToDo
     }
 
     public void handle(PacketBlockEntityMetadata pkg) {
@@ -387,13 +409,13 @@ public class PacketHandler {
             int y = ((int) pkg.getLocation().getY()) + record[1];
             int z = ((int) pkg.getLocation().getY()) + record[2];
             BlockPosition blockPosition = new BlockPosition(x, (short) y, z);
-            connection.getPlayer().getWorld().setBlock(blockPosition, Blocks.AIR);
+            connection.getPlayer().getWorld().setBlock(blockPosition, Blocks.nullBlock);
         }
-        //ToDo: motion support
+        // ToDo: motion support
     }
 
     public void handle(PacketCollectItem pkg) {
-        //ToDo
+        // ToDo
     }
 
     public void handle(PacketOpenWindow pkg) {
@@ -407,40 +429,41 @@ public class PacketHandler {
     public void handle(PacketSetSlot pkg) {
         if (pkg.getWindowId() == -1) {
             // invalid window Id
-            //ToDo: what is windowId -1
+            // ToDo: what is windowId -1
             return;
         }
         connection.getPlayer().setSlot(pkg.getWindowId(), pkg.getSlotId(), pkg.getSlot());
     }
 
     public void handle(PacketWindowProperty pkg) {
-        //ToDo
+        // ToDo
     }
 
     public void handle(PacketConfirmTransactionReceiving pkg) {
-        //ToDo
+        // ToDo
     }
 
     public void handle(PacketStatistics pkg) {
-        //ToDo
+        // ToDo
     }
 
     public void handle(PacketTabCompleteReceiving pkg) {
-        //ToDo
+        // ToDo
     }
 
     public void handle(PacketSpawnPainting pkg) {
+        connection.getPlayer().getWorld().addEntity(new Painting(pkg.getEntityId(), pkg.getPosition(), pkg.getDirection(), pkg.getPainting()));
     }
 
     public void handle(PacketEntity pkg) {
     }
 
     public void handle(PacketParticle pkg) {
-        //ToDo
+        // ToDo
     }
 
     public void handle(PacketEffect pkg) {
-        //ToDo
+        // ToDo
     }
 
     public void handle(PacketScoreboardObjective pkg) {
@@ -464,9 +487,9 @@ public class PacketHandler {
                 break;
             case REMOVE:
                 ScoreboardObjective objective = connection.getPlayer().getScoreboardManager().getObjective(pkg.getScoreName());
-                //ToDo handle correctly
+                // ToDo handle correctly
                 if (objective == null) {
-                    Log.warn(String.format("Server tried to remove score with was not created before (itemName=\"%s\", scoreName=\"%s\")!", pkg.getItemName(), pkg.getScoreName()));
+                    Log.warn(String.format("Server tried to remove score witch was not created before (itemName=\"%s\", scoreName=\"%s\")!", pkg.getItemName(), pkg.getScoreName()));
                 } else {
                     objective.removeScore(pkg.getItemName());
                 }
@@ -476,7 +499,7 @@ public class PacketHandler {
     }
 
     public void handle(PacketScoreboardDisplayScoreboard pkg) {
-        //ToDo
+        // ToDo
     }
 
     public void handle(PacketTeams pkg) {
@@ -500,7 +523,7 @@ public class PacketHandler {
     }
 
     public void handle(PacketMapData pkg) {
-        //ToDo
+        // ToDo
     }
 
     public void handle(PacketLoginSetCompression pkg) {
@@ -515,28 +538,28 @@ public class PacketHandler {
     }
 
     public void handle(PackerResourcePackSend pkg) {
-        //ToDo ask user, download pack. for now just send an okay
+        // ToDo ask user, download pack. for now just send an okay
         connection.sendPacket(new PacketResourcePackStatus(pkg.getHash(), PacketResourcePackStatus.ResourcePackStatus.SUCCESSFULLY));
     }
 
     public void handle(PacketEntityProperties pkg) {
-        //ToDo
+        // ToDo
     }
 
     public void handle(PacketWorldBorder pkg) {
-        //ToDo
+        // ToDo
     }
 
     public void handle(PacketTitle pkg) {
-        //ToDo
+        // ToDo
     }
 
     public void handle(PacketCombatEvent pkg) {
-        //ToDo
+        // ToDo
     }
 
     public void handle(PacketCamera pkg) {
-        //ToDo
+        // ToDo
     }
 
     public void handle(PacketUnloadChunk pkg) {
@@ -544,17 +567,45 @@ public class PacketHandler {
     }
 
     public void handle(PacketSoundEffect pkg) {
-        //ToDo
+        // ToDo
     }
 
     public void handle(PacketBossBar pkg) {
-        //ToDo
+        // ToDo
     }
 
     public void handle(PacketSetPassenger pkg) {
-        //ToDo
+        // ToDo
     }
 
     public void handle(PacketSetCooldown pkg) {
+    }
+
+    public void handle(PacketCraftRecipeResponse pkg) {
+    }
+
+    public void handle(PacketUnlockRecipes pkg) {
+    }
+
+    public void handle(PacketSelectAdvancementTab pkg) {
+    }
+
+    public void handle(PacketAdvancements pkg) {
+    }
+
+    public void handle(PacketNBTQueryResponse pkg) {
+    }
+
+    public void handle(PacketFacePlayer pkg) {
+    }
+
+    public void handle(PacketTags pkg) {
+        //ToDo
+    }
+
+    public void handle(PacketDeclareRecipes pkg) {
+    }
+
+    public void handle(PacketStopSound pkg) {
     }
 }

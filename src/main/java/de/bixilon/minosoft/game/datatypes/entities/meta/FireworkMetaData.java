@@ -31,9 +31,22 @@ public class FireworkMetaData extends EntityMetaData {
             case VERSION_1_9_4:
                 return (Slot) sets.get(5).getData();
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
                 return (Slot) sets.get(6).getData();
         }
         return null;
+    }
+
+    public int getBoostedEntityId() {
+        switch (version) {
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
+                return (int) sets.get(7).getData();
+        }
+        return 0;
     }
 
 }

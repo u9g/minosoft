@@ -35,7 +35,6 @@ public class PacketClickWindow implements ServerboundPacket {
         this.action = action;
         this.actionNumber = actionNumber;
         this.clickedItem = clickedItem;
-        log();
     }
 
 
@@ -47,6 +46,8 @@ public class PacketClickWindow implements ServerboundPacket {
             case VERSION_1_8:
             case VERSION_1_9_4:
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
                 buffer.writeByte(windowId);
                 buffer.writeShort(slot);
                 buffer.writeByte(action.getButton());

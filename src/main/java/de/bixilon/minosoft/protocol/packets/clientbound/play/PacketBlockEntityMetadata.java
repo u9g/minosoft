@@ -19,7 +19,7 @@ import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.nbt.tag.CompoundTag;
 import de.bixilon.minosoft.protocol.packets.ClientboundPacket;
-import de.bixilon.minosoft.protocol.protocol.InPacketBuffer;
+import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
 import de.bixilon.minosoft.protocol.protocol.PacketHandler;
 import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
 
@@ -30,7 +30,7 @@ public class PacketBlockEntityMetadata implements ClientboundPacket {
 
 
     @Override
-    public boolean read(InPacketBuffer buffer) {
+    public boolean read(InByteBuffer buffer) {
         switch (buffer.getVersion()) {
             case VERSION_1_7_10:
                 position = buffer.readBlockPositionShort();
@@ -40,6 +40,9 @@ public class PacketBlockEntityMetadata implements ClientboundPacket {
             case VERSION_1_8:
             case VERSION_1_9_4:
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
                 position = buffer.readPosition();
                 action = Actions.byId(buffer.readByte(), buffer.getVersion());
                 nbt = buffer.readNBT();
@@ -74,11 +77,14 @@ public class PacketBlockEntityMetadata implements ClientboundPacket {
         COMMAND_BLOCK_TEXT(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_7_10, 2)}),
         BEACON(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_8, 3)}),
         SKULL(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_7_10, 3), new MapSet<>(ProtocolVersion.VERSION_1_8, 4)}),
-        FLOWER_POT(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_7_10, 4), new MapSet<>(ProtocolVersion.VERSION_1_8, 5)}),
+        FLOWER_POT(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_7_10, 4), new MapSet<>(ProtocolVersion.VERSION_1_8, 5), new MapSet<>(ProtocolVersion.VERSION_1_13_2, 1000)}),
+        DECLARE_CONDUIT(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_13_2, 5)}),
         BANNER(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_8, 6)}),
         DATA_STRUCTURE_TILE_ENTITY(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_9_4, 7)}),
         END_GATEWAY_DESTINATION(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_9_4, 8)}),
-        SET_TEXT_ON_SIGN(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_9_4, 9)});
+        SET_TEXT_ON_SIGN(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_9_4, 9)}),
+        DECLARE_SHULKER_BOX(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_11_2, 10)}),
+        SET_BED_COLOR(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_12_2, 11)});
 
         final VersionValueMap<Integer> valueMap;
 

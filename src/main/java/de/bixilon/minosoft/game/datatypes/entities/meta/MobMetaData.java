@@ -12,6 +12,7 @@
  */
 package de.bixilon.minosoft.game.datatypes.entities.meta;
 
+import de.bixilon.minosoft.game.datatypes.TextComponent;
 import de.bixilon.minosoft.game.datatypes.player.Hand;
 import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
 import de.bixilon.minosoft.util.BitByte;
@@ -32,9 +33,12 @@ public class MobMetaData extends EntityMetaData {
             case VERSION_1_9_4:
                 return (float) sets.get(6).getData();
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
                 return (float) sets.get(7).getData();
         }
-        return 0.0F;
+        return 1.0F;
     }
 
     public int getPotionEffectColor() {
@@ -45,6 +49,9 @@ public class MobMetaData extends EntityMetaData {
             case VERSION_1_9_4:
                 return (int) sets.get(7).getData();
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
                 return (int) sets.get(8).getData();
         }
         return 0;
@@ -59,6 +66,9 @@ public class MobMetaData extends EntityMetaData {
             case VERSION_1_9_4:
                 return (boolean) sets.get(8).getData();
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
                 return (boolean) sets.get(9).getData();
         }
         return false;
@@ -72,18 +82,21 @@ public class MobMetaData extends EntityMetaData {
             case VERSION_1_9_4:
                 return (int) sets.get(9).getData();
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
                 return (int) sets.get(10).getData();
         }
         return 0;
     }
 
     @Override
-    public String getNameTag() {
+    public TextComponent getNameTag() {
         switch (version) {
             case VERSION_1_7_10:
-                return (String) sets.get(10).getData();
+                return new TextComponent((String) sets.get(10).getData());
             case VERSION_1_8:
-                return (String) sets.get(2).getData();
+                return new TextComponent((String) sets.get(2).getData());
             default:
                 return super.getNameTag();
         }
@@ -109,26 +122,39 @@ public class MobMetaData extends EntityMetaData {
         return false;
     }
 
-    public boolean hasHandActive() {
+    public boolean isHandActive() {
         switch (version) {
             case VERSION_1_9_4:
                 return BitByte.isBitMask((byte) sets.get(5).getData(), 0x01);
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
                 return BitByte.isBitMask((byte) sets.get(6).getData(), 0x01);
         }
         return false;
     }
 
     public Hand getActiveHand() {
-        //ToDo main, offhand
+        // ToDo main, offhand
         switch (version) {
             case VERSION_1_9_4:
-                return BitByte.isBitMask((byte) sets.get(5).getData(), 0x01) ? Hand.LEFT : Hand.RIGHT;
+                return BitByte.isBitMask((byte) sets.get(5).getData(), 0x02) ? Hand.LEFT : Hand.RIGHT;
             case VERSION_1_10:
-                return BitByte.isBitMask((byte) sets.get(6).getData(), 0x01) ? Hand.LEFT : Hand.RIGHT;
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
+                return BitByte.isBitMask((byte) sets.get(6).getData(), 0x02) ? Hand.LEFT : Hand.RIGHT;
         }
         return Hand.RIGHT;
     }
 
+    public boolean isRiptideAttack() {
+        switch (version) {
+            case VERSION_1_13_2:
+                return BitByte.isBitMask((byte) sets.get(6).getData(), 0x04);
+        }
+        return false;
+    }
 
 }

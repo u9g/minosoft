@@ -18,16 +18,20 @@ public class Protocol_1_14_4 extends Protocol {
 
     Protocol_1_14_4() {
         super();
-        //ToDo
+        // ToDo
     }
 
-    public int getProtocolVersion() {
+    public int getProtocolVersionNumber() {
         return 498;
     }
 
     @Override
-    public String getName() {
+    public String getVersionString() {
         return "1.14.4";
     }
 
+    @Override
+    public String getReleaseName() {
+        return "Village and Pillage";
+    }
 }

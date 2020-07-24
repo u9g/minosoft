@@ -17,9 +17,11 @@ import de.bixilon.minosoft.game.datatypes.Direction;
 import de.bixilon.minosoft.game.datatypes.TextComponent;
 import de.bixilon.minosoft.game.datatypes.entities.Location;
 import de.bixilon.minosoft.game.datatypes.entities.Pose;
+import de.bixilon.minosoft.game.datatypes.entities.items.Items;
 import de.bixilon.minosoft.game.datatypes.entities.meta.EntityMetaData;
 import de.bixilon.minosoft.game.datatypes.inventory.Slot;
 import de.bixilon.minosoft.game.datatypes.particle.*;
+import de.bixilon.minosoft.game.datatypes.recipes.Ingredient;
 import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
 import de.bixilon.minosoft.nbt.tag.CompoundTag;
 import de.bixilon.minosoft.util.BitByte;
@@ -175,7 +177,7 @@ public class InByteBuffer {
     }
 
     public BlockPosition readPosition() {
-        if (version.getVersion() >= ProtocolVersion.VERSION_1_14_4.getVersion()) {
+        if (version.getVersionNumber() >= ProtocolVersion.VERSION_1_14_4.getVersionNumber()) {
             // changed in 1.14, thanks for the explanation @Sainan
             Long raw = readLong();
             int x = (int) (raw >> 38);
@@ -219,7 +221,11 @@ public class InByteBuffer {
     }
 
     public Particle readParticle() {
-        Particles type = Particles.byType(readVarInt());
+        Particles type = Particles.byId(readVarInt());
+        return readParticleData(type);
+    }
+
+    public Particle readParticleData(Particles type) {
         try {
             if (type.getClazz() == OtherParticles.class) {
                 return type.getClazz().getConstructor(Particles.class).newInstance(type);
@@ -263,30 +269,24 @@ public class InByteBuffer {
 
     public Slot readSlot() {
         switch (version) {
-            case VERSION_1_7_10: {
-                short id = readShort();
-                if (id != -1) {
-                    return new Slot(id, readByte(), readShort(), readNBT(true));
-                }
-                break;
-            }
+            case VERSION_1_7_10:
             case VERSION_1_8:
             case VERSION_1_9_4:
-            case VERSION_1_10: {
+            case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
                 short id = readShort();
                 if (id == -1) {
                     return null;
                 }
-                return new Slot(id, readByte(), readShort(), readNBT());
-            }
-                /*
-
-        if (readBoolean()) {
-            return new Slot(readVarInt(), readByte(), readNBT());
-        }
-        //else no data
-        return null;
-                 */
+                byte count = readByte();
+                short metaData = readShort();
+                CompoundTag nbt = readNBT(version == ProtocolVersion.VERSION_1_7_10);
+                return new Slot(Items.getItemByLegacy(id, metaData), count, metaData, nbt);
+            case VERSION_1_13_2:
+                if (readBoolean()) {
+                    return new Slot(Items.getItem(readVarInt(), version), readByte(), readNBT());
+                }
         }
         return null;
     }
@@ -365,6 +365,7 @@ public class InByteBuffer {
             }
             case VERSION_1_9_4:
             case VERSION_1_10:
+            case VERSION_1_11_2: {
                 byte index = readByte();
                 while (index != (byte) 0xFF) {
                     EntityMetaData.Types type = EntityMetaData.Types.byId(readByte(), version);
@@ -372,6 +373,17 @@ public class InByteBuffer {
                     index = readByte();
                 }
                 break;
+            }
+            case VERSION_1_12_2:
+            case VERSION_1_13_2: {
+                byte index = readByte();
+                while (index != (byte) 0xFF) {
+                    EntityMetaData.Types type = EntityMetaData.Types.byId(readVarInt(), version);
+                    sets.put((int) index, new EntityMetaData.MetaDataSet(index, EntityMetaData.getData(type, this)));
+                    index = readByte();
+                }
+                break;
+            }
         }
         return sets;
     }
@@ -383,5 +395,33 @@ public class InByteBuffer {
 
     public byte[] getBytes() {
         return bytes;
+    }
+
+    public int[] readVarIntArray(int length) {
+        int[] ret = new int[length];
+        for (int i = 0; i < length; i++) {
+            ret[i] = readVarInt();
+        }
+        return ret;
+    }
+
+    public Ingredient readIngredient() {
+        return new Ingredient(readSlotArray(readVarInt()));
+    }
+
+    public Ingredient[] readIngredientArray(int length) {
+        Ingredient[] ret = new Ingredient[length];
+        for (int i = 0; i < length; i++) {
+            ret[i] = readIngredient();
+        }
+        return ret;
+    }
+
+    public Slot[] readSlotArray(int length) {
+        Slot[] res = new Slot[length];
+        for (int i = 0; i < length; i++) {
+            res[i] = readSlot();
+        }
+        return res;
     }
 }

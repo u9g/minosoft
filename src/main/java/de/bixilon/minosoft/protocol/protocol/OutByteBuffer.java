@@ -33,12 +33,25 @@ public class OutByteBuffer {
         this.version = version;
     }
 
-    public void writeByte(byte b) {
-        bytes.add(b);
-    }
-
     public static void writeByte(byte b, List<Byte> write) {
         write.add(b);
+    }
+
+    public static void writeVarInt(int value, List<Byte> write) {
+        // thanks https://wiki.vg/Protocol#VarInt_and_VarLong
+        do {
+            byte temp = (byte) (value & 0b01111111);
+            // Note: >>> means that the sign bit is shifted with the rest of the number rather than being left alone
+            value >>>= 7;
+            if (value != 0) {
+                temp |= 0b10000000;
+            }
+            writeByte(temp, write);
+        } while (value != 0);
+    }
+
+    public void writeByte(byte b) {
+        bytes.add(b);
     }
 
     public void writeBytes(byte[] b) {
@@ -57,19 +70,6 @@ public class OutByteBuffer {
         for (byte b : buffer.array()) {
             bytes.add(b);
         }
-    }
-
-    public static void writeVarInt(int value, List<Byte> write) {
-        // thanks https://wiki.vg/Protocol#VarInt_and_VarLong
-        do {
-            byte temp = (byte) (value & 0b01111111);
-            // Note: >>> means that the sign bit is shifted with the rest of the number rather than being left alone
-            value >>>= 7;
-            if (value != 0) {
-                temp |= 0b10000000;
-            }
-            writeByte(temp, write);
-        } while (value != 0);
     }
 
     public void writeLong(Long l) {
@@ -153,7 +153,7 @@ public class OutByteBuffer {
     }
 
     public void writePosition(BlockPosition location) {
-        if (version.getVersion() >= ProtocolVersion.VERSION_1_14_4.getVersion()) {
+        if (version.getVersionNumber() >= ProtocolVersion.VERSION_1_14_4.getVersionNumber()) {
             writeLong((((long) (location.getX() & 0x3FFFFFF) << 38) | ((long) (location.getZ() & 0x3FFFFFF) << 12) | (long) (location.getY() & 0xFFF)));
         } else {
             writeLong((((long) location.getX() & 0x3FFFFFF) << 38) | (((long) location.getZ() & 0x3FFFFFF)) | ((long) location.getY() & 0xFFF) << 26);
@@ -170,14 +170,26 @@ public class OutByteBuffer {
             case VERSION_1_8:
             case VERSION_1_9_4:
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
                 if (slot == null) {
                     writeShort((short) -1);
                     return;
                 }
-                writeShort((short) slot.getItemId());
+                writeShort((short) slot.getItemId(version));
                 writeByte((byte) slot.getItemCount());
                 writeShort(slot.getItemMetadata());
                 writeNBT(slot.getNbt());
+                break;
+            case VERSION_1_13_2:
+                if (slot == null) {
+                    writeBoolean(false);
+                    return;
+                }
+                writeVarInt(slot.getItemId(version));
+                writeByte((byte) slot.getItemCount());
+                writeNBT(slot.getNbt());
+
         }
     }
 

@@ -38,6 +38,9 @@ public class SkeletonMetaData extends MobMetaData {
     public boolean isSwingingArms() {
         switch (version) {
             case VERSION_1_9_4:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
                 return (boolean) sets.get(12).getData();
             case VERSION_1_10:
                 return (boolean) sets.get(13).getData();

@@ -15,7 +15,7 @@ package de.bixilon.minosoft.protocol.packets.clientbound.play;
 
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.packets.ClientboundPacket;
-import de.bixilon.minosoft.protocol.protocol.InPacketBuffer;
+import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
 import de.bixilon.minosoft.protocol.protocol.PacketHandler;
 
 public class PacketTabCompleteReceiving implements ClientboundPacket {
@@ -24,7 +24,7 @@ public class PacketTabCompleteReceiving implements ClientboundPacket {
 
 
     @Override
-    public boolean read(InPacketBuffer buffer) {
+    public boolean read(InByteBuffer buffer) {
         switch (buffer.getVersion()) {
             case VERSION_1_7_10:
                 count = buffer.readVarInt();
@@ -33,6 +33,8 @@ public class PacketTabCompleteReceiving implements ClientboundPacket {
             case VERSION_1_8:
             case VERSION_1_9_4:
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
                 count = buffer.readVarInt();
                 match = new String[count];
                 for (int i = 0; i < count; i++) {

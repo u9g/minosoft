@@ -15,15 +15,15 @@ package de.bixilon.minosoft.protocol.packets.clientbound.play;
 
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.packets.ClientboundPacket;
-import de.bixilon.minosoft.protocol.protocol.InPacketBuffer;
+import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
 import de.bixilon.minosoft.protocol.protocol.PacketHandler;
 
 public class PacketKeepAlive implements ClientboundPacket {
-    int id;
+    long id;
 
 
     @Override
-    public boolean read(InPacketBuffer buffer) {
+    public boolean read(InByteBuffer buffer) {
         switch (buffer.getVersion()) {
             case VERSION_1_7_10:
                 id = buffer.readInt();
@@ -31,7 +31,12 @@ public class PacketKeepAlive implements ClientboundPacket {
             case VERSION_1_8:
             case VERSION_1_9_4:
             case VERSION_1_10:
+            case VERSION_1_11_2:
                 id = buffer.readVarInt();
+                return true;
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
+                id = buffer.readLong();
                 return true;
         }
 
@@ -40,7 +45,7 @@ public class PacketKeepAlive implements ClientboundPacket {
 
     @Override
     public void log() {
-        Log.protocol(String.format("Keep alive packet received (%s)", id));
+        Log.protocol(String.format("Keep alive packet received (%d)", id));
     }
 
     @Override
@@ -48,7 +53,7 @@ public class PacketKeepAlive implements ClientboundPacket {
         h.handle(this);
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 }

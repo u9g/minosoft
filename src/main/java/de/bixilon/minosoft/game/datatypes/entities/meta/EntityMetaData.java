@@ -12,10 +12,7 @@
  */
 package de.bixilon.minosoft.game.datatypes.entities.meta;
 
-import de.bixilon.minosoft.game.datatypes.EntityRotation;
-import de.bixilon.minosoft.game.datatypes.MapSet;
-import de.bixilon.minosoft.game.datatypes.Vector;
-import de.bixilon.minosoft.game.datatypes.VersionValueMap;
+import de.bixilon.minosoft.game.datatypes.*;
 import de.bixilon.minosoft.game.datatypes.blocks.Blocks;
 import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
 import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
@@ -34,6 +31,7 @@ public class EntityMetaData {
     1.8: https://wiki.vg/index.php?title=Entity_metadata&oldid=6611
     1.9.4: https://wiki.vg/index.php?title=Entity_metadata&oldid=7955
     1.10: https://wiki.vg/index.php?title=Entity_metadata&oldid=8241
+    1.13: https://wiki.vg/index.php?title=Entity_metadata&oldid=14800
      */
     public EntityMetaData(HashMap<Integer, MetaDataSet> sets, ProtocolVersion version) {
         this.sets = sets;
@@ -109,7 +107,7 @@ public class EntityMetaData {
                 break;
             case BLOCK_ID:
                 int blockId = buffer.readVarInt();
-                data = Blocks.byId(blockId >> 4, blockId & 0xF);
+                data = Blocks.getBlock(blockId, buffer.getVersion());
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + type);
@@ -127,6 +125,9 @@ public class EntityMetaData {
             case VERSION_1_8:
             case VERSION_1_9_4:
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
                 return BitByte.isBitMask((byte) sets.get(0).getData(), 0x01);
         }
         return false;
@@ -138,6 +139,9 @@ public class EntityMetaData {
             case VERSION_1_8:
             case VERSION_1_9_4:
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
                 return BitByte.isBitMask((byte) sets.get(0).getData(), 0x02);
         }
         return false;
@@ -149,6 +153,9 @@ public class EntityMetaData {
             case VERSION_1_8:
             case VERSION_1_9_4:
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
                 return BitByte.isBitMask((byte) sets.get(0).getData(), 0x08);
         }
         return false;
@@ -160,6 +167,14 @@ public class EntityMetaData {
             case VERSION_1_8:
             case VERSION_1_9_4:
             case VERSION_1_10:
+                return BitByte.isBitMask((byte) sets.get(0).getData(), 0x10);
+        }
+        return false;
+    }
+
+    public boolean isSwimming() {
+        switch (version) {
+            case VERSION_1_13_2:
                 return BitByte.isBitMask((byte) sets.get(0).getData(), 0x10);
         }
         return false;
@@ -179,6 +194,9 @@ public class EntityMetaData {
             case VERSION_1_8:
             case VERSION_1_9_4:
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
                 return BitByte.isBitSet((byte) sets.get(0).getData(), 0x20);
         }
         return false;
@@ -190,6 +208,9 @@ public class EntityMetaData {
             case VERSION_1_8:
             case VERSION_1_9_4:
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
                 return BitByte.isBitSet((byte) sets.get(0).getData(), 0x40);
         }
         return false;
@@ -201,16 +222,23 @@ public class EntityMetaData {
             case VERSION_1_8:
             case VERSION_1_9_4:
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
                 return BitByte.isBitSet((byte) sets.get(0).getData(), 0x80);
         }
         return false;
     }
 
-    public String getNameTag() {
+    public TextComponent getNameTag() {
         switch (version) {
             case VERSION_1_9_4:
             case VERSION_1_10:
-                return (String) sets.get(2).getData();
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+                return new TextComponent((String) sets.get(2).getData());
+            case VERSION_1_13_2:
+                return (TextComponent) sets.get(2).getData();
         }
         return null;
     }
@@ -219,6 +247,9 @@ public class EntityMetaData {
         switch (version) {
             case VERSION_1_9_4:
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
                 return (boolean) sets.get(3).getData();
         }
         return false;
@@ -228,6 +259,9 @@ public class EntityMetaData {
         switch (version) {
             case VERSION_1_9_4:
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
                 return (boolean) sets.get(4).getData();
         }
         return false;
@@ -236,9 +270,12 @@ public class EntityMetaData {
     public boolean hasGravity() {
         switch (version) {
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
                 return !(boolean) sets.get(5).getData();
         }
-        return false;
+        return true;
     }
 
     public enum Types {
@@ -249,24 +286,22 @@ public class EntityMetaData {
         FLOAT(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_7_10, 3), new MapSet<>(ProtocolVersion.VERSION_1_9_4, 2)}),
         STRING(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_7_10, 4), new MapSet<>(ProtocolVersion.VERSION_1_9_4, 3)}),
         CHAT(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_9_4, 4)}),
-        OPT_CHAT(-1),
-        SLOT(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_7_10, 5)}),
-        BOOLEAN(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_9_4, 6)}),
+        OPT_CHAT(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_13_2, 5)}),
+        SLOT(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_7_10, 5), new MapSet<>(ProtocolVersion.VERSION_1_13_2, 6)}),
+        BOOLEAN(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_9_4, 6), new MapSet<>(ProtocolVersion.VERSION_1_13_2, 7)}),
         VECTOR(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_7_10, 6), new MapSet<>(ProtocolVersion.VERSION_1_9_4, 1002)}),
-        ROTATION(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_7_10, 7)}),
-        POSITION(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_9_4, 8)}),
-        OPT_POSITION(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_9_4, 9)}),
-        DIRECTION(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_9_4, 10)}),
-        OPT_UUID(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_9_4, 11)}),
+        ROTATION(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_7_10, 7), new MapSet<>(ProtocolVersion.VERSION_1_13_2, 8)}),
+        POSITION(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_9_4, 8), new MapSet<>(ProtocolVersion.VERSION_1_13_2, 9)}),
+        OPT_POSITION(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_9_4, 9), new MapSet<>(ProtocolVersion.VERSION_1_13_2, 10)}),
+        DIRECTION(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_9_4, 10), new MapSet<>(ProtocolVersion.VERSION_1_13_2, 11)}),
+        OPT_UUID(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_9_4, 11), new MapSet<>(ProtocolVersion.VERSION_1_13_2, 12)}),
         BLOCK_ID(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_9_4, 12), new MapSet<>(ProtocolVersion.VERSION_1_10, 1003)}),
-        OPT_BLOCK_ID(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_10, 12)}),
-        NBT(-1),
-        PARTICLE(-1),
+        OPT_BLOCK_ID(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_10, 12), new MapSet<>(ProtocolVersion.VERSION_1_13_2, 13)}),
+        NBT(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_12_2, 13), new MapSet<>(ProtocolVersion.VERSION_1_13_2, 14)}),
+        PARTICLE(new MapSet[]{new MapSet<>(ProtocolVersion.VERSION_1_13_2, 15)}),
         VILLAGER_DATA(-1),
         OPT_VAR_INT(-1),
         POSE(-1);
-
-        //ToDo: add all types by version
 
         final VersionValueMap<Integer> valueMap;
 

@@ -17,7 +17,7 @@ import de.bixilon.minosoft.game.datatypes.TextComponent;
 import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.packets.ClientboundPacket;
-import de.bixilon.minosoft.protocol.protocol.InPacketBuffer;
+import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
 import de.bixilon.minosoft.protocol.protocol.PacketHandler;
 
 public class PacketUpdateSignReceiving implements ClientboundPacket {
@@ -25,7 +25,7 @@ public class PacketUpdateSignReceiving implements ClientboundPacket {
     BlockPosition position;
 
     @Override
-    public boolean read(InPacketBuffer buffer) {
+    public boolean read(InByteBuffer buffer) {
         // not used anymore ( >= 1.9)
         switch (buffer.getVersion()) {
             case VERSION_1_7_10:
@@ -35,6 +35,8 @@ public class PacketUpdateSignReceiving implements ClientboundPacket {
                 }
                 return true;
             case VERSION_1_8:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
                 position = buffer.readPosition();
                 for (byte i = 0; i < 4; i++) {
                     lines[i] = buffer.readTextComponent();

@@ -42,6 +42,9 @@ public class GuardianMetaData extends MobMetaData {
             case VERSION_1_9_4:
                 return BitByte.isBitSet((byte) sets.get(11).getData(), 0x02);
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
                 return BitByte.isBitSet((byte) sets.get(12).getData(), 0x02);
         }
         return false;
@@ -55,6 +58,9 @@ public class GuardianMetaData extends MobMetaData {
             case VERSION_1_9_4:
                 return (int) sets.get(12).getData();
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
                 return (int) sets.get(13).getData();
         }
         return 0;

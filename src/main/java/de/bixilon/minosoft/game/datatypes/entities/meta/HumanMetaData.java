@@ -13,6 +13,7 @@
 package de.bixilon.minosoft.game.datatypes.entities.meta;
 
 import de.bixilon.minosoft.game.datatypes.player.Hand;
+import de.bixilon.minosoft.nbt.tag.CompoundTag;
 import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
 
 import java.util.HashMap;
@@ -32,6 +33,9 @@ public class HumanMetaData extends MobMetaData {
             case VERSION_1_9_4:
                 return (float) sets.get(10).getData();
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
                 return (float) sets.get(11).getData();
         }
         return 0.0F;
@@ -45,6 +49,9 @@ public class HumanMetaData extends MobMetaData {
             case VERSION_1_9_4:
                 return (int) sets.get(11).getData();
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
                 return (int) sets.get(12).getData();
         }
         return 0;
@@ -56,9 +63,30 @@ public class HumanMetaData extends MobMetaData {
             case VERSION_1_9_4:
                 return Hand.byId((byte) sets.get(13).getData());
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
                 return Hand.byId((byte) sets.get(14).getData());
         }
         return Hand.RIGHT;
+    }
+
+    public CompoundTag getLeftShoulderEntityData() {
+        switch (version) {
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
+                return (CompoundTag) sets.get(15).getData();
+        }
+        return null;
+    }
+
+    public CompoundTag getRightShoulderEntityData() {
+        switch (version) {
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
+                return (CompoundTag) sets.get(16).getData();
+        }
+        return null;
     }
 
 

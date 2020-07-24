@@ -17,7 +17,7 @@ import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
 
 import java.util.HashMap;
 
-public class AreaEffectCloudMetaData extends MobMetaData {
+public class AreaEffectCloudMetaData extends EntityMetaData {
 
     public AreaEffectCloudMetaData(HashMap<Integer, MetaDataSet> sets, ProtocolVersion version) {
         super(sets, version);
@@ -29,9 +29,12 @@ public class AreaEffectCloudMetaData extends MobMetaData {
             case VERSION_1_9_4:
                 return (float) sets.get(5).getData();
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
                 return (float) sets.get(6).getData();
         }
-        return 0;
+        return 0.5F;
     }
 
     public int getColor() {
@@ -39,6 +42,9 @@ public class AreaEffectCloudMetaData extends MobMetaData {
             case VERSION_1_9_4:
                 return (int) sets.get(6).getData();
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
                 return (int) sets.get(7).getData();
         }
         return 0;
@@ -49,6 +55,9 @@ public class AreaEffectCloudMetaData extends MobMetaData {
             case VERSION_1_9_4:
                 return (boolean) sets.get(7).getData();
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+            case VERSION_1_13_2:
                 return (boolean) sets.get(8).getData();
         }
         return false;
@@ -57,16 +66,22 @@ public class AreaEffectCloudMetaData extends MobMetaData {
     public Particles getParticle() {
         switch (version) {
             case VERSION_1_9_4:
-                return Particles.byType((int) sets.get(8).getData());
+                return Particles.byId((int) sets.get(8).getData());
             case VERSION_1_10:
-                return Particles.byType((int) sets.get(9).getData());
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
+                return Particles.byId((int) sets.get(9).getData());
+            case VERSION_1_13_2:
+                return (Particles) sets.get(9).getData();
         }
-        return null;
+        return Particles.EFFECT;
     }
 
     public int getParticleParameter1() {
         switch (version) {
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
                 return (int) sets.get(10).getData();
         }
         return 0;
@@ -75,6 +90,8 @@ public class AreaEffectCloudMetaData extends MobMetaData {
     public int getParticleParameter2() {
         switch (version) {
             case VERSION_1_10:
+            case VERSION_1_11_2:
+            case VERSION_1_12_2:
                 return (int) sets.get(11).getData();
         }
         return 0;
