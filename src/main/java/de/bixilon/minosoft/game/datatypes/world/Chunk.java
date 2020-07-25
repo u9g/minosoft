@@ -14,6 +14,7 @@
 package de.bixilon.minosoft.game.datatypes.world;
 
 import de.bixilon.minosoft.game.datatypes.blocks.Block;
+import de.bixilon.minosoft.game.datatypes.blocks.Blocks;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +35,7 @@ public class Chunk {
         }
         byte section = (byte) (y / 16);
         if (nibbles.get(section) == null) {
-            return Blocks.AIR;
+            return Blocks.nullBlock;
         }
         return nibbles.get(section).getBlock(x, y % 16, z);
     }

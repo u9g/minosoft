@@ -13,6 +13,7 @@
 
 package de.bixilon.minosoft.render;
 
+import de.bixilon.minosoft.game.datatypes.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.blocks.Blocks;
 import de.bixilon.minosoft.game.datatypes.world.*;
 import de.bixilon.minosoft.logging.Log;
@@ -56,7 +57,7 @@ public class WorldRenderer {
         int xOffset = location.getX() * 16;
         int zOffset = location.getZ() * 16;
         for (Map.Entry<Byte, ChunkNibble> set : chunk.getNibbles().entrySet()) {
-            for (Map.Entry<ChunkNibbleLocation, Blocks> blockEntry : set.getValue().getBlocks().entrySet()) {
+            for (Map.Entry<ChunkNibbleLocation, Block> blockEntry : set.getValue().getBlocks().entrySet()) {
                 prepareBlock(new BlockPosition(blockEntry.getKey().getX() + xOffset,
                                 (short) (blockEntry.getKey().getY() + set.getKey() * 16),
                                 blockEntry.getKey().getZ() + zOffset),
@@ -65,16 +66,16 @@ public class WorldRenderer {
         }
     }
 
-    public void prepareBlock(BlockPosition position, Blocks block) {
-        if (block == Blocks.AIR)
+    public void prepareBlock(BlockPosition position, Block block) {
+        if (block == Blocks.nullBlock)
             return;
 
         for (FaceOrientation orientation : FaceOrientation.values()) {
             BlockPosition neighbourPos = position.add(faceDir[orientation.getId()]);
 
             if (neighbourPos.getY() >= 0) {
-                Blocks neighbourBlock = MainWindow.getConnection().getPlayer().getWorld().getBlock(neighbourPos);
-                if (!(neighbourBlock == Blocks.AIR || neighbourBlock == null)) //!modelLoader.isFull(neighbourBlock))
+                Block neighbourBlock = MainWindow.getConnection().getPlayer().getWorld().getBlock(neighbourPos);
+                if (!(neighbourBlock == Blocks.nullBlock || neighbourBlock == null)) //!modelLoader.isFull(neighbourBlock))
                     // if there is a block next to the current block, don't draw the face
                     continue;
                 //TODO: fix buggy behavior, not always working correctly, probably a problem in the World or BlockPosition class

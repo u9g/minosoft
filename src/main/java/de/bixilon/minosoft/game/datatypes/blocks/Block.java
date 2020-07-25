@@ -13,20 +13,22 @@
 
 package de.bixilon.minosoft.game.datatypes.blocks;
 
+import java.util.ArrayList;
+
 public class Block {
     final String mod;
     final String identifier;
     final BlockRotation rotation;
-    final BlockProperties[] properties;
+    final ArrayList<BlockProperties> properties;
 
-    public Block(String mod, String identifier, BlockProperties[] properties, BlockRotation rotation) {
+    public Block(String mod, String identifier, ArrayList<BlockProperties> properties, BlockRotation rotation) {
         this.mod = mod;
         this.identifier = identifier;
         this.properties = properties;
         this.rotation = rotation;
     }
 
-    public Block(String mod, String identifier, BlockProperties[] properties) {
+    public Block(String mod, String identifier, ArrayList<BlockProperties> properties) {
         this.mod = mod;
         this.identifier = identifier;
         this.properties = properties;
@@ -36,14 +38,14 @@ public class Block {
     public Block(String mod, String identifier, BlockRotation rotation) {
         this.mod = mod;
         this.identifier = identifier;
-        this.properties = new BlockProperties[0];
+        this.properties = new ArrayList<>();
         this.rotation = rotation;
     }
 
     public Block(String mod, String identifier) {
         this.mod = mod;
         this.identifier = identifier;
-        this.properties = new BlockProperties[0];
+        this.properties = new ArrayList<>();
         this.rotation = BlockRotation.NONE;
     }
 
@@ -59,7 +61,7 @@ public class Block {
         return rotation;
     }
 
-    public BlockProperties[] getProperties() {
+    public ArrayList<BlockProperties> getProperties() {
         return properties;
     }
 
@@ -71,7 +73,7 @@ public class Block {
             out.append("rotation=");
             out.append(getRotation().name());
         }
-        if (properties.length > 0) {
+        if (properties.size() > 0) {
             if (out.length() > 0) {
                 out.append(" ,");
             } else {

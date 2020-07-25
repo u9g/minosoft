@@ -14,52 +14,77 @@
 package de.bixilon.minosoft.render.blockModels;
 
 import de.bixilon.minosoft.Config;
+import de.bixilon.minosoft.game.datatypes.blocks.Block;
+import de.bixilon.minosoft.game.datatypes.blocks.BlockProperties;
 import de.bixilon.minosoft.game.datatypes.blocks.Blocks;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.Map;
-
-import static de.bixilon.minosoft.render.blockModels.BlockName.getBlockByName;
 
 public class BlockModelLoader {
-    private final Map<Blocks, DrawDescription> drawDescriptionMap;
+    final HashMap<String, DrawDescription> drawDescriptionMap;
 
     public BlockModelLoader() {
         drawDescriptionMap = new HashMap<>();
         try {
-            loadModels(Config.homeDir + "assets/minecraft/models/block");
+            loadModels();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void loadModels(String path) throws IOException {
-        File[] files = new File(path).listFiles();
-
-        for (File file : files) {
-            String fileName = file.getName().substring(0, file.getName().lastIndexOf('.'));
-            String fileContent = new String(Files.readAllBytes(Paths.get(file.getPath())));
-            JSONObject object = new JSONObject(fileContent);
-            DrawDescription drawDescription = new DrawDescription(object);
-            drawDescriptionMap.put(getBlockByName(fileName), drawDescription);
+    private void loadModels() throws IOException {
+        for (Block block : Blocks.getBlockList()) {
+            String mod = block.getMod();
+            String identifier = block.getIdentifier();
+            if (handleProperties(block)) {
+                return;
+            }
+            if (identifier.contains("pane")) {
+                // TODO: handle glass panes
+                continue;
+            }
+            if (identifier.equals("large_fern")) {
+                loadModel(mod, identifier + "_bottom");
+                loadModel(mod, identifier + "_top");
+                continue;
+            }
+            if (drawDescriptionMap.containsKey((mod + ":" + identifier))) {
+                // a description for that block already exists, checking because Blocks.getBlockList()
+                // returns all blocks with all possible combinations
+                continue;
+            }
+            loadModel(mod, identifier);
         }
     }
 
-    public DrawDescription getDrawDescription(Blocks block) {
-        if (!drawDescriptionMap.containsKey(block))
-            throw new IllegalArgumentException(String.format("no description for block %s found", block));
-        return drawDescriptionMap.get(block);
+    private boolean handleProperties(Block block) {
+        return !block.getProperties().contains(BlockProperties.NONE) && block.getProperties().size() != 0;
     }
 
-    public boolean isFull(Blocks block) {
-        if (block == Blocks.AIR || block == null) {
+    private void loadModel(String mod, String identifier) throws IOException {
+        String path = Config.homeDir + "assets/" + mod + "/models/block/" + identifier + ".json";
+
+        String fileContent = new String(Files.readAllBytes(Paths.get(path)));
+        JSONObject object = new JSONObject(fileContent);
+        DrawDescription description = new DrawDescription(object);
+        drawDescriptionMap.put(mod + ":" + identifier, description);
+    }
+
+    public DrawDescription getDrawDescription(Block block) {
+        if (!drawDescriptionMap.containsKey(block)) {
+            throw new IllegalArgumentException(String.format("No description for block %s found", block));
+        }
+        return drawDescriptionMap.get(block.getMod() + ":" + block.getIdentifier());
+    }
+
+    public boolean isFull(Block block) {
+        if (block == Blocks.nullBlock || block == null) {
             return false;
         }
-        return drawDescriptionMap.get(block).isFull();
+        return getDrawDescription(block).isFull();
     }
 }

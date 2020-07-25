@@ -59,7 +59,7 @@ public class PacketHandler {
     public void handle(PacketStatusResponse pkg) {
         if (connection.getReason() == ConnectionReason.GET_VERSION) {
             // now we know the version, set it, if the config allows it
-            int version = Minosoft.getConfig().getInteger("debug.version");
+            int version = Minosoft.getConfig().getInteger("version");
             if (version == -1) {
                 connection.setVersion(ProtocolVersion.byId(pkg.getResponse().getProtocolNumber()));
             } else {

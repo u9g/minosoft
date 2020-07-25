@@ -590,4 +590,8 @@ public class Blocks {
         }
         return blockId;
     }
+
+    public static ArrayList<Block> getBlockList() {
+        return blockList;
+    }
 }

@@ -33,8 +33,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class Minosoft {
     static Configuration config;
@@ -82,9 +81,10 @@ public class Minosoft {
         } else {
             Log.mojang("Could not refresh session, you will not be able to join premium servers!");
         }
-        c.setPlayer(new Player(account));
-        c.connect();
-        MainWindow.start(c);
+        Connection connection = new Connection(config.getString("debug.host"), config.getInteger("debug.port"));
+        connection.setPlayer(new Player(account));
+        connection.connect();
+        MainWindow.start(connection);
     }
 
     /**

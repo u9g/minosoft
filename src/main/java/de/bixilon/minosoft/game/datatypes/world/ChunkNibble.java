@@ -48,7 +48,7 @@ public class ChunkNibble {
         blocks.put(location, block);
     }
 
-    public HashMap<ChunkNibbleLocation, Blocks> getBlocks() {
+    public HashMap<ChunkNibbleLocation, Block> getBlocks() {
         return blocks;
     }
 }
