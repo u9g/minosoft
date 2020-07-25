@@ -22,7 +22,6 @@ import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
 import de.bixilon.minosoft.util.BitByte;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class PacketMapData implements ClientboundPacket {
     int mapId;
@@ -35,8 +34,9 @@ public class PacketMapData implements ClientboundPacket {
     byte[] colors;
 
     // players
-    List<MapPinSet> pins;
+    ArrayList<MapPinSet> pins;
 
+    boolean locked = false;
     //scale
     byte scale;
 
@@ -104,10 +104,14 @@ public class PacketMapData implements ClientboundPacket {
                 }
                 return true;
             }
-            case VERSION_1_13_2: {
+            case VERSION_1_13_2:
+            case VERSION_1_14_4: {
                 mapId = buffer.readVarInt();
                 scale = buffer.readByte();
                 boolean trackPosition = buffer.readBoolean();
+                if (buffer.getVersion().getVersionNumber() >= ProtocolVersion.VERSION_1_14_4.getVersionNumber()) {
+                    locked = buffer.readBoolean();
+                }
                 int pinCount = buffer.readVarInt();
                 pins = new ArrayList<>();
                 for (int i = 0; i < pinCount; i++) {
@@ -164,7 +168,7 @@ public class PacketMapData implements ClientboundPacket {
     }
 
 
-    public List<MapPinSet> getPins() {
+    public ArrayList<MapPinSet> getPins() {
         return pins;
     }
 
@@ -288,6 +292,4 @@ public class PacketMapData implements ClientboundPacket {
             return z;
         }
     }
-
-
 }

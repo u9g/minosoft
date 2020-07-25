@@ -18,11 +18,10 @@ import de.bixilon.minosoft.game.datatypes.TextComponent;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.List;
 
 public class Log {
     final static SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-    final static List<String> queue = new ArrayList<>();
+    final static ArrayList<String> queue = new ArrayList<>();
     static LogLevel level = LogLevel.PROTOCOL;
     static Thread logThread;
 
@@ -66,7 +65,6 @@ public class Log {
                     Thread.sleep(100);
                 } catch (InterruptedException ignored) {
                 }
-
             }
         });
         logThread.setName("Log-Thread");

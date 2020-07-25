@@ -13,12 +13,16 @@
 
 package de.bixilon.minosoft;
 
+import com.google.gson.JsonObject;
 import de.bixilon.minosoft.config.Configuration;
 import de.bixilon.minosoft.config.GameConfiguration;
 import de.bixilon.minosoft.game.datatypes.Mappings;
 import de.bixilon.minosoft.game.datatypes.Player;
-import de.bixilon.minosoft.game.datatypes.blocks.Blocks;
-import de.bixilon.minosoft.game.datatypes.entities.items.Items;
+import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Blocks;
+import de.bixilon.minosoft.game.datatypes.objectLoader.enchantments.Enchantments;
+import de.bixilon.minosoft.game.datatypes.objectLoader.entities.Entities;
+import de.bixilon.minosoft.game.datatypes.objectLoader.entities.items.Items;
+import de.bixilon.minosoft.game.datatypes.objectLoader.statistics.Statistics;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.logging.LogLevel;
 import de.bixilon.minosoft.mojang.api.MojangAccount;
@@ -28,16 +32,17 @@ import de.bixilon.minosoft.render.MainWindow;
 import de.bixilon.minosoft.util.FolderUtil;
 import de.bixilon.minosoft.util.OSUtil;
 import de.bixilon.minosoft.util.Util;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class Minosoft {
     static Configuration config;
-    static List<MojangAccount> accountList;
+    static ArrayList<MojangAccount> accountList;
 
     public static void main(String[] args) {
         // init log thread
@@ -56,13 +61,14 @@ public class Minosoft {
         Log.info(String.format("Loaded config file (version=%s)", config.getInteger(GameConfiguration.CONFIG_VERSION)));
         // set log level from config
         Log.setLevel(LogLevel.byName(config.getString(GameConfiguration.GENERAL_LOG_LEVEL)));
-        Log.info(String.format("Logging info with level: %s", Log.getLevel().name()));
+        Log.info(String.format("Logging info with level: %s", Log.getLevel()));
         Log.info("Checking assets...");
         checkAssets();
         Log.info("Assets checking done");
         Log.info("Loading all mappings...");
+        long mappingsStart = System.currentTimeMillis();
         loadMappings();
-        Log.info("Mappings loaded");
+        Log.info(String.format("Mappings loaded within %sms", (System.currentTimeMillis() - mappingsStart)));
 
         checkClientToken();
 
@@ -138,15 +144,17 @@ public class Minosoft {
                     // skip them, use mapping of 1.12
                     continue;
                 }
+                long startTime = System.currentTimeMillis();
                 for (Map.Entry<String, Mappings> mappingSet : mappingsHashMap.entrySet()) {
-                    JSONObject data = Util.readJsonFromFile(Config.homeDir + String.format("assets/mapping/%s/%s.json", version.getVersionString(), mappingSet.getKey()));
-                    for (Iterator<String> mods = data.keys(); mods.hasNext(); ) {
-                        // key = mod name
-                        String mod = mods.next();
-                        JSONObject modJSON = data.getJSONObject(mod);
+                    JsonObject data = Util.readJsonFromFile(Config.homeDir + String.format("assets/mapping/%s/%s.json", version.getVersionString(), mappingSet.getKey()));
+                    for (String mod : data.keySet()) {
+                        JsonObject modJSON = data.getAsJsonObject(mod);
                         switch (mappingSet.getValue()) {
                             case REGISTRIES:
-                                Items.load(mod, modJSON.getJSONObject("item").getJSONObject("entries"), version);
+                                Items.load(mod, modJSON.getAsJsonObject("item").getAsJsonObject("entries"), version);
+                                Entities.load(mod, modJSON.getAsJsonObject("entity_type").getAsJsonObject("entries"), version);
+                                Enchantments.load(mod, modJSON.getAsJsonObject("enchantment").getAsJsonObject("entries"), version);
+                                Statistics.load(mod, modJSON.getAsJsonObject("custom_stat").getAsJsonObject("entries"), version);
                                 break;
                             case BLOCKS:
                                 Blocks.load(mod, modJSON, version);
@@ -154,8 +162,9 @@ public class Minosoft {
                         }
                     }
                 }
+                Log.verbose(String.format("Loaded mappings for version %s in %dms (%s)", version, (System.currentTimeMillis() - startTime), version.getReleaseName()));
             }
-        } catch (IOException | JSONException e) {
+        } catch (IOException e) {
             Log.fatal("Error occurred while loading version mapping: " + e.getLocalizedMessage());
             System.exit(1);
         }
@@ -169,5 +178,4 @@ public class Minosoft {
             System.exit(1);
         }
     }
-
 }

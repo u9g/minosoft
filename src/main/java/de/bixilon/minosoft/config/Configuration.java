@@ -20,7 +20,10 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class Configuration {
     LinkedHashMap<String, Object> config;
@@ -128,7 +131,6 @@ public class Configuration {
                 // not yet existing, creating it
                 temp.computeIfAbsent(spilt[i], k -> new LinkedHashMap<String, Object>());
                 temp = (LinkedHashMap<String, Object>) temp.get(spilt[i]);
-
             }
             temp.put(spilt[spilt.length - 1], value);
             return;
@@ -148,8 +150,8 @@ public class Configuration {
         yaml.dump(config, writer);
     }
 
-    public List<MojangAccount> getMojangAccounts() {
-        List<MojangAccount> accounts = new ArrayList<>();
+    public ArrayList<MojangAccount> getMojangAccounts() {
+        ArrayList<MojangAccount> accounts = new ArrayList<>();
         LinkedHashMap<String, Object> objects = (LinkedHashMap<String, Object>) get("account.accounts");
         if (objects == null) {
             return accounts;
@@ -159,7 +161,6 @@ public class Configuration {
             accounts.add(new MojangAccount((String) entry.get("accessToken"), set.getKey(), UUID.fromString((String) entry.get("uuid")), (String) entry.get("playerName"), (String) entry.get("mojangUserName")));
         }
         return accounts;
-
     }
 }
 

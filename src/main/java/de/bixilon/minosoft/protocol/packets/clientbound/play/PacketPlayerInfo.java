@@ -25,11 +25,10 @@ import de.bixilon.minosoft.protocol.protocol.PacketHandler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
 
 public class PacketPlayerInfo implements ClientboundPacket {
-    final List<PlayerInfoBulk> infos = new ArrayList<>();
+    final ArrayList<PlayerInfoBulk> infos = new ArrayList<>();
 
 
     @Override
@@ -44,6 +43,7 @@ public class PacketPlayerInfo implements ClientboundPacket {
             case VERSION_1_11_2:
             case VERSION_1_12_2:
             case VERSION_1_13_2:
+            case VERSION_1_14_4:
                 PlayerInfoAction action = PlayerInfoAction.byId(buffer.readVarInt());
                 int count = buffer.readVarInt();
                 for (int i = 0; i < count; i++) {
@@ -94,8 +94,7 @@ public class PacketPlayerInfo implements ClientboundPacket {
             if (property.isLegacy()) {
                 Log.game(String.format("[TAB] Player info bulk (uuid=%s, name=%s, ping=%d)", property.getUUID(), property.getName(), property.getPing()));
             } else {
-                Log.game(String.format("[TAB] Player info bulk (uuid=%s, action=%s, name=%s, gameMode=%s, ping=%d, displayName=%s)", property.getUUID(), property.getAction(), property.getName(), ((property.getGameMode() == null) ? "null" : property.getGameMode().name()), property.getPing(), ((property.getDisplayName() == null) ? "null" : property.getDisplayName().getColoredMessage())));
-
+                Log.game(String.format("[TAB] Player info bulk (uuid=%s, action=%s, name=%s, gameMode=%s, ping=%d, displayName=%s)", property.getUUID(), property.getAction(), property.getName(), property.getGameMode(), property.getPing(), property.getDisplayName()));
             }
         }
     }
@@ -105,7 +104,7 @@ public class PacketPlayerInfo implements ClientboundPacket {
         h.handle(this);
     }
 
-    public List<PlayerInfoBulk> getInfos() {
+    public ArrayList<PlayerInfoBulk> getInfos() {
         return infos;
     }
 
