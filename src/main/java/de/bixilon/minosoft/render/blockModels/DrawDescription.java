@@ -13,10 +13,10 @@
 
 package de.bixilon.minosoft.render.blockModels;
 
+import com.google.gson.JsonObject;
 import de.bixilon.minosoft.render.MainWindow;
 import de.bixilon.minosoft.render.face.FaceOrientation;
 import javafx.util.Pair;
-import org.json.JSONObject;
 
 import java.util.*;
 
@@ -36,21 +36,20 @@ public class DrawDescription {
     Map<FaceOrientation, Pair<Float, Float>> faces;
     boolean full = false; // is the block a completely filled block?
 
-    public DrawDescription(JSONObject json) {
+    public DrawDescription(JsonObject json) {
         if (!(json.has("parent") && json.has("textures"))) return;
 
         faces = new HashMap<>();
 
-        JSONObject textures = json.getJSONObject("textures");
+        JsonObject textures = json.getAsJsonObject("textures");
 
-        for (Iterator<String> textureIterator = textures.keys(); textureIterator.hasNext(); ) {
-            String textureUse = textureIterator.next();
+        for (String texture : textures.keySet()) {
+            String textureUse = textures.getAsJsonObject(texture).toString();
 
-            String textureName = textures.getString(textureUse);
-            Pair<Float, Float> texture;
+            Pair<Float, Float> texturePair;
 
             try {
-                texture = MainWindow.getRenderer().getTextureLoader().getTexture(textureName);
+                texturePair = MainWindow.getRenderer().getTextureLoader().getTexture(texture);
             } catch (Exception e) {
                 continue;
             }
@@ -71,7 +70,7 @@ public class DrawDescription {
             }
 
             for (FaceOrientation faceOrientation : faceOrientations) {
-                faces.put(faceOrientation, texture);
+                faces.put(faceOrientation, texturePair);
             }
         }
         full = true;

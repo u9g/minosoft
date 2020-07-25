@@ -13,16 +13,16 @@
 
 package de.bixilon.minosoft.render.blockModels;
 
+import com.google.gson.JsonObject;
 import de.bixilon.minosoft.Config;
-import de.bixilon.minosoft.game.datatypes.blocks.Block;
-import de.bixilon.minosoft.game.datatypes.blocks.BlockProperties;
-import de.bixilon.minosoft.game.datatypes.blocks.Blocks;
-import org.json.JSONObject;
+import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
+import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockProperties;
+import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Blocks;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.HashMap;
+
+import static de.bixilon.minosoft.util.Util.readJsonFromFile;
 
 public class BlockModelLoader {
     final HashMap<String, DrawDescription> drawDescriptionMap;
@@ -67,9 +67,7 @@ public class BlockModelLoader {
 
     private void loadModel(String mod, String identifier) throws IOException {
         String path = Config.homeDir + "assets/" + mod + "/models/block/" + identifier + ".json";
-
-        String fileContent = new String(Files.readAllBytes(Paths.get(path)));
-        JSONObject object = new JSONObject(fileContent);
+        JsonObject object = readJsonFromFile(path);
         DrawDescription description = new DrawDescription(object);
         drawDescriptionMap.put(mod + ":" + identifier, description);
     }

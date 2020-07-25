@@ -471,8 +471,7 @@ public class Blocks {
                         rotation = rotationMapping.get(propertiesJSON.get("rotation").getAsString());
                         propertiesJSON.remove("rotation");
                     }
-                    BlockProperties[] properties = new BlockProperties[propertiesJSON.size()];
-                    int ii = 0;
+                    ArrayList<BlockProperties> properties = new ArrayList<>();
                     for (String propertyName : propertiesJSON.keySet()) {
                         if (propertiesMapping.get(propertyName) == null) {
                             throw new RuntimeException(String.format("Unknown block property: %s (identifier=%s)", propertyName, identifierName));
@@ -480,8 +479,7 @@ public class Blocks {
                         if (propertiesMapping.get(propertyName).get(propertiesJSON.get(propertyName).getAsString()) == null) {
                             throw new RuntimeException(String.format("Unknown block property: %s -> %s (identifier=%s)", propertyName, propertiesJSON.get(propertyName).getAsString(), identifierName));
                         }
-                        properties[ii] = propertiesMapping.get(propertyName).get(propertiesJSON.get(propertyName).getAsString());
-                        ii++;
+                        properties.add(propertiesMapping.get(propertyName).get(propertiesJSON.get(propertyName).getAsString()));
                     }
 
                     Block block = new Block(mod, identifierName, properties, rotation);
@@ -537,12 +535,12 @@ public class Blocks {
         return blockId;
     }
 
-    public static boolean propertiesEquals(BlockProperties[] one, BlockProperties[] two) {
-        if (one.length != two.length) {
+    public static boolean propertiesEquals(ArrayList<BlockProperties> one, ArrayList<BlockProperties> two) {
+        if (one.size() != two.size()) {
             return false;
         }
         for (BlockProperties property : one) {
-            if (!containsElement(two, property)) {
+            if (!two.contains(property)) {
                 return false;
             }
         }
