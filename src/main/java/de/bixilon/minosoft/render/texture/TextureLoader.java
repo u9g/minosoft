@@ -63,7 +63,7 @@ public class TextureLoader {
         // this method has some bugs but it looks cool so let's just say it is an intended mechanic
         Triplet<Float, Float, Float> rgbValues = getRGBTriplet(rgb);
         float brightness = getBrightness(rgbValues);
-        rgbValues = multiply(new Triplet<>(94f / 255f, 157f / 255f, 52f / 255f), brightness);
+        rgbValues = multiply(new Triplet<>(94f / 255f, 157f / 255f, 52f / 255f), rgbValues.item1);
         return getRGBInt(rgbValues);
     }
 
@@ -160,15 +160,18 @@ public class TextureLoader {
     }
 
     public Pair<Float, Float> getTexture(String name) {
-        // returns the start and end u-coordinatea of a specific texture to access it
-        String textureName = name;
-        if (textureName.contains("block/"))
-            textureName = textureName.substring(textureName.lastIndexOf('/') + 1);
+        // returns the start and end u-coordinate of a specific texture to access it
+        if (name == null) {
+            throw new NullPointerException("received null string as texture name");
+        }
+        if (name.contains("block/")) {
+            name = name.substring(name.lastIndexOf('/') + 1);
+        }
 
-        Integer pos = textureCoordinates.get(textureName);
+        Integer pos = textureCoordinates.get(name);
         if (pos == null) {
             // the texture does not exist
-            throw new IllegalArgumentException(String.format("could not find texture %s", textureName));
+            throw new IllegalArgumentException(String.format("could not find texture %s", name));
         }
 
         return new Pair<Float, Float>(

@@ -11,7 +11,7 @@
  *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
-package de.bixilon.minosoft.render.face;
+package de.bixilon.minosoft.render.fullFace;
 
 public class RenderConstants {
     //TODO: fix rotated faces

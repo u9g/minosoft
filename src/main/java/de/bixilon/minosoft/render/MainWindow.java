@@ -13,9 +13,9 @@
 
 package de.bixilon.minosoft.render;
 
-import de.bixilon.minosoft.movement.PlayerController;
 import de.bixilon.minosoft.protocol.network.Connection;
 import de.bixilon.minosoft.render.MainMenu.MainMenu;
+import de.bixilon.minosoft.render.movement.PlayerController;
 import de.bixilon.minosoft.render.utility.RenderMode;
 
 import static de.bixilon.minosoft.render.utility.RenderMode.MAIN_MENU;
@@ -100,7 +100,10 @@ public class MainWindow {
     public static void pause() {
         renderMode = MAIN_MENU;
         glfwSetInputMode(openGLWindow.getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        connection.disconnect();
+        try {
+            connection.disconnect();
+        } catch (Exception ignored) {
+        }
     }
 
     public static Connection getConnection() {

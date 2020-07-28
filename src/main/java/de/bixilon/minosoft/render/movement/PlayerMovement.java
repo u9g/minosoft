@@ -15,7 +15,7 @@
  * A simple camera controller to fly around the scene
  */
 
-package de.bixilon.minosoft.movement;
+package de.bixilon.minosoft.render.movement;
 
 import de.bixilon.minosoft.render.MainWindow;
 import de.bixilon.minosoft.render.utility.Vec3;

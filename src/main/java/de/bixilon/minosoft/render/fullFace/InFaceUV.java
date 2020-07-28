@@ -11,12 +11,22 @@
  *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
-package de.bixilon.minosoft.render.blockModels;
+package de.bixilon.minosoft.render.fullFace;
 
-public enum BlockType {
-    FULL, // a full block
-    CUBE_ALL, // a full block but all the sides are the same
-    HEIGHT, // a full block with a custom y height
-    STAIRS, // a stairs block
-    CUSTOM // a unique model not worth having a own type
+import com.google.gson.JsonArray;
+
+public class InFaceUV {
+    int u1, v1, u2, v2;
+
+    public InFaceUV(JsonArray json) {
+        u1 = json.get(0).getAsInt();
+        v1 = json.get(1).getAsInt();
+        u2 = json.get(2).getAsInt();
+        v2 = json.get(3).getAsInt();
+    }
+
+    public InFaceUV() {
+        u1 = v1 = 0;
+        u2 = v2 = 16;
+    }
 }

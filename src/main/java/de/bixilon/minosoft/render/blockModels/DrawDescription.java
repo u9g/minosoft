@@ -15,7 +15,7 @@ package de.bixilon.minosoft.render.blockModels;
 
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.render.MainWindow;
-import de.bixilon.minosoft.render.face.FaceOrientation;
+import de.bixilon.minosoft.render.fullFace.FaceOrientation;
 import javafx.util.Pair;
 
 import java.util.*;

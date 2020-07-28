@@ -18,28 +18,28 @@ import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Blocks;
 import de.bixilon.minosoft.game.datatypes.world.*;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.render.blockModels.BlockModelLoader;
-import de.bixilon.minosoft.render.face.FaceOrientation;
-import de.bixilon.minosoft.render.face.FacePosition;
-import de.bixilon.minosoft.render.face.RenderConstants;
+import de.bixilon.minosoft.render.fullFace.FaceOrientation;
+import de.bixilon.minosoft.render.fullFace.FullFacePosition;
+import de.bixilon.minosoft.render.fullFace.RenderConstants;
 import de.bixilon.minosoft.render.texture.TextureLoader;
 import javafx.util.Pair;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static de.bixilon.minosoft.render.face.RenderConstants.UV;
-import static de.bixilon.minosoft.render.face.RenderConstants.faceDir;
+import static de.bixilon.minosoft.render.fullFace.RenderConstants.UV;
+import static de.bixilon.minosoft.render.fullFace.RenderConstants.faceDir;
 import static org.lwjgl.opengl.GL11.*;
 
 public class WorldRenderer {
     private final TextureLoader textureLoader;
-    private final HashMap<FacePosition, Pair<Float, Float>> faces;
+    private final HashMap<FullFacePosition, Pair<Float, Float>> faces;
     private final int faceCount = 0;
     private BlockModelLoader modelLoader;
 
     public WorldRenderer() {
         textureLoader = new TextureLoader(MainWindow.getOpenGLWindow().getWindow());
-        faces = new HashMap<FacePosition, Pair<Float, Float>>();
+        faces = new HashMap<FullFacePosition, Pair<Float, Float>>();
     }
 
     public void init() {
@@ -80,15 +80,15 @@ public class WorldRenderer {
                     continue;
                 //TODO: fix buggy behavior, not always working correctly, probably a problem in the World or BlockPosition class
             }
-
-
-            FacePosition facePosition = new FacePosition(position, orientation);
-            Pair<Float, Float> texture = modelLoader.getDrawDescription(block).getTexture(orientation);
+            /*
+            FullFacePosition facePosition = new FullFacePosition(position, orientation);
+            Pair<Float, Float> texture = modelLoader.getBlockDescription(block).getTexture(orientation);
             if (!faces.containsKey(facePosition)) {
                 synchronized (faces) {
                     faces.put(facePosition, texture);
                 }
             }
+             */
         }
     }
 
@@ -109,7 +109,7 @@ public class WorldRenderer {
         glBindTexture(GL_TEXTURE_2D, textureLoader.getTextureID());
         glBegin(GL_QUADS);
         synchronized (faces) {
-            for (Map.Entry<FacePosition, Pair<Float, Float>> entry : faces.entrySet()) {
+            for (Map.Entry<FullFacePosition, Pair<Float, Float>> entry : faces.entrySet()) {
                 float[][] vertPositions = RenderConstants.FACE_VERTEX[entry.getKey().getFaceOrientation().getId()];
 
                 for (int vert = 0; vert < 4; vert++) {

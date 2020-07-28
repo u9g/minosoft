@@ -530,4 +530,8 @@ public class Blocks {
         }
         return blockId;
     }
+
+    public static HashSet<Block> getBlockList() {
+        return blockList;
+    }
 }

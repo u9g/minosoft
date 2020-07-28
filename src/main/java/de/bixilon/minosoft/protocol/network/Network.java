@@ -194,7 +194,7 @@ public class Network {
                                 e.printStackTrace();
                             }
                         } catch (Exception e) {
-                            Log.protocol("Received broken packet!");
+                            Log.info("Received broken packet!");
                             e.printStackTrace();
                         }
                     }

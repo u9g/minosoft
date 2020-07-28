@@ -90,7 +90,6 @@ public class Minosoft {
         }
         Connection connection = new Connection(config.getString("debug.host"), config.getInteger("debug.port"));
         connection.setPlayer(new Player(account));
-        connection.connect();
         MainWindow.start(connection);
     }
 
