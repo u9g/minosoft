@@ -368,6 +368,7 @@ public class BlockModelLoader {
             String path = Config.homeDir + "assets/" + mod + "/models/block/" + identifier + ".json";
             JsonObject json = readJsonFromFile(path);
             BlockDescription description = new BlockDescription(json);
+            blockDescriptionMap.put(mod + ":" + identifier, description);
             //Log.info("Loaded model for " + mod + ":" + identifier);
         } catch (IOException e) {
             Log.debug("could not load block model for block " + mod + ":" + identifier);
@@ -380,8 +381,10 @@ public class BlockModelLoader {
     }
 
     public BlockDescription getBlockDescription(Block block) {
-        if (!blockDescriptionMap.containsKey(block)) {
-            throw new IllegalArgumentException(String.format("No description for block %s found", block));
+        String blockName = block.getMod() + ":" + block.getIdentifier();
+        if (!blockDescriptionMap.containsKey(blockName)) {
+            System.out.println(String.format("No description for block %s found", blockName));
+            System.exit(-1);
         }
         return blockDescriptionMap.get(block.getMod() + ":" + block.getIdentifier());
     }

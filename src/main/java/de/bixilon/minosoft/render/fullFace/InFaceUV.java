@@ -16,7 +16,7 @@ package de.bixilon.minosoft.render.fullFace;
 import com.google.gson.JsonArray;
 
 public class InFaceUV {
-    int u1, v1, u2, v2;
+    public int u1, v1, u2, v2;
 
     public InFaceUV(JsonArray json) {
         u1 = json.get(0).getAsInt();

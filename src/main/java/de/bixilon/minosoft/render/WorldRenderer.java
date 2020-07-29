@@ -18,28 +18,26 @@ import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Blocks;
 import de.bixilon.minosoft.game.datatypes.world.*;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.render.blockModels.BlockModelLoader;
+import de.bixilon.minosoft.render.blockModels.Face;
 import de.bixilon.minosoft.render.fullFace.FaceOrientation;
-import de.bixilon.minosoft.render.fullFace.FullFacePosition;
-import de.bixilon.minosoft.render.fullFace.RenderConstants;
 import de.bixilon.minosoft.render.texture.TextureLoader;
-import javafx.util.Pair;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
-import static de.bixilon.minosoft.render.fullFace.RenderConstants.UV;
 import static de.bixilon.minosoft.render.fullFace.RenderConstants.faceDir;
 import static org.lwjgl.opengl.GL11.*;
 
 public class WorldRenderer {
     private final TextureLoader textureLoader;
-    private final HashMap<FullFacePosition, Pair<Float, Float>> faces;
+    private final HashMap<BlockPosition, HashSet<Face>> faces;
     private final int faceCount = 0;
     private BlockModelLoader modelLoader;
 
     public WorldRenderer() {
         textureLoader = new TextureLoader(MainWindow.getOpenGLWindow().getWindow());
-        faces = new HashMap<FullFacePosition, Pair<Float, Float>>();
+        faces = new HashMap<>();
     }
 
     public void init() {
@@ -67,67 +65,34 @@ public class WorldRenderer {
     }
 
     public void prepareBlock(BlockPosition position, Block block) {
-        if (block == Blocks.nullBlock)
-            return;
+        if (block.equals(Blocks.nullBlock))
+            faces.put(position, null);
+        HashMap<FaceOrientation, Boolean> adjacentBlocks = new HashMap<>();
 
         for (FaceOrientation orientation : FaceOrientation.values()) {
             BlockPosition neighbourPos = position.add(faceDir[orientation.getId()]);
 
             if (neighbourPos.getY() >= 0) {
                 Block neighbourBlock = MainWindow.getConnection().getPlayer().getWorld().getBlock(neighbourPos);
-                if (!(neighbourBlock == Blocks.nullBlock || neighbourBlock == null)) //!modelLoader.isFull(neighbourBlock))
-                    // if there is a block next to the current block, don't draw the face
-                    continue;
-                //TODO: fix buggy behavior, not always working correctly, probably a problem in the World or BlockPosition class
+                boolean isNeighbourFull = modelLoader.isFull(neighbourBlock);
+                adjacentBlocks.put(orientation, isNeighbourFull);
+            } else {
+                adjacentBlocks.put(orientation, false);
             }
-            /*
-            FullFacePosition facePosition = new FullFacePosition(position, orientation);
-            Pair<Float, Float> texture = modelLoader.getBlockDescription(block).getTexture(orientation);
-            if (!faces.containsKey(facePosition)) {
-                synchronized (faces) {
-                    faces.put(facePosition, texture);
-                }
-            }
-             */
+        }
+        synchronized (faces) {
+            faces.put(position, modelLoader.getBlockDescription(block).prepare(adjacentBlocks));
         }
     }
 
     public void draw() {
         glPushMatrix();
-            /*
-            glBindBuffer(GL_ARRAY_BUFFER, vbo);
-            float[] floatArray = vertices.toArray();
-            glBufferData(GL_ARRAY_BUFFER,
-                    (FloatBuffer) BufferUtils.createFloatBuffer(vertices.size()).put(
-                            floatArray).flip(), GL_STATIC_DRAW);
-
-            glBindTexture(GL_TEXTURE_2D, textureLoader.getTextureID());
-            glVertexPointer(3, GL_FLOAT, 28, 0L);
-            glTexCoordPointer(2, GL_FLOAT,28, 0L);
-            glDrawArrays(GL_QUADS, 0, floatArray.length);
-             */
         glBindTexture(GL_TEXTURE_2D, textureLoader.getTextureID());
         glBegin(GL_QUADS);
         synchronized (faces) {
-            for (Map.Entry<FullFacePosition, Pair<Float, Float>> entry : faces.entrySet()) {
-                float[][] vertPositions = RenderConstants.FACE_VERTEX[entry.getKey().getFaceOrientation().getId()];
-
-                for (int vert = 0; vert < 4; vert++) {
-                    float u = 0;
-                    switch (UV[vert][0]) {
-                        case 0:
-                            u = entry.getValue().getKey();
-                            break;
-                        case 1:
-                            u = entry.getValue().getValue();
-                            break;
-                    }
-                    float x = vertPositions[vert][0] + entry.getKey().getBlockPosition().getX();
-                    float y = vertPositions[vert][1] + entry.getKey().getBlockPosition().getY();
-                    float z = vertPositions[vert][2] + entry.getKey().getBlockPosition().getZ();
-
-                    glTexCoord2f(u, UV[vert][1]);
-                    glVertex3f(x, y, z);
+            for (Map.Entry<BlockPosition, HashSet<Face>> entry : faces.entrySet()) {
+                for (Face face : entry.getValue()) {
+                    face.draw(entry.getKey());
                 }
             }
         }

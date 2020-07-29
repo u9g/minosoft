@@ -20,13 +20,14 @@ import de.bixilon.minosoft.render.fullFace.InFaceUV;
 import javafx.util.Pair;
 
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class SubBlock {
     SubBlockPosition pos1; // the most negative Point of the SubBlock
     SubBlockPosition pos2; // the most positive Point of the SubBlock
 
     HashMap<FaceOrientation, Pair<Float, Float>> textures;
-    HashMap<FaceOrientation, Pair<Float, Float>> cullFaceTextures;
+    HashMap<FaceOrientation, Boolean> cullFaceTextures;
 
     HashMap<FaceOrientation, InFaceUV> uv;
 
@@ -46,24 +47,7 @@ public class SubBlock {
         }
     }
 
-    private void applyTexture(JsonObject faceJson, FaceOrientation orientation, HashMap<String, String> variables) {
-        try {
-            uv.put(orientation, new InFaceUV(faceJson.getAsJsonArray("uv")));
-        } catch (Exception e) {
-            uv.put(orientation, new InFaceUV());
-        }
-
-        String textureName = getRealTextureName(faceJson.get("texture").getAsString(), variables);
-        Pair<Float, Float> texture = MainWindow.getRenderer().getTextureLoader().getTexture(textureName);
-
-        if (faceJson.has("cullface")) {
-            cullFaceTextures.put(orientation, texture);
-        } else {
-            textures.put(orientation, texture);
-        }
-    }
-
-    private String getRealTextureName(String textureName, HashMap<String, String> variables) {
+    private static String getRealTextureName(String textureName, HashMap<String, String> variables) {
         if (textureName.contains("#")) {
             if (variables.containsKey(textureName)) {
                 String newName = variables.get(textureName);
@@ -80,5 +64,34 @@ public class SubBlock {
         } else {
             return textureName;
         }
+    }
+
+    private void applyTexture(JsonObject faceJson, FaceOrientation orientation, HashMap<String, String> variables) {
+        try {
+            uv.put(orientation, new InFaceUV(faceJson.getAsJsonArray("uv")));
+        } catch (Exception e) {
+            uv.put(orientation, new InFaceUV());
+        }
+
+        String textureName = getRealTextureName(faceJson.get("texture").getAsString(), variables);
+        Pair<Float, Float> texture = MainWindow.getRenderer().getTextureLoader().getTexture(textureName);
+
+        cullFaceTextures.put(orientation, faceJson.has("cullface"));
+
+        textures.put(orientation, texture);
+    }
+
+    public HashSet<Face> getFaces(HashMap<FaceOrientation, Boolean> adjacentBlocks) {
+        HashSet<Face> result = new HashSet<>();
+        for (FaceOrientation orientation : FaceOrientation.values()) {
+            if (!textures.containsKey(orientation)) {
+                continue;
+            }
+            if (!(adjacentBlocks.get(orientation) && cullFaceTextures.get(orientation))) {
+                result.add(new Face(orientation, textures.get(orientation),
+                        uv.get(orientation), this));
+            }
+        }
+        return result;
     }
 }

@@ -16,6 +16,7 @@ package de.bixilon.minosoft.render.blockModels;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.Config;
+import de.bixilon.minosoft.render.fullFace.FaceOrientation;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -67,5 +68,13 @@ public class BlockDescription {
 
     public boolean isFull() {
         return isFull;
+    }
+
+    public HashSet<Face> prepare(HashMap<FaceOrientation, Boolean> adjacentBlocks) {
+        HashSet<Face> result = new HashSet<>();
+        for (SubBlock subBlock : subBlocks) {
+            result.addAll(subBlock.getFaces(adjacentBlocks));
+        }
+        return result;
     }
 }

@@ -38,6 +38,7 @@ public class TextureLoader {
     private final int TEXTURE_PACK_RES = 16;
     private HashMap<String, Integer> textureCoordinates;
     int imageLength = 1;
+    float step;
 
     public TextureLoader(long window) {
         try {
@@ -143,6 +144,7 @@ public class TextureLoader {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        step = (float) 1 / (float) imageLength;
     }
 
     private int bindTexture(ByteBuffer buf, int width, int height) {
@@ -182,5 +184,9 @@ public class TextureLoader {
 
     public int getTextureID() {
         return textureID;
+    }
+
+    public float getStep() {
+        return step;
     }
 }

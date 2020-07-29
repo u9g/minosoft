@@ -14,7 +14,10 @@
 package de.bixilon.minosoft.render.fullFace;
 
 public class RenderConstants {
-    //TODO: fix rotated faces
+    public static final int texturePackRes = 16;
+
+    public static final int blockRes = 16;
+
     public static final float[][][] FACE_VERTEX = new float[][][]{
             {
                     {1, 0, 0},
