@@ -16,7 +16,6 @@ package de.bixilon.minosoft.render.movement;
 import de.bixilon.minosoft.game.datatypes.GameMode;
 import de.bixilon.minosoft.game.datatypes.world.World;
 import de.bixilon.minosoft.render.MainWindow;
-import de.bixilon.minosoft.render.blockModels.BlockModelLoader;
 import de.bixilon.minosoft.render.utility.Vec3;
 
 import static de.bixilon.minosoft.render.utility.Vec3.mul;
@@ -45,7 +44,7 @@ public class PlayerController {
         oldPos = playerPos.copy();
 
         GameMode gameMode = MainWindow.getConnection().getPlayer().getGameMode();
-        enableGravity = gameMode == GameMode.CREATIVE || gameMode == GameMode.SPECTATOR;
+        enableGravity = gameMode != GameMode.CREATIVE && gameMode != GameMode.SPECTATOR;
         handleGravity(deltaTime);
         cameraMovement.loop();
         playerMovement.loop(deltaTime);
@@ -65,7 +64,6 @@ public class PlayerController {
             playerVelocity.zero();
             return;
         }
-        BlockModelLoader modelLoader = MainWindow.getRenderer().getModelLoader();
         collisionHandler.handleCollisions();
     }
 
@@ -89,7 +87,7 @@ public class PlayerController {
         if (!enableGravity) {
             return;
         }
-        // a rather accurate model for the real world, but minecraft probably does it differently
+        // a rather accurate model for the real world, but minecraft does it differently
         playerVelocity.y -= gravity * deltaTime;
     }
 

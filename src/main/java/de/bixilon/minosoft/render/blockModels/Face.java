@@ -26,111 +26,98 @@ import static org.lwjgl.opengl.GL11.glVertex3f;
 
 public class Face {
     FaceOrientation orientation;
-    Pair<Float, Float> texture;
-    InFaceUV uv;
-    SubBlock subBlock;
+    float x1, y1, z1, x2, y2, z2;
+    float u1, v1, u2, v2;
 
     public Face(FaceOrientation orientation, Pair<Float, Float> texture, InFaceUV uv, SubBlock subBlock) {
         this.orientation = orientation;
-        this.texture = texture;
-        this.uv = uv;
-        this.subBlock = subBlock;
-    }
 
-    public void draw(BlockPosition pos) {
-        float x1 = 0, y1 = 0, z1 = 0, x2 = 0, y2 = 0, z2 = 0;
         float step = MainWindow.getRenderer().getTextureLoader().getStep();
-        float u1 = texture.getKey() + (float) uv.u1 / (float) blockRes * step;
-        float u2 = texture.getValue() + (float) uv.u1 / (float) blockRes * step;
-        float v1 = (float) uv.v1 / (float) texturePackRes;
-        float v2 = (float) uv.v2 / (float) texturePackRes;
+        u1 = texture.getKey();// + (float) uv.u1 / (float) texturePackRes * step;
+        u2 = texture.getValue();// - (float) (texturePackRes - uv.u2) / (float) texturePackRes * step;
+        v1 = (float) uv.v1 / (float) texturePackRes;
+        v2 = (float) uv.v2 / (float) texturePackRes;
+
+        x1 = subBlock.pos1.x;
+        y1 = subBlock.pos1.y;
+        z1 = subBlock.pos1.z;
+
+        x2 = subBlock.pos2.x;
+        y2 = subBlock.pos2.y;
+        z2 = subBlock.pos2.z;
 
         switch (orientation) {
             case EAST:
                 x1 = x2 = subBlock.pos2.x;
-                y1 = subBlock.pos1.y;
-                y2 = subBlock.pos2.y;
-                z1 = subBlock.pos1.z;
-                z2 = subBlock.pos2.z;
                 break;
             case WEST:
                 x1 = x2 = subBlock.pos1.x;
-                y1 = subBlock.pos1.y;
-                y2 = subBlock.pos2.y;
-                z1 = subBlock.pos1.z;
-                z2 = subBlock.pos2.z;
                 break;
             case UP:
                 y1 = y2 = subBlock.pos2.y;
-                x1 = subBlock.pos1.x;
-                x2 = subBlock.pos2.x;
-                z1 = subBlock.pos1.z;
-                z2 = subBlock.pos2.z;
                 break;
             case DOWN:
                 y1 = y2 = subBlock.pos1.y;
-                x1 = subBlock.pos1.x;
-                x2 = subBlock.pos2.x;
-                z1 = subBlock.pos1.z;
-                z2 = subBlock.pos2.z;
                 break;
             case SOUTH:
                 z1 = z2 = subBlock.pos2.z;
-                x1 = subBlock.pos1.x;
-                x2 = subBlock.pos2.x;
-                y1 = subBlock.pos1.y;
-                y2 = subBlock.pos2.y;
                 break;
             case NORTH:
                 z1 = z2 = subBlock.pos1.z;
-                x1 = subBlock.pos1.x;
-                x2 = subBlock.pos2.x;
-                y1 = subBlock.pos1.y;
-                y2 = subBlock.pos2.y;
                 break;
         }
+        x1 /= blockRes;
+        y1 /= blockRes;
+        z1 /= blockRes;
+
+        x2 /= blockRes;
+        y2 /= blockRes;
+        z2 /= blockRes;
+    }
+
+    public void draw(BlockPosition pos) {
         switch (orientation) {
             case EAST:
             case WEST:
+                glTexCoord2f(u1, v2);
+                glVertex3f(x1 + pos.getX(), y1 + pos.getY(), z1 + pos.getZ());
+
                 glTexCoord2f(u1, v1);
-                glVertex3f(x1, y1, z1);
+                glVertex3f(x1 + pos.getX(), y2 + pos.getY(), z1 + pos.getZ());
 
                 glTexCoord2f(u2, v1);
-                glVertex3f(x1, y2, z1);
+                glVertex3f(x1 + pos.getX(), y2 + pos.getY(), z2 + pos.getZ());
 
                 glTexCoord2f(u2, v2);
-                glVertex3f(x1, y2, z2);
-
-                glTexCoord2f(u2, v2);
-                glVertex3f(x1, y2, z2);
+                glVertex3f(x1 + pos.getX(), y1 + pos.getY(), z2 + pos.getZ());
                 break;
             case UP:
             case DOWN:
                 glTexCoord2f(u1, v1);
-                glVertex3f(x1, y1, z1);
+                glVertex3f(x1 + pos.getX(), y1 + pos.getY(), z1 + pos.getZ());
 
                 glTexCoord2f(u2, v1);
-                glVertex3f(x2, y1, z1);
+                glVertex3f(x2 + pos.getX(), y1 + pos.getY(), z1 + pos.getZ());
 
                 glTexCoord2f(u2, v2);
-                glVertex3f(x2, y1, z2);
+                glVertex3f(x2 + pos.getX(), y1 + pos.getY(), z2 + pos.getZ());
 
-                glTexCoord2f(u2, v2);
-                glVertex3f(x1, y1, z2);
+                glTexCoord2f(u1, v2);
+                glVertex3f(x1 + pos.getX(), y1 + pos.getY(), z2 + pos.getZ());
                 break;
             case NORTH:
             case SOUTH:
+                glTexCoord2f(u2, v2);
+                glVertex3f(x1 + pos.getX(), y1 + pos.getY(), z1 + pos.getZ());
+
+                glTexCoord2f(u1, v2);
+                glVertex3f(x2 + pos.getX(), y1 + pos.getY(), z1 + pos.getZ());
+
                 glTexCoord2f(u1, v1);
-                glVertex3f(x1, y1, z1);
+                glVertex3f(x2 + pos.getX(), y2 + pos.getY(), z1 + pos.getZ());
 
                 glTexCoord2f(u2, v1);
-                glVertex3f(x2, y1, z1);
-
-                glTexCoord2f(u2, v2);
-                glVertex3f(x2, y2, z1);
-
-                glTexCoord2f(u2, v2);
-                glVertex3f(x1, y2, z1);
+                glVertex3f(x1 + pos.getX(), y2 + pos.getY(), z1 + pos.getZ());
                 break;
         }
     }

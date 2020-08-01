@@ -71,8 +71,10 @@ public class CollisionHandler {
         }
         controller.playerPos.y = controller.oldPos.y;
         controller.playerVelocity.y = 0;
-        //TODO: check if player is actually standing ON a block and is not hanging on the ceiling
-        controller.onGround = true;
+
+        if (deltaY < 0) {
+            controller.onGround = true;
+        }
     }
 
     private void zAxisCollision() {
@@ -94,8 +96,8 @@ public class CollisionHandler {
         int[] xPositions = valuesBetween(betterRound(testPos.x + width),
                 betterRound(testPos.x - width));
 
-        int[] yPositions = valuesBetween(betterRound(testPos.y + 1),
-                betterRound(testPos.y + controller.getPlayerHeight() + 1));
+        int[] yPositions = valuesBetween(betterRound(testPos.y),
+                betterRound(testPos.y + controller.getPlayerHeight()));
 
         int[] zPositions = valuesBetween(betterRound(testPos.z + width),
                 betterRound(testPos.z - width));

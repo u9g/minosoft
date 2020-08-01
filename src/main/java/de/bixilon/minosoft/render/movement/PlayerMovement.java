@@ -58,12 +58,12 @@ public class PlayerMovement {
 
         if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
             if (!MainWindow.getPlayerController().isEnableGravity()) {
-                playerPos.add(0, cameraSpeed * deltaTime, 0);
+                playerPos.add(0, -cameraSpeed * deltaTime, 0);
             }
         }
         if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
             if (!MainWindow.getPlayerController().isEnableGravity()) {
-                playerPos.add(0, -cameraSpeed * deltaTime, 0);
+                playerPos.add(0, cameraSpeed * deltaTime, 0);
             }
             if (MainWindow.getPlayerController().isOnGround()) {
                 MainWindow.getPlayerController().jump();

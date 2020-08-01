@@ -19,34 +19,47 @@ import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockProperties;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Blocks;
 import de.bixilon.minosoft.logging.Log;
+import de.bixilon.minosoft.render.fullFace.FaceOrientation;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.*;
 
 import static de.bixilon.minosoft.util.Util.readJsonFromFile;
 
 public class BlockModelLoader {
-    final HashMap<String, BlockDescription> blockDescriptionMap;
+    // a list of blocks not drawn by the world renderer
+    public static final List<String> ignoredBlocks = new ArrayList<>(Arrays.asList(
+            "air", "cave_air", "void_air", "moving_piston", "shrub", "structure_void", "water", "lava",
+            //TODO
+            "chest", "trapped_chest", "oak_fence"
+    ));
 
     public BlockModelLoader() {
         blockDescriptionMap = new HashMap<>();
         loadModels();
     }
 
+    final HashMap<String, HashMap<String, BlockDescription>> blockDescriptionMap;
+
     private void loadModels() {
         for (Block block : Blocks.getBlockList()) {
             String mod = block.getMod();
             String identifier = block.getIdentifier();
+
+            if (ignoredBlocks.contains(identifier)) {
+                continue;
+            }
+
+            if (!blockDescriptionMap.containsKey(mod)) {
+                blockDescriptionMap.put(mod, new HashMap<>());
+            }
+
             if (blockDescriptionMap.containsKey(mod + ":" + identifier)) {
                 continue;
             }
 
-            if (!mod.equals("minecraft")) {
-                loadModel(mod, identifier);
-                continue;
-            }
             if (identifier.equals("silver_glazed_terracotta")) {
-                // WHAT EVEN IS THIS BLOCK!?!?!
+                loadModel(mod, "light_gray_glazed_terracotta");
                 continue;
             }
             if (identifier.equals("flower_upper_block")) {
@@ -54,15 +67,11 @@ public class BlockModelLoader {
                 continue;
             }
             if (identifier.equals("bubble_column")) {
-                // handled with client side particles
+                // handled with client side "particles"
                 continue;
             }
             if (identifier.equals("barrier")) {
                 // TODO: display barriers if setting is enabled
-                continue;
-            }
-            if (identifier.equals("shrub")) {
-                // no longer exists ?
                 continue;
             }
             if (identifier.equals("end_portal") || identifier.equals("end_gateway")) {
@@ -74,19 +83,15 @@ public class BlockModelLoader {
                 // is not displayed
                 continue;
             }
-            if (identifier.contains("air")) {
-                // is not displayed
-                continue;
-            }
             if (identifier.contains("infested")) {
                 // same block model as the not infested blocks
                 continue;
             }
             if (identifier.equals("conduit")) {
-                // shown as entity?
+                // shown as entity
                 continue;
             }
-            if (identifier.equals("moving_piston") || identifier.equals("piston_extension")) {
+            if (identifier.equals("piston_extension")) {
                 // TODO: handle pistons
                 continue;
             }
@@ -308,10 +313,12 @@ public class BlockModelLoader {
                 continue;
             }
             if (identifier.equals("repeater")) {
-                loadRepeater(mod, identifier, "1");
-                loadRepeater(mod, identifier, "2");
-                loadRepeater(mod, identifier, "3");
-                loadRepeater(mod, identifier, "4");
+                for (int ticks = 1; ticks < 5; ticks++) {
+                    loadModel(mod, identifier + "_" + ticks + "tick");
+                    loadModel(mod, identifier + "_" + ticks + "tick_locked");
+                    loadModel(mod, identifier + "_" + ticks + "tick_on");
+                    loadModel(mod, identifier + "_" + ticks + "tick_on_locked");
+                }
                 continue;
             }
             if (identifier.contains("door")) {
@@ -347,31 +354,25 @@ public class BlockModelLoader {
         Log.info("finished loading all block descriptions");
     }
 
-    private void loadRepeater(String mod, String identifier, String ticks) {
-        loadModel(mod, identifier + "_" + ticks + "tick");
-        loadModel(mod, identifier + "_" + ticks + "tick_locked");
-        loadModel(mod, identifier + "_" + ticks + "tick_on");
-        loadModel(mod, identifier + "_" + ticks + "tick_on_locked");
-    }
-
     private boolean handleProperties(Block block) {
         return !block.getProperties().contains(BlockProperties.NONE) && block.getProperties().size() != 0;
     }
 
     private void loadModel(String mod, String identifier) {
-        if (blockDescriptionMap.containsKey((mod + ":" + identifier))) {
-            // a description for that block already exists, checking because Blocks.getBlockList()
-            // returns all blocks with all possible combinations
+        if (blockDescriptionMap.containsKey(mod) && blockDescriptionMap.get(mod).containsKey(identifier)) {
+            // a description for that block already exists. checking because Blocks.getBlockList()
+            // returns all blocks with all possible combinations (rotation, etc.)
             return;
         }
         try {
             String path = Config.homeDir + "assets/" + mod + "/models/block/" + identifier + ".json";
             JsonObject json = readJsonFromFile(path);
             BlockDescription description = new BlockDescription(json);
-            blockDescriptionMap.put(mod + ":" + identifier, description);
-            //Log.info("Loaded model for " + mod + ":" + identifier);
+
+            HashMap<String, BlockDescription> modList = blockDescriptionMap.get(mod);
+            modList.put(identifier, description);
         } catch (IOException e) {
-            Log.debug("could not load block model for block " + mod + ":" + identifier);
+            Log.debug("could not find block model for block " + mod + ":" + identifier);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(mod + ":" + identifier);
@@ -381,18 +382,37 @@ public class BlockModelLoader {
     }
 
     public BlockDescription getBlockDescription(Block block) {
-        String blockName = block.getMod() + ":" + block.getIdentifier();
-        if (!blockDescriptionMap.containsKey(blockName)) {
-            System.out.println(String.format("No description for block %s found", blockName));
-            System.exit(-1);
+        if (ignoredBlocks.contains(block.getIdentifier())) {
+            return null;
         }
-        return blockDescriptionMap.get(block.getMod() + ":" + block.getIdentifier());
+        if (!blockDescriptionMap.containsKey(block.getMod())) {
+            System.out.println(String.format("No mod %s found", block.getMod()));
+            //System.exit(-1);
+        }
+        HashMap<String, BlockDescription> modList = blockDescriptionMap.get(block.getMod());
+        if (!modList.containsKey(block.getIdentifier())) {
+            System.out.println(String.format("No block %s:%s found", block.getMod(), block.getIdentifier()));
+            //System.exit(-1);
+        }
+        return modList.get(block.getIdentifier());
     }
 
     public boolean isFull(Block block) {
         if (block == Blocks.nullBlock || block == null) {
             return false;
         }
-        return getBlockDescription(block).isFull();
+        BlockDescription description = getBlockDescription(block);
+        if (description == null) {
+            return false;
+        }
+        return description.isFull();
+    }
+
+    public HashSet<Face> prepare(Block block, HashMap<FaceOrientation, Boolean> adjacentBlocks) {
+        BlockDescription description = getBlockDescription(block);
+        if (description == null) {
+            return new HashSet<>();
+        }
+        return description.prepare(adjacentBlocks);
     }
 }

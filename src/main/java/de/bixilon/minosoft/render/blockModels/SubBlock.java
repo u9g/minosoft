@@ -30,6 +30,7 @@ public class SubBlock {
     HashMap<FaceOrientation, Boolean> cullFaceTextures;
 
     HashMap<FaceOrientation, InFaceUV> uv;
+    private final boolean isFull;
 
     public SubBlock(JsonObject json, HashMap<String, String> variables) {
         uv = new HashMap<>();
@@ -45,6 +46,7 @@ public class SubBlock {
                         orientation, variables);
             }
         }
+        isFull = (pos1.x == 0 && pos1.y == 0 && pos1.z == 0) && (pos2.x == 16 && pos2.y == 16 && pos2.z == 16);
     }
 
     private static String getRealTextureName(String textureName, HashMap<String, String> variables) {
@@ -93,5 +95,9 @@ public class SubBlock {
             }
         }
         return result;
+    }
+
+    public boolean isFull() {
+        return isFull;
     }
 }

@@ -60,6 +60,12 @@ public class BlockDescription {
         } else {
             throw new IllegalArgumentException("json does not have a parent nor subblocks");
         }
+
+        for (SubBlock subBlock : subBlocks) {
+            if (subBlock.isFull()) {
+                isFull = true;
+            }
+        }
     }
 
     public BlockDescription(JsonObject json) {

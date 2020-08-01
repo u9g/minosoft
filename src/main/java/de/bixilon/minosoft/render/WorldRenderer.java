@@ -81,7 +81,7 @@ public class WorldRenderer {
             }
         }
         synchronized (faces) {
-            faces.put(position, modelLoader.getBlockDescription(block).prepare(adjacentBlocks));
+            faces.put(position, modelLoader.prepare(block, adjacentBlocks));
         }
     }
 
