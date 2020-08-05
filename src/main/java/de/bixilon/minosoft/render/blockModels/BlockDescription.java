@@ -1,6 +1,6 @@
 /*
  * Codename Minosoft
- * Copyright (C) 2020 Moritz Zwerger
+ * Copyright (C) 2020 Lukas Eisenhauer
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -16,6 +16,7 @@ package de.bixilon.minosoft.render.blockModels;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.Config;
+import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.render.fullFace.FaceOrientation;
 
 import java.io.IOException;
@@ -25,15 +26,43 @@ import java.util.HashSet;
 import static de.bixilon.minosoft.util.Util.readJsonFromFile;
 
 public class BlockDescription {
-    HashSet<SubBlock> subBlocks;
+    HashSet<SubBlock> defaultState;
+    HashMap<BlockConfiguration, HashSet<SubBlock>> blockConfigurationStates;
     boolean isFull;
 
-    public BlockDescription(JsonObject json, HashMap<String, String> variables) {
-        subBlocks = new HashSet<>();
-        if (!json.has("textures")) {
-            //throw new IllegalArgumentException("could not find 'textures' in json");
+    public BlockDescription(JsonElement child, String identifier, String mod) {
+        if (child.getAsString().equals("invisible")) {
+            return;
+        } else if (child.getAsString().equals("regular")) {
+            defaultState = load(mod, identifier, new HashMap<>());
+        } else {
+            JsonObject childJson = child.getAsJsonObject();
+            for (String state : childJson.keySet()) {
+                if (state.equals("else")) {
+                    defaultState = load(mod, childJson.get("else").getAsString(), new HashMap<>());
+                }
+                blockConfigurationStates.put(new BlockConfiguration(state),
+                        load(mod, childJson.get(state).getAsString()));
+            }
         }
+        for (SubBlock subBlock : defaultState) {
+            if (subBlock.isFull()) {
+                isFull = true;
+            }
+        }
+    }
+
+    public static HashSet<SubBlock> load(String mod, String identifier, HashMap<String, String> variables) {
+        String path = Config.homeDir + "assets/" + mod + "/models/block/" + identifier + ".json";
+        JsonObject json = null;
         try {
+            json = readJsonFromFile(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        HashSet<SubBlock> result = new HashSet<>();
+        try {
+            // read the textures into a variable hashmap
             JsonObject textures = json.getAsJsonObject("textures");
             for (String texture : textures.keySet()) {
                 if (texture.contains("#") && variables.containsKey(texture)) {
@@ -43,42 +72,32 @@ public class BlockDescription {
                 }
             }
         } catch (Exception ignored) {
-
         }
         if (json.has("elements")) {
             for (JsonElement subBlockJson : json.get("elements").getAsJsonArray()) {
-                subBlocks.add(new SubBlock(subBlockJson.getAsJsonObject(), variables));
+                result.add(new SubBlock(subBlockJson.getAsJsonObject(), variables));
             }
         } else if (json.has("parent") && !json.get("parent").getAsString().equals("block/block")) {
             String parent = json.get("parent").getAsString();
-            String path = Config.homeDir + "assets/minecraft/models/" + parent + ".json";
-            try {
-                subBlocks.addAll(new BlockDescription(readJsonFromFile(path), variables).subBlocks);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            String parentIdentifier = parent.substring(parent.lastIndexOf("/") + 1);
+            result.addAll(load(mod, parentIdentifier, variables));
         } else {
             throw new IllegalArgumentException("json does not have a parent nor subblocks");
         }
-
-        for (SubBlock subBlock : subBlocks) {
-            if (subBlock.isFull()) {
-                isFull = true;
-            }
-        }
+        return result;
     }
 
-    public BlockDescription(JsonObject json) {
-        this(json, new HashMap<>());
+    private HashSet<SubBlock> load(String mod, String identifier) {
+        return load(mod, identifier, new HashMap<>());
     }
 
     public boolean isFull() {
         return isFull;
     }
 
-    public HashSet<Face> prepare(HashMap<FaceOrientation, Boolean> adjacentBlocks) {
+    public HashSet<Face> prepare(Block block, HashMap<FaceOrientation, Boolean> adjacentBlocks) {
         HashSet<Face> result = new HashSet<>();
-        for (SubBlock subBlock : subBlocks) {
+        for (SubBlock subBlock : defaultState) {
             result.addAll(subBlock.getFaces(adjacentBlocks));
         }
         return result;

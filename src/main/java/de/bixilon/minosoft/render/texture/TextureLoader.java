@@ -14,7 +14,6 @@
 package de.bixilon.minosoft.render.texture;
 
 import de.bixilon.minosoft.Config;
-import de.bixilon.minosoft.render.utility.Triplet;
 import de.matthiasmann.twl.utils.PNGDecoder;
 import javafx.util.Pair;
 
@@ -47,9 +46,8 @@ public class TextureLoader {
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
-        PNGDecoder decoder = null;
         try {
-            decoder = new PNGDecoder(new FileInputStream(
+            PNGDecoder decoder = new PNGDecoder(new FileInputStream(
                     Config.homeDir + "assets/allTextures.png"));
             ByteBuffer buf = ByteBuffer.allocateDirect(decoder.getWidth() * decoder.getHeight() * 4);
             decoder.decode(buf, decoder.getWidth() * 4, PNGDecoder.Format.RGBA);
@@ -58,39 +56,6 @@ public class TextureLoader {
             e.printStackTrace();
         }
 
-    }
-
-    private static int makeGreen(int rgb) {
-        // this method has some bugs but it looks cool so let's just say it is an intended mechanic
-        Triplet<Float, Float, Float> rgbValues = getRGBTriplet(rgb);
-        float brightness = getBrightness(rgbValues);
-        rgbValues = multiply(new Triplet<>(94f / 255f, 157f / 255f, 52f / 255f), rgbValues.item1);
-        return getRGBInt(rgbValues);
-    }
-
-    private static Triplet<Float, Float, Float> multiply(Triplet<Float, Float, Float> rgbValues, float value) {
-        rgbValues.item1 *= value;
-        rgbValues.item2 *= value;
-        rgbValues.item3 *= value;
-        return rgbValues;
-    }
-
-    private static int getRGBInt(Triplet<Float, Float, Float> rgbValues) {
-        int red = (int) (rgbValues.item1 * 255);
-        int green = (int) (rgbValues.item2 * 255);
-        int blue = (int) (rgbValues.item3 * 255);
-        return ((red << 16) | (green << 8) | blue);
-    }
-
-    static Triplet<Float, Float, Float> getRGBTriplet(int rgb) {
-        float red = (float) ((rgb >>> 16) & 0xFF) / 16f;
-        float green = (float) ((rgb >> 8) & 0xFF) / 16f;
-        float blue = (float) ((rgb) & 0xFF) / 16f;
-        return new Triplet<>(red, green, blue);
-    }
-
-    private static float getBrightness(Triplet<Float, Float, Float> rgbValues) {
-        return .2126f * rgbValues.item1 + .7152f * rgbValues.item2 + .0722f * rgbValues.item3;
     }
 
     private void loadTextures(String textureFolder) throws IOException {
@@ -127,9 +92,6 @@ public class TextureLoader {
             for (int y = 0; y < TEXTURE_PACK_RES; y++) {
                 for (int xPixel = 0; xPixel < TEXTURE_PACK_RES; xPixel++) {
                     int rgb = img.getRGB(xPixel, y);
-                    if (allTextures.get(xPos).getValue().equals("grass_block_top")) {
-                        rgb = makeGreen(rgb);
-                    }
                     totalImage.setRGB(xPos * TEXTURE_PACK_RES + xPixel, y, rgb);
                 }
             }

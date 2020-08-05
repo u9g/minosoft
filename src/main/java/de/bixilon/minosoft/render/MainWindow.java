@@ -100,10 +100,8 @@ public class MainWindow {
     public static void pause() {
         renderMode = MAIN_MENU;
         glfwSetInputMode(openGLWindow.getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        try {
-            connection.disconnect();
-        } catch (Exception ignored) {
-        }
+        assert connection != null;
+        connection.disconnect();
     }
 
     public static Connection getConnection() {
@@ -111,7 +109,7 @@ public class MainWindow {
     }
 
     public static void close() {
-        System.exit(1);
+        //System.exit(0);
     }
 
     public static PlayerController getPlayerController() {
