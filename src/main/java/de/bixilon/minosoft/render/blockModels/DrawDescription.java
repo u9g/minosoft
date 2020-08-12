@@ -36,7 +36,7 @@ public class DrawDescription {
     Map<FaceOrientation, Pair<Float, Float>> faces;
     boolean full = false; // is the block a completely filled block?
 
-    public DrawDescription(JsonObject json) {
+    public DrawDescription(JsonObject json, String mod) {
         if (!(json.has("parent") && json.has("textures"))) return;
 
         faces = new HashMap<>();
@@ -49,7 +49,7 @@ public class DrawDescription {
             Pair<Float, Float> texturePair;
 
             try {
-                texturePair = MainWindow.getRenderer().getTextureLoader().getTexture(texture);
+                texturePair = MainWindow.getRenderer().getModelLoader().getTextureLoader().getTexture(mod, texture);
             } catch (Exception e) {
                 continue;
             }

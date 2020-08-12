@@ -32,7 +32,7 @@ public class Face {
     public Face(FaceOrientation orientation, Pair<Float, Float> texture, InFaceUV uv, SubBlock subBlock) {
         this.orientation = orientation;
 
-        float step = MainWindow.getRenderer().getTextureLoader().getStep();
+        float step = MainWindow.getRenderer().getModelLoader().getTextureLoader().getStep();
         u1 = texture.getKey();// + (float) uv.u1 / (float) texturePackRes * step;
         u2 = texture.getValue();// - (float) (texturePackRes - uv.u2) / (float) texturePackRes * step;
         v1 = (float) uv.v1 / (float) texturePackRes;

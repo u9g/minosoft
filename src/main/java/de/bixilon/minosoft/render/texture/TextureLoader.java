@@ -18,34 +18,34 @@ import de.matthiasmann.twl.utils.PNGDecoder;
 import javafx.util.Pair;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Map;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 
 public class TextureLoader {
-    int textureID;
-    int length; //describes the amount of loaded textures
     private final int TEXTURE_PACK_RES = 16;
-    private HashMap<String, Integer> textureCoordinates;
-    int imageLength = 1;
+    private final HashMap<String, HashMap<String, Integer>> textureCoordinates;
+    int textureID;
     float step;
+    int totalTextures = 0;
+    HashMap<String, HashMap<String, BufferedImage>> images;
 
-    public TextureLoader(long window) {
-        try {
-            textureCoordinates = new HashMap<>();
-            loadTextures(Config.homeDir + "assets/minecraft/textures/block");
-        } catch (IOException ioException) {
-            ioException.printStackTrace();
+    public TextureLoader(HashMap<String, HashSet<String>> textures, HashMap<String, HashMap<String, float[]>> tints) {
+        textureCoordinates = new HashMap<>();
+        images = new HashMap<>();
+        for (String mod : textures.keySet()) {
+            loadTextures(mod, textures.get(mod), tints.get(mod));
         }
+        combineTextures();
         try {
             PNGDecoder decoder = new PNGDecoder(new FileInputStream(
                     Config.homeDir + "assets/allTextures.png"));
@@ -54,59 +54,77 @@ public class TextureLoader {
             textureID = bindTexture(buf, decoder.getWidth(), decoder.getHeight());
         } catch (IOException e) {
             e.printStackTrace();
+            System.exit(5);
         }
-
     }
 
-    private void loadTextures(String textureFolder) throws IOException {
-        // Any animated block will be stationary
-        File[] textureFiles = new File(textureFolder).listFiles();
-
-        if (textureFiles == null) {
-            throw new IOException("Failed to load textures: Texture folder empty");
-        }
-        List<Pair<BufferedImage, String>> allTextures = new ArrayList<>();
-        for (int i = 0; i < textureFiles.length; i++) {
-            String fileName = textureFiles[i].getName();
-            String textureName = fileName.substring(0, fileName.lastIndexOf('.'));
-            String fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1);
-            if (fileExtension.equals("png")) {
-                InputStream textureInputStream = new FileInputStream(textureFiles[i]);
-                BufferedImage img = ImageIO.read(textureInputStream);
-                allTextures.add(new Pair<>(img, textureName));
+    private static void tintImage(BufferedImage image, float[] tintColor) {
+        for (int x = 0; x < image.getWidth(); x++) {
+            for (int y = 0; y < image.getHeight(); y++) {
+                Color color = new Color(image.getRGB(x, y));
+                int r = (int) (color.getRed() * tintColor[0]);
+                int g = (int) (color.getGreen() * tintColor[1]);
+                int b = (int) (color.getBlue() * tintColor[2]);
+                int rgba = (color.getAlpha() << 24) | (r << 16) | (g << 8) | b;
+                image.setRGB(x, y, rgba);
             }
-            //else we have a .mcmeta file describing animated blocks
         }
+    }
 
+    private void loadTextures(String mod, HashSet<String> textureNames, HashMap<String, float[]> tint) {
+        HashMap<String, BufferedImage> modTextureMap = new HashMap<>();
+        for (String textureName : textureNames) {
+            String path = Config.homeDir + "assets/" + mod + "/textures/" + textureName + ".png";
+            try {
+                BufferedImage image = ImageIO.read(new File(path));
+                if (tint.containsKey(textureName)) {
+                    tintImage(image, tint.get(textureName));
+                }
+                modTextureMap.put(textureName, image);
+            } catch (IOException e) {
+                System.out.println(textureName);
+                System.out.println(path);
+                e.printStackTrace();
+                System.exit(6);
+            }
+            totalTextures++;
+        }
+        images.put(mod, modTextureMap);
+    }
+
+    private void combineTextures() {
         // CONVERT ALL THE IMAGES INTO A SINGLE, VERY LONG IMAGE
         // greatly improves performance in opengl
         // TEXTURE_PACK_RESxTEXTURE_PACK_RES textures only
-        length = allTextures.size();
+        int imageLength = 1;
+        while (totalTextures * TEXTURE_PACK_RES > imageLength) {
+            imageLength *= 2; //figure out the right length for the image
+        }
+        BufferedImage totalImage = new BufferedImage(imageLength, TEXTURE_PACK_RES,
+                BufferedImage.TYPE_4BYTE_ABGR);
 
-        while (length * TEXTURE_PACK_RES > imageLength) imageLength *= 2; //figure out the right length for the image
-
-        BufferedImage totalImage = new BufferedImage(imageLength, TEXTURE_PACK_RES, BufferedImage.TYPE_4BYTE_ABGR);
-        for (int xPos = 0; xPos < length; xPos++) {
-            //copy the image into a part of the long image
-            BufferedImage img = allTextures.get(xPos).getKey();
-            for (int y = 0; y < TEXTURE_PACK_RES; y++) {
-                for (int xPixel = 0; xPixel < TEXTURE_PACK_RES; xPixel++) {
-                    int rgb = img.getRGB(xPixel, y);
-                    totalImage.setRGB(xPos * TEXTURE_PACK_RES + xPixel, y, rgb);
+        int currentPos = 0;
+        for (Map.Entry<String, HashMap<String, BufferedImage>> mod : images.entrySet()) {
+            HashMap<String, Integer> modMap = new HashMap<>();
+            for (Map.Entry<String, BufferedImage> texture : mod.getValue().entrySet()) {
+                for (int y = 0; y < TEXTURE_PACK_RES; y++) {
+                    for (int xPixel = 0; xPixel < TEXTURE_PACK_RES; xPixel++) {
+                        int rgb = texture.getValue().getRGB(xPixel, y);
+                        totalImage.setRGB(currentPos * TEXTURE_PACK_RES + xPixel, y, rgb);
+                    }
                 }
+                modMap.put(texture.getKey(), currentPos++);
             }
-            String textureName = allTextures.get(xPos).getValue();
-            textureCoordinates.put(textureName, xPos);
+            textureCoordinates.put(mod.getKey(), modMap);
         }
 
         try {
-            // save our long image to reload it later
             File outputFile = new File(Config.homeDir + "assets/allTextures.png");
             ImageIO.write(totalImage, "png", outputFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        step = (float) 1 / (float) imageLength;
+        step = (float) 1 / (float) imageLength * TEXTURE_PACK_RES;
     }
 
     private int bindTexture(ByteBuffer buf, int width, int height) {
@@ -123,24 +141,23 @@ public class TextureLoader {
         return textureID;
     }
 
-    public Pair<Float, Float> getTexture(String name) {
+    public Pair<Float, Float> getTexture(String mod, String textureName) {
         // returns the start and end u-coordinate of a specific texture to access it
-        if (name == null) {
-            throw new NullPointerException("received null string as texture name");
+        HashMap<String, Integer> modMap = textureCoordinates.get(mod);
+        if (modMap == null) {
+            System.out.println("no mod " + mod + " loaded");
+            System.exit(9);
         }
-        if (name.contains("block/")) {
-            name = name.substring(name.lastIndexOf('/') + 1);
-        }
+        Integer pos = modMap.get(textureName);
 
-        Integer pos = textureCoordinates.get(name);
         if (pos == null) {
-            // the texture does not exist
-            throw new IllegalArgumentException(String.format("could not find texture %s", name));
+            System.out.println("failed to find texture " + textureName);
+            System.exit(10);
         }
 
-        return new Pair<Float, Float>(
-                (float) pos / ((float) imageLength / (float) TEXTURE_PACK_RES),
-                (float) (pos + 1) / ((float) imageLength / (float) TEXTURE_PACK_RES)
+        return new Pair<>(
+                pos * step,
+                (pos + 1) * step
         );
     }
 

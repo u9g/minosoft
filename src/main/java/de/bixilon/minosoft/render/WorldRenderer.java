@@ -20,7 +20,6 @@ import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.render.blockModels.BlockModelLoader;
 import de.bixilon.minosoft.render.blockModels.Face;
 import de.bixilon.minosoft.render.fullFace.FaceOrientation;
-import de.bixilon.minosoft.render.texture.TextureLoader;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,13 +29,10 @@ import static de.bixilon.minosoft.render.fullFace.RenderConstants.faceDir;
 import static org.lwjgl.opengl.GL11.*;
 
 public class WorldRenderer {
-    private final TextureLoader textureLoader;
     private final HashMap<BlockPosition, HashSet<Face>> faces;
-    private final int faceCount = 0;
     private BlockModelLoader modelLoader;
 
     public WorldRenderer() {
-        textureLoader = new TextureLoader(MainWindow.getOpenGLWindow().getWindow());
         faces = new HashMap<>();
     }
 
@@ -87,7 +83,7 @@ public class WorldRenderer {
 
     public void draw() {
         glPushMatrix();
-        glBindTexture(GL_TEXTURE_2D, textureLoader.getTextureID());
+        glBindTexture(GL_TEXTURE_2D, modelLoader.getTextureLoader().getTextureID());
         glBegin(GL_QUADS);
         synchronized (faces) {
             for (Map.Entry<BlockPosition, HashSet<Face>> entry : faces.entrySet()) {
@@ -98,10 +94,6 @@ public class WorldRenderer {
         }
         glEnd();
         glPopMatrix();
-    }
-
-    public TextureLoader getTextureLoader() {
-        return textureLoader;
     }
 
     public BlockModelLoader getModelLoader() {

@@ -48,6 +48,7 @@ public class MainWindow {
             renderMode = MAIN_MENU;
             mainMenu = new MainMenu(openGLWindow.getWidth(), openGLWindow.getHeight());
             mainLoop();
+            System.exit(0);
         });
         guiThread.start();
     }

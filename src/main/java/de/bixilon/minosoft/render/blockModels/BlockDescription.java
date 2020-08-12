@@ -18,6 +18,7 @@ import com.google.gson.JsonObject;
 import de.bixilon.minosoft.Config;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.render.fullFace.FaceOrientation;
+import de.bixilon.minosoft.render.texture.TextureLoader;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -31,23 +32,29 @@ public class BlockDescription {
     boolean isFull;
 
     public BlockDescription(JsonElement child, String identifier, String mod) {
-        if (child.getAsString().equals("invisible")) {
+        blockConfigurationStates = new HashMap<>();
+        if (child.isJsonPrimitive() && child.getAsString().equals("invisible")) {
+            defaultState = new HashSet<>();
             return;
-        } else if (child.getAsString().equals("regular")) {
-            defaultState = load(mod, identifier, new HashMap<>());
-        } else {
+        } else if (child.isJsonPrimitive() && child.getAsString().equals("regular")) {
+            defaultState = load(mod, identifier);
+        } else if (child.isJsonPrimitive()) {
+            defaultState = load(mod, child.getAsString());
+        } else if (child.isJsonObject()) {
             JsonObject childJson = child.getAsJsonObject();
             for (String state : childJson.keySet()) {
                 if (state.equals("else")) {
                     defaultState = load(mod, childJson.get("else").getAsString(), new HashMap<>());
                 }
-                blockConfigurationStates.put(new BlockConfiguration(state),
+                BlockConfiguration configuration = new BlockConfiguration(state);
+                blockConfigurationStates.put(configuration,
                         load(mod, childJson.get(state).getAsString()));
             }
         }
         for (SubBlock subBlock : defaultState) {
             if (subBlock.isFull()) {
                 isFull = true;
+                break;
             }
         }
     }
@@ -101,5 +108,19 @@ public class BlockDescription {
             result.addAll(subBlock.getFaces(adjacentBlocks));
         }
         return result;
+    }
+
+    public HashSet<String> getAllTextures() {
+        HashSet<String> result = new HashSet<>();
+        for (SubBlock subBlock : defaultState) {
+            result.addAll(subBlock.getTextures());
+        }
+        return result;
+    }
+
+    public void applyTextures(String mod, TextureLoader loader) {
+        for (SubBlock subBlock : defaultState) {
+            subBlock.applyTextures(mod, loader);
+        }
     }
 }

@@ -20,51 +20,88 @@ import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Blocks;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.render.fullFace.FaceOrientation;
+import de.bixilon.minosoft.render.texture.TextureLoader;
+import org.apache.commons.collections.primitives.ArrayFloatList;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 import static de.bixilon.minosoft.util.Util.readJsonFromFile;
 
 public class BlockModelLoader {
+    private final HashMap<String, HashMap<String, BlockDescription>> blockDescriptionMap;
+    TextureLoader textureLoader;
+
     public BlockModelLoader() {
         blockDescriptionMap = new HashMap<>();
+        HashMap<String, HashMap<String, float[]>> tints = new HashMap<>();
+        HashMap<String, HashSet<String>> textures = new HashMap<>();
         try {
             String folderPath = Config.homeDir + "assets/mapping/blockModels/";
             for (File file : new File(folderPath).listFiles()) {
-                JsonObject blockList = readJsonFromFile(file.getAbsolutePath());
+                JsonObject json = readJsonFromFile(file.getAbsolutePath());
                 String mod = file.getName().substring(0, file.getName().lastIndexOf('.'));
-                loadModels(blockList, mod);
+                tints.put(mod, readTints(json));
+                textures.put(mod, loadModels(json.get("blocks").getAsJsonObject(), mod));
             }
-        } catch (IOException | NullPointerException e) {
+            textureLoader = new TextureLoader(textures, tints);
+            applyTextures();
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        Log.info("finished loading all block descriptions");
+        Log.info("finished loading all blocks");
     }
 
-    final HashMap<String, HashMap<String, BlockDescription>> blockDescriptionMap;
+    private void applyTextures() {
+        for (Map.Entry<String, HashMap<String, BlockDescription>> mod : blockDescriptionMap.entrySet()) {
+            for (Map.Entry<String, BlockDescription> block : mod.getValue().entrySet()) {
+                block.getValue().applyTextures(mod.getKey(), textureLoader);
+            }
+        }
+    }
 
-    private void loadModels(JsonObject blockList, String mod) {
+    private HashMap<String, float[]> readTints(JsonObject json) {
+        HashMap<String, float[]> result = new HashMap<>();
+        if (json.has("tinted_textures")) {
+            JsonObject textures = json.get("tinted_textures").getAsJsonObject();
+            for (String textureName : textures.keySet()) {
+                ArrayFloatList colorValues = new ArrayFloatList();
+                for (JsonElement colorValue : textures.get(textureName).getAsJsonArray()) {
+                    colorValues.add(colorValue.getAsFloat());
+                }
+                float[] color = colorValues.toArray();
+                result.put(textureName, color);
+            }
+        }
+        return result;
+    }
+
+    private HashSet<String> loadModels(JsonObject blockList, String mod) {
+        HashSet<String> result = new HashSet<>();
         blockDescriptionMap.put(mod, new HashMap<>());
         for (String identifier : blockList.keySet()) {
             JsonElement child = blockList.get(identifier);
-            loadModel(mod, identifier, child);
+            result.addAll(loadModel(mod, identifier, child));
         }
+        return result;
     }
 
-    private void loadModel(String mod, String identifier, JsonElement child) {
+    private HashSet<String> loadModel(String mod, String identifier, JsonElement child) {
+        HashSet<String> result = new HashSet<>();
         try {
             HashMap<String, BlockDescription> modList = blockDescriptionMap.get(mod);
             BlockDescription description = new BlockDescription(child, identifier, mod);
+            result.addAll(description.getAllTextures());
             modList.put(identifier, description);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(mod + ":" + identifier);
             System.exit(-1);
         }
-
+        return result;
     }
 
     public BlockDescription getBlockDescription(Block block) {
@@ -97,5 +134,9 @@ public class BlockModelLoader {
             return new HashSet<>();
         }
         return description.prepare(block, adjacentBlocks);
+    }
+
+    public TextureLoader getTextureLoader() {
+        return textureLoader;
     }
 }

@@ -14,19 +14,21 @@
 package de.bixilon.minosoft.render.blockModels;
 
 import com.google.gson.JsonObject;
-import de.bixilon.minosoft.render.MainWindow;
 import de.bixilon.minosoft.render.fullFace.FaceOrientation;
 import de.bixilon.minosoft.render.fullFace.InFaceUV;
+import de.bixilon.minosoft.render.texture.TextureLoader;
 import javafx.util.Pair;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 public class SubBlock {
     SubBlockPosition pos1; // the most negative Point of the SubBlock
     SubBlockPosition pos2; // the most positive Point of the SubBlock
 
-    HashMap<FaceOrientation, Pair<Float, Float>> textures;
+    HashMap<FaceOrientation, Pair<Float, Float>> textureCoordinates;
+    HashMap<FaceOrientation, String> textures;
     HashMap<FaceOrientation, Boolean> cullFaceTextures;
 
     HashMap<FaceOrientation, InFaceUV> uv;
@@ -35,6 +37,7 @@ public class SubBlock {
     public SubBlock(JsonObject json, HashMap<String, String> variables) {
         uv = new HashMap<>();
         textures = new HashMap<>();
+        textureCoordinates = new HashMap<>();
         cullFaceTextures = new HashMap<>();
 
         pos1 = new SubBlockPosition(json.getAsJsonArray("from"));
@@ -50,6 +53,7 @@ public class SubBlock {
     }
 
     private static String getRealTextureName(String textureName, HashMap<String, String> variables) {
+        // read the variables and find the real texture name
         if (textureName.contains("#")) {
             if (variables.containsKey(textureName)) {
                 String newName = variables.get(textureName);
@@ -68,6 +72,15 @@ public class SubBlock {
         }
     }
 
+    public void applyTextures(String mod, TextureLoader loader) {
+        for (Map.Entry<FaceOrientation, String> entry : textures.entrySet()) {
+            Pair<Float, Float> texture = loader.getTexture(mod, entry.getValue());
+            textureCoordinates.put(entry.getKey(), texture);
+        }
+        // clean up
+        textures.clear();
+    }
+
     private void applyTexture(JsonObject faceJson, FaceOrientation orientation, HashMap<String, String> variables) {
         try {
             uv.put(orientation, new InFaceUV(faceJson.getAsJsonArray("uv")));
@@ -76,21 +89,18 @@ public class SubBlock {
         }
 
         String textureName = getRealTextureName(faceJson.get("texture").getAsString(), variables);
-        Pair<Float, Float> texture = MainWindow.getRenderer().getTextureLoader().getTexture(textureName);
-
+        textures.put(orientation, textureName);
         cullFaceTextures.put(orientation, faceJson.has("cullface"));
-
-        textures.put(orientation, texture);
     }
 
     public HashSet<Face> getFaces(HashMap<FaceOrientation, Boolean> adjacentBlocks) {
         HashSet<Face> result = new HashSet<>();
         for (FaceOrientation orientation : FaceOrientation.values()) {
-            if (!textures.containsKey(orientation)) {
+            if (!textureCoordinates.containsKey(orientation)) {
                 continue;
             }
             if (!(adjacentBlocks.get(orientation) && cullFaceTextures.get(orientation))) {
-                result.add(new Face(orientation, textures.get(orientation),
+                result.add(new Face(orientation, textureCoordinates.get(orientation),
                         uv.get(orientation), this));
             }
         }
@@ -99,5 +109,13 @@ public class SubBlock {
 
     public boolean isFull() {
         return isFull;
+    }
+
+    public HashSet<String> getTextures() {
+        HashSet<String> result = new HashSet<>();
+        for (Map.Entry<FaceOrientation, String> texture : textures.entrySet()) {
+            result.add(texture.getValue());
+        }
+        return result;
     }
 }
