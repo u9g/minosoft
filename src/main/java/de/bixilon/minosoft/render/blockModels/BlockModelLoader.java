@@ -39,20 +39,33 @@ public class BlockModelLoader {
         blockDescriptionMap = new HashMap<>();
         HashMap<String, HashMap<String, float[]>> tints = new HashMap<>();
         HashMap<String, HashSet<String>> textures = new HashMap<>();
+        HashMap<String, HashSet<String>> ignoredTextures = new HashMap<>();
         try {
             String folderPath = Config.homeDir + "assets/mapping/blockModels/";
             for (File file : new File(folderPath).listFiles()) {
                 JsonObject json = readJsonFromFile(file.getAbsolutePath());
                 String mod = file.getName().substring(0, file.getName().lastIndexOf('.'));
                 tints.put(mod, readTints(json));
+                ignoredTextures.put(mod, readIgnored(json));
                 textures.put(mod, loadModels(json.get("blocks").getAsJsonObject(), mod));
             }
-            textureLoader = new TextureLoader(textures, tints);
+            textureLoader = new TextureLoader(textures, tints, ignoredTextures);
             applyTextures();
         } catch (IOException e) {
             e.printStackTrace();
         }
         Log.info("finished loading all blocks");
+    }
+
+    private HashSet<String> readIgnored(JsonObject json) {
+        if (!json.has("ignored_textures")) {
+            return new HashSet<>();
+        }
+        HashSet<String> result = new HashSet<>();
+        for (JsonElement texture : json.get("ignored_textures").getAsJsonArray()) {
+            result.add(texture.getAsString());
+        }
+        return result;
     }
 
     private void applyTextures() {

@@ -41,6 +41,9 @@ public class PlayerController {
     }
 
     public void loop(float deltaTime) {
+        if (!MainWindow.getConnection().getPlayer().isSpawnConfirmed()) {
+            return;
+        }
         oldPos = playerPos.copy();
 
         GameMode gameMode = MainWindow.getConnection().getPlayer().getGameMode();

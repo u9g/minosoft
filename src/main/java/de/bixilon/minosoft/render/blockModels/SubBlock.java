@@ -75,6 +75,9 @@ public class SubBlock {
     public void applyTextures(String mod, TextureLoader loader) {
         for (Map.Entry<FaceOrientation, String> entry : textures.entrySet()) {
             Pair<Float, Float> texture = loader.getTexture(mod, entry.getValue());
+            if (texture == null) {
+                continue;
+            }
             textureCoordinates.put(entry.getKey(), texture);
         }
         // clean up
@@ -87,7 +90,6 @@ public class SubBlock {
         } catch (Exception e) {
             uv.put(orientation, new InFaceUV());
         }
-
         String textureName = getRealTextureName(faceJson.get("texture").getAsString(), variables);
         textures.put(orientation, textureName);
         cullFaceTextures.put(orientation, faceJson.has("cullface"));

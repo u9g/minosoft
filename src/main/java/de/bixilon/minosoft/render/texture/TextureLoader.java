@@ -34,16 +34,19 @@ import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 public class TextureLoader {
     private final int TEXTURE_PACK_RES = 16;
     private final HashMap<String, HashMap<String, Integer>> textureCoordinates;
+    private final HashMap<String, HashSet<String>> ignored;
     int textureID;
     float step;
     int totalTextures = 0;
     HashMap<String, HashMap<String, BufferedImage>> images;
 
-    public TextureLoader(HashMap<String, HashSet<String>> textures, HashMap<String, HashMap<String, float[]>> tints) {
+    public TextureLoader(HashMap<String, HashSet<String>> textures, HashMap<String, HashMap<String, float[]>> tints,
+                         HashMap<String, HashSet<String>> ignored_textures) {
         textureCoordinates = new HashMap<>();
         images = new HashMap<>();
+        this.ignored = ignored_textures;
         for (String mod : textures.keySet()) {
-            loadTextures(mod, textures.get(mod), tints.get(mod));
+            loadTextures(mod, textures.get(mod), tints.get(mod), ignored_textures.get(mod));
         }
         combineTextures();
         try {
@@ -71,9 +74,12 @@ public class TextureLoader {
         }
     }
 
-    private void loadTextures(String mod, HashSet<String> textureNames, HashMap<String, float[]> tint) {
+    private void loadTextures(String mod, HashSet<String> textureNames, HashMap<String, float[]> tint, HashSet<String> ignored) {
         HashMap<String, BufferedImage> modTextureMap = new HashMap<>();
         for (String textureName : textureNames) {
+            if (ignored != null && ignored.contains(textureName)) {
+                continue;
+            }
             String path = Config.homeDir + "assets/" + mod + "/textures/" + textureName + ".png";
             try {
                 BufferedImage image = ImageIO.read(new File(path));
@@ -143,6 +149,10 @@ public class TextureLoader {
 
     public Pair<Float, Float> getTexture(String mod, String textureName) {
         // returns the start and end u-coordinate of a specific texture to access it
+        if (ignored.get(mod) != null && ignored.get(mod).contains(textureName)) {
+            return null;
+        }
+
         HashMap<String, Integer> modMap = textureCoordinates.get(mod);
         if (modMap == null) {
             System.out.println("no mod " + mod + " loaded");

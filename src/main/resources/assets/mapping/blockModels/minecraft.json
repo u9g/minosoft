@@ -116,5 +116,8 @@
       1,
       0
     ]
-  }
+  },
+  "ignored_textures": [
+    "block/grass_block_side_overlay"
+  ]
 }
