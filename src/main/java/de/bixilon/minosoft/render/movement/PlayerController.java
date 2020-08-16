@@ -26,7 +26,7 @@ public class PlayerController {
     private final float playerWidth = 0.5f;
     CameraMovement cameraMovement;
     PlayerMovement playerMovement;
-    Vec3 playerPos = new Vec3(0, 1, 0); // the feet position of the player
+    Vec3 playerPos = new Vec3(); // the feet position of the player
     Vec3 playerVelocity = new Vec3();
     float gravity = 9.81f;
     boolean onGround;

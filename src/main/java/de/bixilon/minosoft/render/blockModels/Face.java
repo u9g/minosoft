@@ -14,13 +14,14 @@
 package de.bixilon.minosoft.render.blockModels;
 
 import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
+import de.bixilon.minosoft.render.Face.FaceOrientation;
+import de.bixilon.minosoft.render.Face.InFaceUV;
 import de.bixilon.minosoft.render.MainWindow;
-import de.bixilon.minosoft.render.fullFace.FaceOrientation;
-import de.bixilon.minosoft.render.fullFace.InFaceUV;
+import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlock;
 import javafx.util.Pair;
 
-import static de.bixilon.minosoft.render.fullFace.RenderConstants.blockRes;
-import static de.bixilon.minosoft.render.fullFace.RenderConstants.texturePackRes;
+import static de.bixilon.minosoft.render.Face.RenderConstants.blockRes;
+import static de.bixilon.minosoft.render.Face.RenderConstants.texturePackRes;
 import static org.lwjgl.opengl.GL11.glTexCoord2f;
 import static org.lwjgl.opengl.GL11.glVertex3f;
 

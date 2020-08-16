@@ -17,7 +17,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.Config;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
-import de.bixilon.minosoft.render.fullFace.FaceOrientation;
+import de.bixilon.minosoft.render.Face.FaceOrientation;
+import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlock;
 import de.bixilon.minosoft.render.texture.TextureLoader;
 
 import java.io.IOException;

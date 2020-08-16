@@ -11,11 +11,12 @@
  *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
-package de.bixilon.minosoft.render.blockModels;
+package de.bixilon.minosoft.render.blockModels.subBlocks;
 
 import com.google.gson.JsonObject;
-import de.bixilon.minosoft.render.fullFace.FaceOrientation;
-import de.bixilon.minosoft.render.fullFace.InFaceUV;
+import de.bixilon.minosoft.render.Face.FaceOrientation;
+import de.bixilon.minosoft.render.Face.InFaceUV;
+import de.bixilon.minosoft.render.blockModels.Face;
 import de.bixilon.minosoft.render.texture.TextureLoader;
 import javafx.util.Pair;
 
@@ -24,6 +25,7 @@ import java.util.HashSet;
 import java.util.Map;
 
 public class SubBlock {
+    SubBlockRotation rotation;
     SubBlockPosition pos1; // the most negative Point of the SubBlock
     SubBlockPosition pos2; // the most positive Point of the SubBlock
 
@@ -48,6 +50,9 @@ public class SubBlock {
                 applyTexture(faces.getAsJsonObject(orientation.name().toLowerCase()),
                         orientation, variables);
             }
+        }
+        if (json.has("rotation")) {
+            rotation = new SubBlockRotation(json.get("rotation").getAsJsonObject());
         }
         isFull = (pos1.x == 0 && pos1.y == 0 && pos1.z == 0) && (pos2.x == 16 && pos2.y == 16 && pos2.z == 16);
     }

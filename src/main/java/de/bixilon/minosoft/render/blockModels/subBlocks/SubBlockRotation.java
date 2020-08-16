@@ -11,22 +11,31 @@
  *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
-package de.bixilon.minosoft.render.fullFace;
+package de.bixilon.minosoft.render.blockModels.subBlocks;
 
-import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import de.bixilon.minosoft.render.Face.Axis;
 
-public class InFaceUV {
-    public int u1, v1, u2, v2;
+public class SubBlockRotation {
+    SubBlockPosition origin;
+    Axis direction;
+    float angle;
 
-    public InFaceUV(JsonArray json) {
-        u1 = json.get(0).getAsInt();
-        v1 = json.get(1).getAsInt();
-        u2 = json.get(2).getAsInt();
-        v2 = json.get(3).getAsInt();
+    public SubBlockRotation(JsonObject rotation) {
+        origin = new SubBlockPosition(rotation.get("origin").getAsJsonArray());
+        String axis = rotation.get("axis").getAsString();
+        switch (axis) {
+            case "x":
+                direction = Axis.X;
+                break;
+            case "y":
+                direction = Axis.Y;
+                break;
+            case "z":
+                direction = Axis.Z;
+        }
+        angle = rotation.get("angle").getAsFloat();
     }
 
-    public InFaceUV() {
-        u1 = v1 = 0;
-        u2 = v2 = 16;
-    }
+
 }

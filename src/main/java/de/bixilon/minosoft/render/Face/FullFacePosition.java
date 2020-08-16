@@ -11,13 +11,13 @@
  *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
-package de.bixilon.minosoft.render.fullFace;
+package de.bixilon.minosoft.render.Face;
 
 import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
 import javafx.util.Pair;
 import org.apache.commons.collections.primitives.ArrayFloatList;
 
-import static de.bixilon.minosoft.render.fullFace.RenderConstants.UV;
+import static de.bixilon.minosoft.render.Face.RenderConstants.UV;
 
 public class FullFacePosition {
     private final BlockPosition blockPosition;

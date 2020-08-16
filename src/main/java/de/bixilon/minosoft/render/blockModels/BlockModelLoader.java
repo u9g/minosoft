@@ -19,7 +19,7 @@ import de.bixilon.minosoft.Config;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Blocks;
 import de.bixilon.minosoft.logging.Log;
-import de.bixilon.minosoft.render.fullFace.FaceOrientation;
+import de.bixilon.minosoft.render.Face.FaceOrientation;
 import de.bixilon.minosoft.render.texture.TextureLoader;
 import org.apache.commons.collections.primitives.ArrayFloatList;
 

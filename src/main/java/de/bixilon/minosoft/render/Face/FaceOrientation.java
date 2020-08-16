@@ -11,22 +11,23 @@
  *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
-package de.bixilon.minosoft.render.blockModels;
+package de.bixilon.minosoft.render.Face;
 
-import com.google.gson.JsonArray;
+public enum FaceOrientation {
+    EAST(0), WEST(1), UP(2), DOWN(3), SOUTH(4), NORTH(5);
+    private final int id;
 
-public class SubBlockPosition {
-    int x, y, z;
-
-    public SubBlockPosition(int x, int y, int z) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
+    FaceOrientation(int id) {
+        this.id = id;
     }
 
-    public SubBlockPosition(JsonArray json) {
-        x = json.get(0).getAsInt();
-        y = json.get(1).getAsInt();
-        z = json.get(2).getAsInt();
+    public static FaceOrientation[] getNotVerticalValues() {
+        return new FaceOrientation[]{
+                EAST, WEST, SOUTH, NORTH
+        };
+    }
+
+    public int getId() {
+        return this.id;
     }
 }

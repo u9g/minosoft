@@ -1,6 +1,6 @@
 /*
  * Codename Minosoft
- * Copyright (C) 2020 Moritz Zwerger
+ * Copyright (C) 2020 Lukas Eisenhauer
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -11,23 +11,16 @@
  *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
-package de.bixilon.minosoft.render.fullFace;
+package de.bixilon.minosoft.render.blockModels.subBlocks;
 
-public enum FaceOrientation {
-    EAST(0), WEST(1), UP(2), DOWN(3), SOUTH(4), NORTH(5);
-    private final int id;
+import com.google.gson.JsonArray;
 
-    FaceOrientation(int id) {
-        this.id = id;
-    }
+public class SubBlockPosition {
+    float x, y, z;
 
-    public static FaceOrientation[] getNotVerticalValues() {
-        return new FaceOrientation[]{
-                EAST, WEST, SOUTH, NORTH
-        };
-    }
-
-    public int getId() {
-        return this.id;
+    public SubBlockPosition(JsonArray json) {
+        x = json.get(0).getAsFloat();
+        y = json.get(1).getAsFloat();
+        z = json.get(2).getAsFloat();
     }
 }
