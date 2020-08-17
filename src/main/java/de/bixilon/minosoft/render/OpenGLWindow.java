@@ -105,6 +105,15 @@ public class OpenGLWindow {
 
         glEnableClientState(GL_VERTEX_ARRAY);
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_FRONT);
+
+        glEnable(GL_ALPHA_TEST);
+        glAlphaFunc(GL_GREATER, 0.0f);
     }
 
     public long getWindow() {

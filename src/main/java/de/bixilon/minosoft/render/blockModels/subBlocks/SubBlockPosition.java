@@ -14,6 +14,10 @@
 package de.bixilon.minosoft.render.blockModels.subBlocks;
 
 import com.google.gson.JsonArray;
+import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
+
+import static de.bixilon.minosoft.render.Face.RenderConstants.blockRes;
+import static org.lwjgl.opengl.GL11.glVertex3f;
 
 public class SubBlockPosition {
     float x, y, z;
@@ -22,5 +26,32 @@ public class SubBlockPosition {
         x = json.get(0).getAsFloat();
         y = json.get(1).getAsFloat();
         z = json.get(2).getAsFloat();
+    }
+
+    public SubBlockPosition(float x, float y, float z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
+    public static SubBlockPosition add(SubBlockPosition pos1, SubBlockPosition pos2) {
+        return new SubBlockPosition(
+                pos1.x + pos2.x,
+                pos1.y + pos2.y,
+                pos1.z + pos2.z);
+    }
+
+    public static SubBlockPosition subtract(SubBlockPosition pos1, SubBlockPosition pos2) {
+        return new SubBlockPosition(
+                pos1.x - pos2.x,
+                pos1.y - pos2.y,
+                pos1.z - pos2.z);
+    }
+
+    public void draw(BlockPosition pos) {
+        glVertex3f(
+                pos.getX() + x / blockRes,
+                pos.getY() + y / blockRes,
+                pos.getZ() + z / blockRes);
     }
 }

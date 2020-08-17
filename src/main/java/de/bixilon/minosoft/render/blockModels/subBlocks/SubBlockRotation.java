@@ -15,6 +15,10 @@ package de.bixilon.minosoft.render.blockModels.subBlocks;
 
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.render.Face.Axis;
+import javafx.util.Pair;
+
+import static java.lang.StrictMath.cos;
+import static java.lang.StrictMath.sin;
 
 public class SubBlockRotation {
     SubBlockPosition origin;
@@ -37,5 +41,33 @@ public class SubBlockRotation {
         angle = rotation.get("angle").getAsFloat();
     }
 
+    private static Pair<Float, Float> rotate(float x, float y, float angle) {
+        return new Pair<Float, Float>(
+                x * (float) cos(angle) + y * (float) sin(angle),
+                -x * (float) sin(angle) + y * (float) cos(angle)
+        );
+    }
 
+    public SubBlockPosition apply(SubBlockPosition position) {
+        SubBlockPosition transformed = SubBlockPosition.subtract(position, origin);
+        Pair<Float, Float> rotated;
+        switch (direction) {
+            case X:
+                rotated = rotate(transformed.y, transformed.z, angle);
+                transformed.y = rotated.getKey();
+                transformed.z = rotated.getValue();
+                break;
+            case Y:
+                rotated = rotate(transformed.x, transformed.z, angle);
+                transformed.x = rotated.getKey();
+                transformed.z = rotated.getValue();
+                break;
+            case Z:
+                rotated = rotate(transformed.x, transformed.y, angle);
+                transformed.x = rotated.getKey();
+                transformed.y = rotated.getValue();
+                break;
+        }
+        return SubBlockPosition.add(transformed, origin);
+    }
 }

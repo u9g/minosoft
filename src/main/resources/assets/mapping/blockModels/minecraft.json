@@ -115,6 +115,11 @@
       0,
       1,
       0
+    ],
+    "block/grass": [
+      0,
+      1,
+      0
     ]
   },
   "ignored_textures": [

@@ -15,8 +15,8 @@ package de.bixilon.minosoft.render.blockModels.subBlocks;
 
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.render.Face.FaceOrientation;
-import de.bixilon.minosoft.render.Face.InFaceUV;
 import de.bixilon.minosoft.render.blockModels.Face;
+import de.bixilon.minosoft.render.texture.InFaceUV;
 import de.bixilon.minosoft.render.texture.TextureLoader;
 import javafx.util.Pair;
 
@@ -26,14 +26,15 @@ import java.util.Map;
 
 public class SubBlock {
     SubBlockRotation rotation;
-    SubBlockPosition pos1; // the most negative Point of the SubBlock
-    SubBlockPosition pos2; // the most positive Point of the SubBlock
 
     HashMap<FaceOrientation, Pair<Float, Float>> textureCoordinates;
     HashMap<FaceOrientation, String> textures;
     HashMap<FaceOrientation, Boolean> cullFaceTextures;
 
     HashMap<FaceOrientation, InFaceUV> uv;
+
+    Cuboid cuboid;
+
     private final boolean isFull;
 
     public SubBlock(JsonObject json, HashMap<String, String> variables) {
@@ -42,8 +43,13 @@ public class SubBlock {
         textureCoordinates = new HashMap<>();
         cullFaceTextures = new HashMap<>();
 
-        pos1 = new SubBlockPosition(json.getAsJsonArray("from"));
-        pos2 = new SubBlockPosition(json.getAsJsonArray("to"));
+        SubBlockPosition from = new SubBlockPosition(json.getAsJsonArray("from"));
+        SubBlockPosition to = new SubBlockPosition(json.getAsJsonArray("to"));
+        if (json.has("rotation")) {
+            rotation = new SubBlockRotation(json.get("rotation").getAsJsonObject());
+        }
+        cuboid = new Cuboid(from, to, rotation);
+
         JsonObject faces = json.getAsJsonObject("faces");
         for (FaceOrientation orientation : FaceOrientation.values()) {
             if (faces.has(orientation.name().toLowerCase())) {
@@ -51,10 +57,7 @@ public class SubBlock {
                         orientation, variables);
             }
         }
-        if (json.has("rotation")) {
-            rotation = new SubBlockRotation(json.get("rotation").getAsJsonObject());
-        }
-        isFull = (pos1.x == 0 && pos1.y == 0 && pos1.z == 0) && (pos2.x == 16 && pos2.y == 16 && pos2.z == 16);
+        isFull = (from.x == 0 && from.y == 0 && from.z == 0) && (to.x == 16 && to.y == 16 && to.z == 16);
     }
 
     private static String getRealTextureName(String textureName, HashMap<String, String> variables) {
@@ -108,7 +111,7 @@ public class SubBlock {
             }
             if (!(adjacentBlocks.get(orientation) && cullFaceTextures.get(orientation))) {
                 result.add(new Face(orientation, textureCoordinates.get(orientation),
-                        uv.get(orientation), this));
+                        uv.get(orientation), cuboid));
             }
         }
         return result;

@@ -21,12 +21,6 @@ public enum FaceOrientation {
         this.id = id;
     }
 
-    public static FaceOrientation[] getNotVerticalValues() {
-        return new FaceOrientation[]{
-                EAST, WEST, SOUTH, NORTH
-        };
-    }
-
     public int getId() {
         return this.id;
     }

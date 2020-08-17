@@ -64,7 +64,7 @@ public class TextureLoader {
     private static void tintImage(BufferedImage image, float[] tintColor) {
         for (int x = 0; x < image.getWidth(); x++) {
             for (int y = 0; y < image.getHeight(); y++) {
-                Color color = new Color(image.getRGB(x, y));
+                Color color = new Color(image.getRGB(x, y), true);
                 int r = (int) (color.getRed() * tintColor[0]);
                 int g = (int) (color.getGreen() * tintColor[1]);
                 int b = (int) (color.getBlue() * tintColor[2]);
