@@ -20,30 +20,25 @@ import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockRotation;
 import java.util.HashSet;
 
 public class BlockConfiguration {
-    HashSet<BlockRotation> rotations;
+    BlockRotation rotation;
     HashSet<BlockProperties> blockProperties;
 
     public BlockConfiguration(String config) {
-        rotations = new HashSet<>();
         blockProperties = new HashSet<>();
         for (String configuration : config.split(",")) {
             switch (configuration) {
-                case "orientation:vertical":
-                    rotations.add(BlockRotation.UP);
-                    rotations.add(BlockRotation.DOWN);
-                    break;
                 case "orientation:up":
-                    rotations.add(BlockRotation.UP);
+                    rotation = BlockRotation.UP;
                     break;
                 case "orientation:down":
-                    rotations.add(BlockRotation.DOWN);
+                    rotation = BlockRotation.DOWN;
                     break;
             }
         }
     }
 
-    public HashSet<BlockRotation> getRotations() {
-        return rotations;
+    public BlockRotation getRotation() {
+        return rotation;
     }
 
     public HashSet<BlockProperties> getBlockProperties() {
@@ -51,15 +46,20 @@ public class BlockConfiguration {
     }
 
     public boolean equals(BlockConfiguration blockConfiguration) {
-        return rotations.equals(blockConfiguration.getRotations()) &&
+        return rotation.equals(blockConfiguration.getRotation()) &&
                 blockProperties.equals(blockConfiguration.getBlockProperties());
     }
 
     public boolean contains(Block block) {
-        if (!rotations.contains(block.getRotation()) && block.getRotation() != BlockRotation.NONE) {
+        if (block.getRotation().equals(BlockRotation.NONE)) {
             return false;
         }
-
+        if (!block.getRotation().equals(rotation)) {
+            return false;
+        }
+        if (blockProperties.size() == 0 && block.getProperties().size() == 0) {
+            return true;
+        }
         for (BlockProperties property : blockProperties) {
             if (!block.getProperties().contains(property)) {
                 return false;

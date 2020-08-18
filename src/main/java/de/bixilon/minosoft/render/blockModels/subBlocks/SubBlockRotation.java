@@ -14,7 +14,7 @@
 package de.bixilon.minosoft.render.blockModels.subBlocks;
 
 import com.google.gson.JsonObject;
-import de.bixilon.minosoft.render.Face.Axis;
+import de.bixilon.minosoft.render.blockModels.Face.Axis;
 import javafx.util.Pair;
 
 import static java.lang.StrictMath.cos;

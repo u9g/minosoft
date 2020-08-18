@@ -17,7 +17,7 @@ import com.google.gson.JsonArray;
 import de.bixilon.minosoft.render.MainWindow;
 import javafx.util.Pair;
 
-import static de.bixilon.minosoft.render.Face.RenderConstants.texturePackRes;
+import static de.bixilon.minosoft.render.blockModels.Face.RenderConstants.texturePackRes;
 import static org.lwjgl.opengl.GL11.glTexCoord2f;
 
 public class InFaceUV {

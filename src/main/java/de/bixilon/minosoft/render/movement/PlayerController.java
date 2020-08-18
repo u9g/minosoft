@@ -23,7 +23,7 @@ import static org.lwjgl.opengl.GL11.glTranslatef;
 
 public class PlayerController {
     private final float playerHeight = 1.8f;
-    private final float playerWidth = 0.5f;
+    private final float playerWidth = 0.25f;
     CameraMovement cameraMovement;
     PlayerMovement playerMovement;
     Vec3 playerPos = new Vec3(); // the feet position of the player

@@ -46,7 +46,8 @@
     "lapis_ore": "regular",
     "lapis_block": "regular",
     "dispenser": {
-      "orientation:vertical": "dispenser_vertical",
+      "orientation:up": "dispenser_vertical",
+      "orientation:down": "dispenser_vertical",
       "else": "dispenser"
     },
     "sandstone": "regular",
@@ -111,16 +112,8 @@
     "azure_bluet": "regular"
   },
   "tinted_textures": {
-    "block/grass_block_top": [
-      0,
-      1,
-      0
-    ],
-    "block/grass": [
-      0,
-      1,
-      0
-    ]
+    "block/grass_block_top": [0,1,0],
+    "block/grass": [0,1,0]
   },
   "ignored_textures": [
     "block/grass_block_side_overlay"

@@ -17,13 +17,15 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.Config;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
-import de.bixilon.minosoft.render.Face.FaceOrientation;
+import de.bixilon.minosoft.render.blockModels.Face.Face;
+import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlock;
 import de.bixilon.minosoft.render.texture.TextureLoader;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 import static de.bixilon.minosoft.util.Util.readJsonFromFile;
 
@@ -104,9 +106,19 @@ public class BlockDescription {
     }
 
     public HashSet<Face> prepare(Block block, HashMap<FaceOrientation, Boolean> adjacentBlocks) {
+        for (Map.Entry<BlockConfiguration, HashSet<SubBlock>> entry : blockConfigurationStates.entrySet()) {
+            if (entry.getKey().contains(block)) {
+                return prepareBlockState(entry.getValue(), adjacentBlocks, block);
+            }
+        }
+        return prepareBlockState(defaultState, adjacentBlocks, block);
+    }
+
+    private HashSet<Face> prepareBlockState(HashSet<SubBlock> subBlocks,
+                                            HashMap<FaceOrientation, Boolean> adjacentBlocks, Block block) {
         HashSet<Face> result = new HashSet<>();
-        for (SubBlock subBlock : defaultState) {
-            result.addAll(subBlock.getFaces(adjacentBlocks));
+        for (SubBlock subBlock : subBlocks) {
+            result.addAll(subBlock.getFaces(block, adjacentBlocks));
         }
         return result;
     }
@@ -116,11 +128,23 @@ public class BlockDescription {
         for (SubBlock subBlock : defaultState) {
             result.addAll(subBlock.getTextures());
         }
+        for (HashSet<SubBlock> subBlocks : blockConfigurationStates.values()) {
+            for (SubBlock subBlock : subBlocks) {
+                result.addAll(subBlock.getTextures());
+            }
+        }
         return result;
     }
 
     public void applyTextures(String mod, TextureLoader loader) {
-        for (SubBlock subBlock : defaultState) {
+        applyConfigurationTextures(defaultState, mod, loader);
+        for (HashSet<SubBlock> subBlocks : blockConfigurationStates.values()) {
+            applyConfigurationTextures(subBlocks, mod, loader);
+        }
+    }
+
+    private void applyConfigurationTextures(HashSet<SubBlock> subBlocks, String mod, TextureLoader loader) {
+        for (SubBlock subBlock : subBlocks) {
             subBlock.applyTextures(mod, loader);
         }
     }

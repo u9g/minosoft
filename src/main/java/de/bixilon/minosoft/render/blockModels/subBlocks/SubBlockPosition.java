@@ -16,7 +16,7 @@ package de.bixilon.minosoft.render.blockModels.subBlocks;
 import com.google.gson.JsonArray;
 import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
 
-import static de.bixilon.minosoft.render.Face.RenderConstants.blockRes;
+import static de.bixilon.minosoft.render.blockModels.Face.RenderConstants.blockRes;
 import static org.lwjgl.opengl.GL11.glVertex3f;
 
 public class SubBlockPosition {

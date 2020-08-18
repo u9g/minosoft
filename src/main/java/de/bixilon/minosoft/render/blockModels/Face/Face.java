@@ -11,10 +11,9 @@
  *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
-package de.bixilon.minosoft.render.blockModels;
+package de.bixilon.minosoft.render.blockModels.Face;
 
 import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
-import de.bixilon.minosoft.render.Face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.subBlocks.Cuboid;
 import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlockPosition;
 import de.bixilon.minosoft.render.texture.InFaceUV;

@@ -15,7 +15,7 @@ package de.bixilon.minosoft.render.blockModels.subBlocks;
 
 // some 3d object with 8 corners, 6 faces and 12 edges (example: cube, but can be deformed)
 
-import de.bixilon.minosoft.render.Face.FaceOrientation;
+import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,7 +25,7 @@ public class Cuboid {
             FaceOrientation.EAST, new int[]{7, 5, 1, 3},
             FaceOrientation.WEST, new int[]{4, 6, 2, 0},
             FaceOrientation.UP, new int[]{7, 6, 4, 5},
-            FaceOrientation.DOWN, new int[]{0, 1, 3, 2},
+            FaceOrientation.DOWN, new int[]{2, 3, 1, 0},
             FaceOrientation.SOUTH, new int[]{6, 7, 3, 2},
             FaceOrientation.NORTH, new int[]{5, 4, 0, 1}
     );

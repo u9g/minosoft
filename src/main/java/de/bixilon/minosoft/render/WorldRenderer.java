@@ -17,15 +17,15 @@ import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Blocks;
 import de.bixilon.minosoft.game.datatypes.world.*;
 import de.bixilon.minosoft.logging.Log;
-import de.bixilon.minosoft.render.Face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.BlockModelLoader;
-import de.bixilon.minosoft.render.blockModels.Face;
+import de.bixilon.minosoft.render.blockModels.Face.Face;
+import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import static de.bixilon.minosoft.render.Face.RenderConstants.faceDir;
+import static de.bixilon.minosoft.render.blockModels.Face.RenderConstants.faceDir;
 import static org.lwjgl.opengl.GL11.*;
 
 public class WorldRenderer {

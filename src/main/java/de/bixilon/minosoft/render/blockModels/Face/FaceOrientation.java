@@ -11,7 +11,7 @@
  *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
-package de.bixilon.minosoft.render.Face;
+package de.bixilon.minosoft.render.blockModels.Face;
 
 public enum FaceOrientation {
     EAST(0), WEST(1), UP(2), DOWN(3), SOUTH(4), NORTH(5);

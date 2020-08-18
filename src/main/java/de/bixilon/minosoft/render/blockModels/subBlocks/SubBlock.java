@@ -14,8 +14,9 @@
 package de.bixilon.minosoft.render.blockModels.subBlocks;
 
 import com.google.gson.JsonObject;
-import de.bixilon.minosoft.render.Face.FaceOrientation;
-import de.bixilon.minosoft.render.blockModels.Face;
+import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
+import de.bixilon.minosoft.render.blockModels.Face.Face;
+import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.texture.InFaceUV;
 import de.bixilon.minosoft.render.texture.TextureLoader;
 import javafx.util.Pair;
@@ -103,7 +104,7 @@ public class SubBlock {
         cullFaceTextures.put(orientation, faceJson.has("cullface"));
     }
 
-    public HashSet<Face> getFaces(HashMap<FaceOrientation, Boolean> adjacentBlocks) {
+    public HashSet<Face> getFaces(Block block, HashMap<FaceOrientation, Boolean> adjacentBlocks) {
         HashSet<Face> result = new HashSet<>();
         for (FaceOrientation orientation : FaceOrientation.values()) {
             if (!textureCoordinates.containsKey(orientation)) {
