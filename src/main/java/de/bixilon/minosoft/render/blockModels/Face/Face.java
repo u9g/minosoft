@@ -14,7 +14,6 @@
 package de.bixilon.minosoft.render.blockModels.Face;
 
 import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
-import de.bixilon.minosoft.render.blockModels.subBlocks.Cuboid;
 import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlockPosition;
 import de.bixilon.minosoft.render.texture.InFaceUV;
 import javafx.util.Pair;
@@ -23,14 +22,18 @@ public class Face {
     SubBlockPosition[] positions;
     InFaceUV uv;
 
-    public Face(FaceOrientation orientation, Pair<Float, Float> texture, InFaceUV uv, Cuboid cuboid) {
-        positions = cuboid.getFacePositions(orientation);
+    public Face(Pair<Float, Float> texture, InFaceUV uv, SubBlockPosition[] facePositions) {
+        positions = facePositions;
         this.uv = uv;
         this.uv.prepare(texture);
     }
 
+    public Face() {
+        positions = new SubBlockPosition[]{};
+    }
+
     public void draw(BlockPosition pos) {
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < positions.length; i++) {
             uv.draw(i);
             positions[i].draw(pos);
         }

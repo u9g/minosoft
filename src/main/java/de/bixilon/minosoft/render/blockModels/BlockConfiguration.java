@@ -23,6 +23,7 @@ public class BlockConfiguration {
     BlockRotation rotation;
     HashSet<BlockProperties> blockProperties;
 
+
     public BlockConfiguration(String config) {
         blockProperties = new HashSet<>();
         for (String configuration : config.split(",")) {

@@ -15,6 +15,7 @@ package de.bixilon.minosoft.render.blockModels.subBlocks;
 
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
+import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockRotation;
 import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.texture.InFaceUV;
@@ -110,12 +111,31 @@ public class SubBlock {
             if (!textureCoordinates.containsKey(orientation)) {
                 continue;
             }
-            if (!(adjacentBlocks.get(orientation) && cullFaceTextures.get(orientation))) {
-                result.add(new Face(orientation, textureCoordinates.get(orientation),
-                        uv.get(orientation), cuboid));
+            if (block.getRotation().equals(BlockRotation.DOWN)) {
+                if (orientation.equals(FaceOrientation.DOWN)) {
+                    result.add(prepareFace(FaceOrientation.DOWN, FaceOrientation.UP,
+                            adjacentBlocks));
+                    continue;
+                }
+                if (orientation.equals(FaceOrientation.UP)) {
+                    result.add(prepareFace(FaceOrientation.UP, FaceOrientation.DOWN,
+                            adjacentBlocks));
+                    continue;
+                }
+
             }
+            result.add(prepareFace(orientation, orientation, adjacentBlocks));
         }
         return result;
+    }
+
+    private Face prepareFace(FaceOrientation textureDirection, FaceOrientation faceDirection,
+                             HashMap<FaceOrientation, Boolean> adjacentBlocks) {
+        if (adjacentBlocks.get(faceDirection) && !cullFaceTextures.get(faceDirection)) {
+            return new Face();
+        }
+        return new Face(textureCoordinates.get(textureDirection), uv.get(textureDirection),
+                cuboid.getFacePositions(faceDirection));
     }
 
     public boolean isFull() {
