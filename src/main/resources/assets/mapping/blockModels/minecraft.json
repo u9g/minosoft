@@ -31,6 +31,7 @@
     "gold_ore": "regular",
     "iron_ore": "regular",
     "coal_ore": "regular",
+    "oak_log": "regular",
     "spruce_log": "regular",
     "birch_log": "regular",
     "jungle_log": "regular",
@@ -109,7 +110,96 @@
     "poppy": "regular",
     "blue_orchid": "regular",
     "allium": "regular",
-    "azure_bluet": "regular"
+    "azure_bluet": "regular",
+    "red_tulip": "regular",
+    "orange_tulip": "regular",
+    "white_tulip": "regular",
+    "pink_tulip": "regular",
+    "oxeye_daisy": "regular",
+    "brown_mushroom": "regular",
+    "red_mushroom": "regular",
+    "gold_block": "regular",
+    "iron_block": "regular",
+    "stone_slab": {
+      "else": "stone_slab",
+      "top": "stone_slab_top",
+      "bottom": "stone_slab",
+      "double": "stone"
+    },
+    "sandstone_slab": {
+      "else": "sandstone_slab",
+      "top": "sandstone_slab_top",
+      "bottom": "sandstone_slab",
+      "double": "sandstone"
+    },
+    "oak_slab": {
+      "else": "oak_slab",
+      "top": "oak_slab_top",
+      "bottom": "oak_slab",
+      "double": "oak_planks"
+    },
+    "spruce_slab": {
+      "else": "spruce_slab",
+      "top": "spruce_slab_top",
+      "bottom": "spruce_slab",
+      "double": "spruce_planks"
+    },
+    "birch_slab": {
+      "else": "birch_slab",
+      "top": "birch_slab_top",
+      "bottom": "birch_slab",
+      "double": "birch_planks"
+    },
+    "acacia_slab": {
+      "else": "acacia_slab",
+      "top": "acacia_slab_top",
+      "bottom": "acacia_slab",
+      "double": "acacia_planks"
+    },
+    "dark_oak_slab": {
+      "else": "dark_oak_slab",
+      "top": "dark_oak_slab_top",
+      "bottom": "dark_oak_slab",
+      "double": "dark_oak_planks"
+    },
+    "cobblestone_slab": {
+      "else": "cobblestone_slab",
+      "top": "cobblestone_slab_top",
+      "bottom": "cobblestone_slab",
+      "double": "cobblestone"
+    },
+    "brick_slab": {
+      "else": "brick_slab",
+      "top": "brick_slab_top",
+      "bottom": "brick_slab",
+      "double": "bricks"
+    },
+    "stone_brick_slab": {
+      "else": "stone_brick_slab",
+      "top": "stone_brick_slab_top",
+      "bottom": "stone_brick_slab",
+      "double": "stone_bricks"
+    },
+    "nether_brick_slab": {
+      "else": "nether_brick_slab",
+      "top": "nether_brick_slab_top",
+      "bottom": "nether_brick_slab",
+      "double": "nether_bricks"
+    },
+    "quartz_slab": {
+      "else": "quartz_slab",
+      "top": "quartz_slab_top",
+      "bottom": "quartz_slab",
+      "double": "quartz_block"
+    },
+    "bricks": "regular",
+    "tnt": "regular",
+    "bookshelf": "regular",
+    "mossy_cobblestone": "regular",
+    "obsidian": "regular",
+    "torch": "regular",
+    "wall_torch": "regular",
+    "spawner": "regular"
   },
   "tinted_textures": {
     "block/grass_block_top": [0,1,0],

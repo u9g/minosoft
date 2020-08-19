@@ -47,6 +47,9 @@ public class InFaceUV {
     }
 
     public void draw(int i) {
+        if (i > 3) {
+            i -= 4;
+        }
         switch (i) {
             case 0:
                 glTexCoord2f(realU1, realV1);

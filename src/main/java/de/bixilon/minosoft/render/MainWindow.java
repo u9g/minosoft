@@ -63,8 +63,6 @@ public class MainWindow {
             float mouseY = (float) openGLWindow.getMouseY();
             switch (renderMode) {
                 case MAIN_MENU:
-                    if (glfwGetKey(openGLWindow.getWindow(), GLFW_KEY_ESCAPE) == GLFW_PRESS)
-                        close();
                     glOrtho(0.f, openGLWindow.getWidth(), openGLWindow.getHeight(), 0.f, 0.f, 1.f);
                     mainMenu.draw(mouseX, mouseY);
                     break;
@@ -107,10 +105,6 @@ public class MainWindow {
 
     public static Connection getConnection() {
         return connection;
-    }
-
-    public static void close() {
-        //System.exit(0);
     }
 
     public static PlayerController getPlayerController() {
