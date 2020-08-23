@@ -25,6 +25,12 @@ public class SubBlockRotation {
     Axis direction;
     float angle;
 
+    public SubBlockRotation(SubBlockPosition origin, Axis direction, float angle) {
+        this.origin = origin;
+        this.direction = direction;
+        this.angle = angle;
+    }
+
     public SubBlockRotation(JsonObject rotation) {
         origin = new SubBlockPosition(rotation.get("origin").getAsJsonArray());
         String axis = rotation.get("axis").getAsString();
@@ -37,14 +43,19 @@ public class SubBlockRotation {
                 break;
             case "z":
                 direction = Axis.Z;
+                break;
         }
         angle = rotation.get("angle").getAsFloat();
     }
 
-    private static Pair<Float, Float> rotate(float x, float y, float angle) {
-        return new Pair<Float, Float>(
-                x * (float) cos(angle) + y * (float) sin(angle),
-                -x * (float) sin(angle) + y * (float) cos(angle)
+    public static Pair<Float, Float> rotate(float x, float y, float angle) {
+        float angleRad = (float) Math.toRadians(angle);
+        float newX = x * (float) cos(angleRad) + y * (float) sin(angleRad);
+        float newY = -x * (float) sin(angleRad) + y * (float) cos(angleRad);
+
+        return new Pair<>(
+                newX,
+                newY
         );
     }
 

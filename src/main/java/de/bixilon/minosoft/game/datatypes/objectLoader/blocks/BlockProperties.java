@@ -265,11 +265,6 @@ public enum BlockProperties {
     BOTTOM,
     NOT_BOTTOM,
 
-    // log, portal
-    AXIS_X,
-    AXIS_Y,
-    AXIS_Z,
-
     // trapwire
     DISARMED,
     ARMED,

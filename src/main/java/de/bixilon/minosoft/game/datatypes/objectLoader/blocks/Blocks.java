@@ -337,12 +337,6 @@ public class Blocks {
         propertiesMapping.put("hinge", propertyHashMap);
 
         propertyHashMap = new HashMap<>();
-        propertyHashMap.put("x", BlockProperties.AXIS_X);
-        propertyHashMap.put("y", BlockProperties.AXIS_Y);
-        propertyHashMap.put("z", BlockProperties.AXIS_Z);
-        propertiesMapping.put("axis", propertyHashMap);
-
-        propertyHashMap = new HashMap<>();
         propertyHashMap.put("floor", BlockProperties.FLOOR);
         propertyHashMap.put("wall", BlockProperties.WALL);
         propertyHashMap.put("ceiling", BlockProperties.CEILING);
@@ -434,6 +428,9 @@ public class Blocks {
         rotationMapping.put("ascending_south", BlockRotation.ASCENDING_SOUTH);
         rotationMapping.put("north_south", BlockRotation.NORTH_SOUTH);
         rotationMapping.put("east_west", BlockRotation.EAST_WEST);
+        rotationMapping.put("x", BlockRotation.AXIS_X);
+        rotationMapping.put("y", BlockRotation.AXIS_Y);
+        rotationMapping.put("z", BlockRotation.AXIS_Z);
     }
 
     public static Block getBlockByLegacy(int protocolId, int protocolMetaData) {
@@ -471,6 +468,9 @@ public class Blocks {
                     } else if (propertiesJSON.has("rotation")) {
                         rotation = rotationMapping.get(propertiesJSON.get("rotation").getAsString());
                         propertiesJSON.remove("rotation");
+                    } else if (propertiesJSON.has("axis")) {
+                        rotation = rotationMapping.get(propertiesJSON.get("axis").getAsString());
+                        propertiesJSON.remove("axis");
                     }
                     HashSet<BlockProperties> properties = new HashSet<>();
                     for (String propertyName : propertiesJSON.keySet()) {

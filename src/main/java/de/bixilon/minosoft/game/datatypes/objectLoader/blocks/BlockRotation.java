@@ -40,5 +40,10 @@ public enum BlockRotation {
     ASCENDING_SOUTH,
 
     UP,
-    DOWN
+    DOWN,
+
+    // log, portal
+    AXIS_X,
+    AXIS_Y,
+    AXIS_Z,
 }

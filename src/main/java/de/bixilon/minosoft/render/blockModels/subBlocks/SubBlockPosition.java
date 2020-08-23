@@ -14,13 +14,26 @@
 package de.bixilon.minosoft.render.blockModels.subBlocks;
 
 import com.google.gson.JsonArray;
+import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockRotation;
 import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
+import de.bixilon.minosoft.render.blockModels.Face.Axis;
 
 import static de.bixilon.minosoft.render.blockModels.Face.RenderConstants.blockRes;
 import static org.lwjgl.opengl.GL11.glVertex3f;
 
 public class SubBlockPosition {
     float x, y, z;
+
+    public static final SubBlockPosition middlePos = new SubBlockPosition(8, 8, 8);
+
+    public static final SubBlockRotation westRotator = new SubBlockRotation(middlePos, Axis.Y, 90);
+    public static final SubBlockRotation eastRotator = new SubBlockRotation(middlePos, Axis.Y, 270);
+    public static final SubBlockRotation southRotator = new SubBlockRotation(middlePos, Axis.Y, 180);
+
+    public static final SubBlockRotation xAxisRotator = new SubBlockRotation(middlePos, Axis.Z, 90);
+    public static final SubBlockRotation zAxisRotator = new SubBlockRotation(middlePos, Axis.X, 90);
+
+    public static final SubBlockRotation downRotator = new SubBlockRotation(middlePos, Axis.X, 180);
 
     public SubBlockPosition(JsonArray json) {
         x = json.get(0).getAsFloat();
@@ -53,5 +66,25 @@ public class SubBlockPosition {
                 pos.getX() + x / blockRes,
                 pos.getY() + y / blockRes,
                 pos.getZ() + z / blockRes);
+    }
+
+    public SubBlockPosition rotated(BlockRotation rotation) {
+
+        switch (rotation) {
+            case EAST:
+                return eastRotator.apply(this);
+            case WEST:
+                return westRotator.apply(this);
+            case SOUTH:
+                return southRotator.apply(this);
+            case AXIS_X:
+                return xAxisRotator.apply(this);
+            case AXIS_Z:
+                return zAxisRotator.apply(this);
+            case DOWN:
+                return downRotator.apply(this);
+            default:
+                return this;
+        }
     }
 }

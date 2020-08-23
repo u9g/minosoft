@@ -15,7 +15,6 @@ package de.bixilon.minosoft.render.blockModels.subBlocks;
 
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
-import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockProperties;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockRotation;
 import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
@@ -60,7 +59,7 @@ public class SubBlock {
                         orientation, variables);
             }
         }
-        isFull = (from.x == 0 && from.y == 0 && from.z == 0) && (to.x == 16 && to.y == 16 && to.z == 16);
+        isFull = (from.x == 0 && from.y == 0 && from.z == 0) && (to.x == 16 && to.y == 16 && to.z == 16) && rotation == null;
     }
 
     private static String getRealTextureName(String textureName, HashMap<String, String> variables) {
@@ -112,98 +111,18 @@ public class SubBlock {
             if (!textureCoordinates.containsKey(orientation)) {
                 continue;
             }
-            if (block.getRotation().equals(BlockRotation.DOWN)) {
-                if (orientation.equals(FaceOrientation.UP)) {
-                    result.add(prepareFace(FaceOrientation.DOWN, orientation,
-                            adjacentBlocks));
-                    continue;
-                }
-                if (orientation.equals(FaceOrientation.DOWN)) {
-                    result.add(prepareFace(FaceOrientation.UP, orientation,
-                            adjacentBlocks));
-                    continue;
-                }
-            } else if (block.getProperties().contains(BlockProperties.AXIS_X)) {
-                if (orientation.equals(FaceOrientation.EAST)) {
-                    result.add(prepareFace(FaceOrientation.UP, orientation,
-                            adjacentBlocks));
-                    continue;
-                }
-                if (orientation.equals(FaceOrientation.WEST)) {
-                    result.add(prepareFace(FaceOrientation.DOWN, orientation,
-                            adjacentBlocks));
-                    continue;
-                }
-                if (orientation.equals(FaceOrientation.UP)) {
-                    result.add(prepareFace(FaceOrientation.EAST, orientation,
-                            adjacentBlocks, 1));
-                    continue;
-                }
-                if (orientation.equals(FaceOrientation.DOWN)) {
-                    result.add(prepareFace(FaceOrientation.WEST, orientation,
-                            adjacentBlocks, 1));
-                    continue;
-                }
-                if (orientation.equals(FaceOrientation.NORTH)) {
-                    result.add(prepareFace(orientation, orientation,
-                            adjacentBlocks, 1));
-                    continue;
-                }
-                if (orientation.equals(FaceOrientation.SOUTH)) {
-                    result.add(prepareFace(orientation, orientation,
-                            adjacentBlocks, 1));
-                    continue;
-                }
-            } else if (block.getProperties().contains(BlockProperties.AXIS_Z)) {
-                if (orientation.equals(FaceOrientation.EAST)) {
-                    result.add(prepareFace(orientation, orientation,
-                            adjacentBlocks, 1));
-                    continue;
-                }
-                if (orientation.equals(FaceOrientation.WEST)) {
-                    result.add(prepareFace(orientation, orientation,
-                            adjacentBlocks, 1));
-                    continue;
-                }
-                if (orientation.equals(FaceOrientation.UP)) {
-                    result.add(prepareFace(FaceOrientation.EAST, orientation,
-                            adjacentBlocks));
-                    continue;
-                }
-                if (orientation.equals(FaceOrientation.DOWN)) {
-                    result.add(prepareFace(FaceOrientation.WEST, orientation,
-                            adjacentBlocks));
-                    continue;
-                }
-                if (orientation.equals(FaceOrientation.NORTH)) {
-                    result.add(prepareFace(FaceOrientation.UP, orientation,
-                            adjacentBlocks));
-                    continue;
-                }
-                if (orientation.equals(FaceOrientation.SOUTH)) {
-                    result.add(prepareFace(FaceOrientation.DOWN, orientation,
-                            adjacentBlocks));
-                    continue;
-                }
-            }
-            result.add(prepareFace(orientation, orientation, adjacentBlocks));
+            result.add(prepareFace(orientation, block.getRotation(), adjacentBlocks));
         }
         return result;
     }
 
-    private Face prepareFace(FaceOrientation textureDirection, FaceOrientation faceDirection,
-                             HashMap<FaceOrientation, Boolean> adjacentBlocks, int textureRotation) {
+    private Face prepareFace(FaceOrientation faceDirection, BlockRotation rotation,
+                             HashMap<FaceOrientation, Boolean> adjacentBlocks) {
         if (adjacentBlocks.get(faceDirection) && !cullFaceTextures.get(faceDirection)) {
             return new Face();
         }
-        return new Face(textureCoordinates.get(textureDirection), uv.get(textureDirection),
-                cuboid.getFacePositions(faceDirection), textureRotation);
-    }
-
-    private Face prepareFace(FaceOrientation textureDirection, FaceOrientation faceDirection,
-                             HashMap<FaceOrientation, Boolean> adjacentBlocks) {
-        return prepareFace(textureDirection, faceDirection,
-                adjacentBlocks, 0);
+        return new Face(textureCoordinates.get(faceDirection), uv.get(faceDirection),
+                cuboid.getFacePositions(faceDirection, rotation));
     }
 
     public boolean isFull() {
