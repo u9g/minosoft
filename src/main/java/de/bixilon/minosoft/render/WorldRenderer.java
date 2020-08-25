@@ -38,7 +38,7 @@ public class WorldRenderer {
 
     public void init() {
         modelLoader = new BlockModelLoader();
-        Log.info("finished loading textures");
+        Log.info("Finished loading textures");
     }
 
     public void prepareChunkBulk(HashMap<ChunkLocation, Chunk> chunks) {
