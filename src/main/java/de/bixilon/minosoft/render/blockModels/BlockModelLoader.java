@@ -33,24 +33,27 @@ import java.util.Map;
 import static de.bixilon.minosoft.util.Util.readJsonFromFile;
 
 public class BlockModelLoader {
-    private final HashMap<String, HashMap<String, BlockDescription>> blockDescriptionMap;
+    private final HashMap<String, HashMap<String, BlockModel>> blockDescriptionMap;
     TextureLoader textureLoader;
 
     public BlockModelLoader() {
         blockDescriptionMap = new HashMap<>();
         HashMap<String, HashMap<String, float[]>> tints = new HashMap<>();
         HashMap<String, HashSet<String>> textures = new HashMap<>();
-        HashMap<String, HashSet<String>> ignoredTextures = new HashMap<>();
         try {
             String folderPath = Config.homeDir + "assets/mapping/blockModels/";
-            for (File file : new File(folderPath).listFiles()) {
+            File[] files = new File(folderPath).listFiles();
+            if (files == null) {
+                Log.warn("no mods loaded!");
+            }
+            assert files != null;
+            for (File file : files) {
                 JsonObject json = readJsonFromFile(file.getAbsolutePath());
                 String mod = file.getName().substring(0, file.getName().lastIndexOf('.'));
                 tints.put(mod, readTints(json));
-                ignoredTextures.put(mod, readIgnored(json));
                 textures.put(mod, loadModels(json.get("blocks").getAsJsonObject(), mod));
             }
-            textureLoader = new TextureLoader(textures, tints, ignoredTextures);
+            textureLoader = new TextureLoader(textures, tints);
             applyTextures();
         } catch (IOException e) {
             e.printStackTrace();
@@ -58,20 +61,9 @@ public class BlockModelLoader {
         Log.info("finished loading all blocks");
     }
 
-    private HashSet<String> readIgnored(JsonObject json) {
-        if (!json.has("ignored_textures")) {
-            return new HashSet<>();
-        }
-        HashSet<String> result = new HashSet<>();
-        for (JsonElement texture : json.get("ignored_textures").getAsJsonArray()) {
-            result.add(texture.getAsString());
-        }
-        return result;
-    }
-
     private void applyTextures() {
-        for (Map.Entry<String, HashMap<String, BlockDescription>> mod : blockDescriptionMap.entrySet()) {
-            for (Map.Entry<String, BlockDescription> block : mod.getValue().entrySet()) {
+        for (Map.Entry<String, HashMap<String, BlockModel>> mod : blockDescriptionMap.entrySet()) {
+            for (Map.Entry<String, BlockModel> block : mod.getValue().entrySet()) {
                 block.getValue().applyTextures(mod.getKey(), textureLoader);
             }
         }
@@ -97,19 +89,19 @@ public class BlockModelLoader {
         HashSet<String> result = new HashSet<>();
         blockDescriptionMap.put(mod, new HashMap<>());
         for (String identifier : blockList.keySet()) {
-            JsonElement child = blockList.get(identifier);
-            result.addAll(loadModel(mod, identifier, child));
+            JsonObject block = blockList.get(identifier).getAsJsonObject();
+            result.addAll(loadModel(mod, identifier, block));
         }
         return result;
     }
 
-    private HashSet<String> loadModel(String mod, String identifier, JsonElement child) {
+    private HashSet<String> loadModel(String mod, String identifier, JsonObject block) {
         HashSet<String> result = new HashSet<>();
         try {
-            HashMap<String, BlockDescription> modList = blockDescriptionMap.get(mod);
-            BlockDescription description = new BlockDescription(child, identifier, mod);
+            BlockModel description = new BlockModel(block, mod);
             result.addAll(description.getAllTextures());
-            modList.put(identifier, description);
+            HashMap<String, BlockModel> modMap = blockDescriptionMap.get(mod);
+            modMap.put(identifier, description);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(mod + ":" + identifier);
@@ -118,15 +110,11 @@ public class BlockModelLoader {
         return result;
     }
 
-    public BlockDescription getBlockDescription(Block block) {
-        if (!blockDescriptionMap.containsKey(block.getMod())) {
-            System.out.println(String.format("No mod %s found", block.getMod()));
-            //System.exit(-1);
-        }
-        HashMap<String, BlockDescription> modList = blockDescriptionMap.get(block.getMod());
-        if (!modList.containsKey(block.getIdentifier())) {
-            System.out.println(String.format("No block %s:%s found", block.getMod(), block.getIdentifier()));
-            //System.exit(-1);
+    public BlockModel getBlockDescription(Block block) {
+        HashMap<String, BlockModel> modList = blockDescriptionMap.get(block.getMod());
+
+        if (modList == null || !modList.containsKey(block.getIdentifier())) {
+            throw new IllegalArgumentException(String.format("No block %s:%s found", block.getMod(), block.getIdentifier()));
         }
         return modList.get(block.getIdentifier());
     }
@@ -135,7 +123,7 @@ public class BlockModelLoader {
         if (block == Blocks.nullBlock || block == null) {
             return false;
         }
-        BlockDescription description = getBlockDescription(block);
+        BlockModel description = getBlockDescription(block);
         if (description == null) {
             return false;
         }
@@ -143,7 +131,7 @@ public class BlockModelLoader {
     }
 
     public HashSet<Face> prepare(Block block, HashMap<FaceOrientation, Boolean> adjacentBlocks) {
-        BlockDescription description = getBlockDescription(block);
+        BlockModel description = getBlockDescription(block);
         if (description == null) {
             return new HashSet<>();
         }

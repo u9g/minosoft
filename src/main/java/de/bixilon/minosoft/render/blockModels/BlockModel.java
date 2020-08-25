@@ -17,6 +17,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.Config;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
+import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlock;
@@ -29,37 +30,26 @@ import java.util.Map;
 
 import static de.bixilon.minosoft.util.Util.readJsonFromFile;
 
-public class BlockDescription {
-    HashSet<SubBlock> defaultState;
+public class BlockModel {
     HashMap<BlockConfiguration, HashSet<SubBlock>> blockConfigurationStates;
     boolean isFull;
 
-    public BlockDescription(JsonElement child, String identifier, String mod) {
+    public BlockModel(JsonObject block, String mod) {
         blockConfigurationStates = new HashMap<>();
-        if (child.isJsonPrimitive() && child.getAsString().equals("invisible")) {
-            defaultState = new HashSet<>();
-            return;
-        } else if (child.isJsonPrimitive() && child.getAsString().equals("regular")) {
-            defaultState = load(mod, identifier);
-        } else if (child.isJsonPrimitive()) {
-            defaultState = load(mod, child.getAsString());
-        } else if (child.isJsonObject()) {
-            JsonObject childJson = child.getAsJsonObject();
-            for (String state : childJson.keySet()) {
-                if (state.equals("else")) {
-                    defaultState = load(mod, childJson.get("else").getAsString(), new HashMap<>());
-                }
-                BlockConfiguration configuration = new BlockConfiguration(state);
+
+        if (block.has("blockModel")) {
+            blockConfigurationStates.put(new BlockConfigurationTrue(),
+                    load(mod, block.get("blockModel").getAsString()));
+        } else {
+            for (JsonElement element : block.get("states").getAsJsonArray()) {
+                JsonObject state = element.getAsJsonObject();
+                BlockConfiguration configuration = new BlockConfiguration(state.get("properties").getAsJsonObject());
                 blockConfigurationStates.put(configuration,
-                        load(mod, childJson.get(state).getAsString()));
+                        load(mod, state.get("blockModel").getAsString()));
             }
         }
-        for (SubBlock subBlock : defaultState) {
-            if (subBlock.isFull()) {
-                isFull = true;
-                break;
-            }
-        }
+        // TODO
+        isFull = true;
     }
 
     public static HashSet<SubBlock> load(String mod, String identifier, HashMap<String, String> variables) {
@@ -111,7 +101,8 @@ public class BlockDescription {
                 return prepareBlockState(entry.getValue(), adjacentBlocks, block);
             }
         }
-        return prepareBlockState(defaultState, adjacentBlocks, block);
+        Log.warn("no matching blockConfiguration found! Block: " + block.toString());
+        return new HashSet<>();
     }
 
     private HashSet<Face> prepareBlockState(HashSet<SubBlock> subBlocks,
@@ -125,9 +116,6 @@ public class BlockDescription {
 
     public HashSet<String> getAllTextures() {
         HashSet<String> result = new HashSet<>();
-        for (SubBlock subBlock : defaultState) {
-            result.addAll(subBlock.getTextures());
-        }
         for (HashSet<SubBlock> subBlocks : blockConfigurationStates.values()) {
             for (SubBlock subBlock : subBlocks) {
                 result.addAll(subBlock.getTextures());
@@ -137,7 +125,6 @@ public class BlockDescription {
     }
 
     public void applyTextures(String mod, TextureLoader loader) {
-        applyConfigurationTextures(defaultState, mod, loader);
         for (HashSet<SubBlock> subBlocks : blockConfigurationStates.values()) {
             applyConfigurationTextures(subBlocks, mod, loader);
         }

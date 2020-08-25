@@ -14,48 +14,11 @@
 package de.bixilon.minosoft.render.blockModels.Face;
 
 public class RenderConstants {
+    public static final int TEXTURE_PACK_RES = 16;
+
     public static final int texturePackRes = 16;
 
     public static final int blockRes = 16;
-
-    public static final float[][][] FACE_VERTEX = new float[][][]{
-            {
-                    {1, 0, 0},
-                    {1, -1, 0},
-                    {1, -1, 1},
-                    {1, 0, 1}
-            },
-            {
-                    {0, 0, 0},
-                    {0, -1, 0},
-                    {0, -1, 1},
-                    {0, 0, 1}
-            },
-            {
-                    {0, 0, 0},
-                    {1, 0, 0},
-                    {1, 0, 1},
-                    {0, 0, 1}
-            },
-            {
-                    {0, -1, 0},
-                    {1, -1, 0},
-                    {1, -1, 1},
-                    {0, -1, 1}
-            },
-            {
-                    {1, 0, 1},
-                    {1, -1, 1},
-                    {0, -1, 1},
-                    {0, 0, 1},
-            },
-            {
-                    {1, 0, 0},
-                    {1, -1, 0},
-                    {0, -1, 0},
-                    {0, 0, 0}
-            },
-    };
 
     public static final int[][] faceDir = new int[][]{
             {1, 0, 0},
@@ -64,12 +27,5 @@ public class RenderConstants {
             {0, -1, 0},
             {0, 0, 1},
             {0, 0, -1}
-    };
-
-    public static final int[][] UV = new int[][]{
-            {0, 0},
-            {0, 1},
-            {1, 1},
-            {1, 0},
     };
 }

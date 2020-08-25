@@ -1,6 +1,6 @@
 /*
  * Codename Minosoft
- * Copyright (C) 2020 Moritz Zwerger
+ * Copyright (C) 2020 Lukas Eisenhauer
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -11,30 +11,16 @@
  *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
-package de.bixilon.minosoft.render.blockModels.Face;
+package de.bixilon.minosoft.render.blockModels;
 
-import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
-import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlockPosition;
-import de.bixilon.minosoft.render.texture.InFaceUV;
+import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 
-public class Face {
-    final SubBlockPosition[] positions;
-    InFaceUV uv;
-
-    public Face(float texture, InFaceUV uv, SubBlockPosition[] facePositions) {
-        positions = facePositions;
-        this.uv = uv;
-        this.uv.prepare(texture);
+public class BlockConfigurationTrue extends BlockConfiguration {
+    public BlockConfigurationTrue() {
     }
 
-    public Face() {
-        positions = new SubBlockPosition[]{};
-    }
-
-    public void draw(BlockPosition pos) {
-        for (int i = 0; i < positions.length; i++) {
-            uv.draw(i);
-            positions[i].draw(pos);
-        }
+    @Override
+    public boolean contains(Block block) {
+        return true;
     }
 }

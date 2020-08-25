@@ -20,7 +20,6 @@ import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.texture.InFaceUV;
 import de.bixilon.minosoft.render.texture.TextureLoader;
-import javafx.util.Pair;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,7 +28,7 @@ import java.util.Map;
 public class SubBlock {
     SubBlockRotation rotation;
 
-    HashMap<FaceOrientation, Pair<Float, Float>> textureCoordinates;
+    HashMap<FaceOrientation, Float> textureCoordinates;
     HashMap<FaceOrientation, String> textures;
     HashMap<FaceOrientation, Boolean> cullFaceTextures;
 
@@ -42,7 +41,7 @@ public class SubBlock {
     public SubBlock(JsonObject json, HashMap<String, String> variables) {
         uv = new HashMap<>();
         textures = new HashMap<>();
-        textureCoordinates = new HashMap<>();
+        textureCoordinates = new HashMap<FaceOrientation, Float>();
         cullFaceTextures = new HashMap<>();
 
         SubBlockPosition from = new SubBlockPosition(json.getAsJsonArray("from"));
@@ -84,8 +83,8 @@ public class SubBlock {
 
     public void applyTextures(String mod, TextureLoader loader) {
         for (Map.Entry<FaceOrientation, String> entry : textures.entrySet()) {
-            Pair<Float, Float> texture = loader.getTexture(mod, entry.getValue());
-            if (texture == null) {
+            float texture = loader.getTexture(mod, entry.getValue());
+            if (texture == -1) {
                 continue;
             }
             textureCoordinates.put(entry.getKey(), texture);

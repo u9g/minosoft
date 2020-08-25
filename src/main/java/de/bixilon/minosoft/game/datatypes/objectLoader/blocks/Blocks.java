@@ -1,7 +1,7 @@
 package de.bixilon.minosoft.game.datatypes.objectLoader.blocks;
 /*
  * Codename Minosoft
- * Copyright (C) 2020 Moritz Zwerger
+ * Copyright (C) 2020 Moritz Zwerger, Lukas Eisenhauer
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -533,5 +533,13 @@ public class Blocks {
 
     public static HashSet<Block> getBlockList() {
         return blockList;
+    }
+
+    public static HashMap<String, BlockRotation> getRotationMapping() {
+        return rotationMapping;
+    }
+
+    public static HashMap<String, HashMap<String, BlockProperties>> getPropertiesMapping() {
+        return propertiesMapping;
     }
 }

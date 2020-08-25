@@ -13,10 +13,13 @@
 
 package de.bixilon.minosoft.render.blockModels;
 
+import com.google.gson.JsonObject;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockProperties;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockRotation;
+import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Blocks;
 
+import java.util.HashMap;
 import java.util.HashSet;
 
 public class BlockConfiguration {
@@ -24,18 +27,36 @@ public class BlockConfiguration {
     HashSet<BlockProperties> blockProperties;
 
 
-    public BlockConfiguration(String config) {
-        blockProperties = new HashSet<>();
-        for (String configuration : config.split(",")) {
-            switch (configuration) {
-                case "orientation:up":
-                    rotation = BlockRotation.UP;
-                    break;
-                case "orientation:down":
-                    rotation = BlockRotation.DOWN;
-                    break;
-            }
+    public BlockConfiguration(JsonObject json) {
+        if (json.has("facing")) {
+            rotation = Blocks.getRotationMapping().get(json.get("facing").getAsString());
+            json.remove("facing");
         }
+        if (json.has("rotation")) {
+            rotation = Blocks.getRotationMapping().get(json.get("rotation").getAsString());
+            json.remove("rotation");
+        }
+        if (json.has("axis")) {
+            rotation = Blocks.getRotationMapping().get(json.get("axis").getAsString());
+            json.remove("axis");
+        }
+
+        blockProperties = new HashSet<>();
+        for (String propertyName : json.keySet()) {
+            HashMap<String, BlockProperties> properties = Blocks.getPropertiesMapping().get(propertyName);
+            if (properties == null) {
+                throw new RuntimeException(String.format("Unknown block property: %s", propertyName));
+            }
+            BlockProperties property = properties.get(json.get(propertyName).getAsString());
+            if (property == null) {
+                throw new RuntimeException(String.format("Unknown block property: %s -> %s",
+                        propertyName, json.get(propertyName).getAsString()));
+            }
+            blockProperties.add(property);
+        }
+    }
+
+    public BlockConfiguration() {
     }
 
     public BlockRotation getRotation() {
@@ -52,10 +73,7 @@ public class BlockConfiguration {
     }
 
     public boolean contains(Block block) {
-        if (block.getRotation().equals(BlockRotation.NONE)) {
-            return false;
-        }
-        if (!block.getRotation().equals(rotation)) {
+        if (block.getRotation() != BlockRotation.NONE && !block.getRotation().equals(rotation)) {
             return false;
         }
         if (blockProperties.size() == 0 && block.getProperties().size() == 0) {

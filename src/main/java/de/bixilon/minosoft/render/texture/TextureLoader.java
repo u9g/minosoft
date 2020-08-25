@@ -1,6 +1,6 @@
 /*
  * Codename Minosoft
- * Copyright (C) 2020 Moritz Zwerger
+ * Copyright (C) 2020 Lukas Eisenhauer
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -15,7 +15,6 @@ package de.bixilon.minosoft.render.texture;
 
 import de.bixilon.minosoft.Config;
 import de.matthiasmann.twl.utils.PNGDecoder;
-import javafx.util.Pair;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -28,25 +27,22 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import static de.bixilon.minosoft.render.blockModels.Face.RenderConstants.TEXTURE_PACK_RES;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 
 public class TextureLoader {
-    private final int TEXTURE_PACK_RES = 16;
     private final HashMap<String, HashMap<String, Integer>> textureCoordinates;
-    private final HashMap<String, HashSet<String>> ignored;
     int textureID;
     float step;
     int totalTextures = 0;
     HashMap<String, HashMap<String, BufferedImage>> images;
 
-    public TextureLoader(HashMap<String, HashSet<String>> textures, HashMap<String, HashMap<String, float[]>> tints,
-                         HashMap<String, HashSet<String>> ignored_textures) {
+    public TextureLoader(HashMap<String, HashSet<String>> textures, HashMap<String, HashMap<String, float[]>> tints) {
         textureCoordinates = new HashMap<>();
         images = new HashMap<>();
-        this.ignored = ignored_textures;
         for (String mod : textures.keySet()) {
-            loadTextures(mod, textures.get(mod), tints.get(mod), ignored_textures.get(mod));
+            loadTextures(mod, textures.get(mod), tints.get(mod));
         }
         combineTextures();
         try {
@@ -74,10 +70,10 @@ public class TextureLoader {
         }
     }
 
-    private void loadTextures(String mod, HashSet<String> textureNames, HashMap<String, float[]> tint, HashSet<String> ignored) {
+    private void loadTextures(String mod, HashSet<String> textureNames, HashMap<String, float[]> tint) {
         HashMap<String, BufferedImage> modTextureMap = new HashMap<>();
         for (String textureName : textureNames) {
-            if (ignored != null && ignored.contains(textureName)) {
+            if (textureName.contains("overlay")) {
                 continue;
             }
             String path = Config.homeDir + "assets/" + mod + "/textures/" + textureName + ".png";
@@ -147,12 +143,12 @@ public class TextureLoader {
         return textureID;
     }
 
-    public Pair<Float, Float> getTexture(String mod, String textureName) {
-        // returns the start and end u-coordinate of a specific texture to access it
-        if (ignored.get(mod) != null && ignored.get(mod).contains(textureName)) {
-            return null;
+    public float getTexture(String mod, String textureName) {
+        if (textureName.contains("overlay")) {
+            return -1;
         }
 
+        // returns the start and end u-coordinate of a specific texture to access it
         HashMap<String, Integer> modMap = textureCoordinates.get(mod);
         if (modMap == null) {
             System.out.println("no mod " + mod + " loaded");
@@ -165,10 +161,7 @@ public class TextureLoader {
             System.exit(10);
         }
 
-        return new Pair<>(
-                pos * step,
-                (pos + 1) * step
-        );
+        return pos * step;
     }
 
     public int getTextureID() {
