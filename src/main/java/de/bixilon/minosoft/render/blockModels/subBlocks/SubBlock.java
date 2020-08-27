@@ -74,7 +74,7 @@ public class SubBlock {
                 }
                 return newName;
             } else {
-                throw new IllegalArgumentException("could not find variable " + textureName);
+                throw new IllegalArgumentException("could not resolve variable " + textureName);
             }
         } else {
             return textureName;
@@ -132,6 +132,14 @@ public class SubBlock {
         HashSet<String> result = new HashSet<>();
         for (Map.Entry<FaceOrientation, String> texture : textures.entrySet()) {
             result.add(texture.getValue());
+        }
+        return result;
+    }
+
+    public HashSet<Face> getFacesSimple(BlockRotation rotation) {
+        HashSet<Face> result = new HashSet<>();
+        for (FaceOrientation orientation : FaceOrientation.values()) {
+            result.add(prepareFace(orientation, rotation, new HashMap<>()));
         }
         return result;
     }

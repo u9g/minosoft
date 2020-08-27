@@ -69,7 +69,6 @@ public class SubBlockPosition {
     }
 
     public SubBlockPosition rotated(BlockRotation rotation) {
-
         switch (rotation) {
             case EAST:
                 return eastRotator.apply(this);
@@ -77,12 +76,12 @@ public class SubBlockPosition {
                 return westRotator.apply(this);
             case SOUTH:
                 return southRotator.apply(this);
+            case DOWN:
+                return downRotator.apply(this);
             case AXIS_X:
                 return xAxisRotator.apply(this);
             case AXIS_Z:
                 return zAxisRotator.apply(this);
-            case DOWN:
-                return downRotator.apply(this);
             default:
                 return this;
         }

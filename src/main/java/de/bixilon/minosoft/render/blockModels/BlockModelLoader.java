@@ -98,10 +98,15 @@ public class BlockModelLoader {
     private HashSet<String> loadModel(String mod, String identifier, JsonObject block) {
         HashSet<String> result = new HashSet<>();
         try {
-            BlockModel description = new BlockModel(block, mod);
-            result.addAll(description.getAllTextures());
+            BlockModel model;
+            if (identifier.contains("fire")) {
+                model = new FireModel(block, mod);
+            } else {
+                model = new BlockModel(block, mod);
+            }
+            result.addAll(model.getAllTextures());
             HashMap<String, BlockModel> modMap = blockDescriptionMap.get(mod);
-            modMap.put(identifier, description);
+            modMap.put(identifier, model);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(mod + ":" + identifier);

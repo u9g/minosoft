@@ -40,7 +40,7 @@ public class BlockModel {
         if (block.has("blockModel")) {
             blockConfigurationStates.put(new BlockConfigurationTrue(),
                     load(mod, block.get("blockModel").getAsString()));
-        } else {
+        } else if (block.has("states")) {
             for (JsonElement element : block.get("states").getAsJsonArray()) {
                 JsonObject state = element.getAsJsonObject();
                 BlockConfiguration configuration = new BlockConfiguration(state.get("properties").getAsJsonObject());
@@ -52,6 +52,9 @@ public class BlockModel {
         isFull = true;
     }
 
+    public BlockModel() {
+    }
+
     public static HashSet<SubBlock> load(String mod, String identifier, HashMap<String, String> variables) {
         String path = Config.homeDir + "assets/" + mod + "/models/block/" + identifier + ".json";
         JsonObject json = null;
@@ -60,8 +63,12 @@ public class BlockModel {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        if (json == null) {
+            Log.warn("File not found: " + path);
+            return null;
+        }
         HashSet<SubBlock> result = new HashSet<>();
-        try {
+        if (json.has("textures")) {
             // read the textures into a variable hashmap
             JsonObject textures = json.getAsJsonObject("textures");
             for (String texture : textures.keySet()) {
@@ -71,7 +78,6 @@ public class BlockModel {
                     variables.put("#" + texture, textures.get(texture).getAsString());
                 }
             }
-        } catch (Exception ignored) {
         }
         if (json.has("elements")) {
             for (JsonElement subBlockJson : json.get("elements").getAsJsonArray()) {
@@ -81,14 +87,17 @@ public class BlockModel {
             String parent = json.get("parent").getAsString();
             String parentIdentifier = parent.substring(parent.lastIndexOf("/") + 1);
             result.addAll(load(mod, parentIdentifier, variables));
-        } else {
-            throw new IllegalArgumentException("json does not have a parent nor subblocks");
         }
         return result;
     }
 
-    private HashSet<SubBlock> load(String mod, String identifier) {
-        return load(mod, identifier, new HashMap<>());
+    public static HashSet<Face> prepareBlockState(HashSet<SubBlock> subBlocks,
+                                                  HashMap<FaceOrientation, Boolean> adjacentBlocks, Block block) {
+        HashSet<Face> result = new HashSet<>();
+        for (SubBlock subBlock : subBlocks) {
+            result.addAll(subBlock.getFaces(block, adjacentBlocks));
+        }
+        return result;
     }
 
     public boolean isFull() {
@@ -105,13 +114,8 @@ public class BlockModel {
         return new HashSet<>();
     }
 
-    private HashSet<Face> prepareBlockState(HashSet<SubBlock> subBlocks,
-                                            HashMap<FaceOrientation, Boolean> adjacentBlocks, Block block) {
-        HashSet<Face> result = new HashSet<>();
-        for (SubBlock subBlock : subBlocks) {
-            result.addAll(subBlock.getFaces(block, adjacentBlocks));
-        }
-        return result;
+    HashSet<SubBlock> load(String mod, String identifier) {
+        return load(mod, identifier, new HashMap<>());
     }
 
     public HashSet<String> getAllTextures() {
