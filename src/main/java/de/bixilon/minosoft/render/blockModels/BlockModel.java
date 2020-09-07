@@ -134,7 +134,7 @@ public class BlockModel {
         }
     }
 
-    private void applyConfigurationTextures(HashSet<SubBlock> subBlocks, String mod, TextureLoader loader) {
+    public static void applyConfigurationTextures(HashSet<SubBlock> subBlocks, String mod, TextureLoader loader) {
         for (SubBlock subBlock : subBlocks) {
             subBlock.applyTextures(mod, loader);
         }

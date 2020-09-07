@@ -20,10 +20,10 @@ import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.render.blockModels.BlockModelLoader;
 import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
+import javafx.util.Pair;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import static de.bixilon.minosoft.render.blockModels.Face.RenderConstants.faceDir;
 import static org.lwjgl.opengl.GL11.*;
@@ -32,19 +32,39 @@ public class WorldRenderer {
     private final HashMap<BlockPosition, HashSet<Face>> faces;
     private BlockModelLoader modelLoader;
 
+    private LinkedBlockingQueue<Pair<ChunkLocation, Chunk>> queuedChunks;
+    Thread chunkLoadThread;
+
     public WorldRenderer() {
         faces = new HashMap<>();
     }
 
     public void init() {
+        queuedChunks = new LinkedBlockingQueue<>();
+        chunkLoadThread = new Thread(() -> {
+            while (true) {
+                try {
+                    Pair<ChunkLocation, Chunk> current = queuedChunks.take();
+                    prepareChunk(current.getKey(), current.getValue());
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        chunkLoadThread.setName(String.format("%d/ChunkLoading", 0)); // TODO: connection ID
+        chunkLoadThread.start();
         modelLoader = new BlockModelLoader();
         Log.info("Finished loading textures");
     }
 
-    public void prepareChunkBulk(HashMap<ChunkLocation, Chunk> chunks) {
+    public void queueChunkBulk(HashMap<ChunkLocation, Chunk> chunks) {
         for (Map.Entry<ChunkLocation, Chunk> set : chunks.entrySet()) {
-            prepareChunk(set.getKey(), set.getValue());
+            queueChunk(set.getKey(), set.getValue());
         }
+    }
+
+    public void queueChunk(ChunkLocation location, Chunk chunk) {
+        queuedChunks.add(new Pair<>(location, chunk));
     }
 
     public void prepareChunk(ChunkLocation location, Chunk chunk) {
@@ -61,8 +81,9 @@ public class WorldRenderer {
     }
 
     public void prepareBlock(BlockPosition position, Block block) {
-        if (block.equals(Blocks.nullBlock))
+        if (block.equals(Blocks.nullBlock)) {
             faces.put(position, null);
+        }
         HashMap<FaceOrientation, Boolean> adjacentBlocks = new HashMap<>();
 
         for (FaceOrientation orientation : FaceOrientation.values()) {

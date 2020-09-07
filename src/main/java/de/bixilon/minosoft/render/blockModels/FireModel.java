@@ -20,7 +20,9 @@ import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockRotation;
 import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlock;
+import de.bixilon.minosoft.render.texture.TextureLoader;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -73,5 +75,29 @@ public class FireModel extends BlockModel {
     @Override
     public boolean isFull() {
         return false;
+    }
+
+    @Override
+    public HashSet<String> getAllTextures() {
+        HashSet<String> result = new HashSet<>();
+        result.addAll(getTextures(floor));
+        result.addAll(getTextures(side));
+        result.addAll(getTextures(up));
+        return result;
+    }
+
+    private HashSet<String> getTextures(HashSet<SubBlock> subBlocks) {
+        HashSet<String> result = new HashSet<>();
+        for (SubBlock subBlock : subBlocks) {
+            result.addAll(subBlock.getTextures());
+        }
+        return result;
+    }
+
+    @Override
+    public void applyTextures(String mod, TextureLoader loader) {
+        applyConfigurationTextures(floor, mod, loader);
+        applyConfigurationTextures(side, mod, loader);
+        applyConfigurationTextures(up, mod, loader);
     }
 }

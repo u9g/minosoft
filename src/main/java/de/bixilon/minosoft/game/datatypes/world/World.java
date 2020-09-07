@@ -79,14 +79,14 @@ public class World {
 
     public void setChunk(ChunkLocation location, Chunk chunk) {
         chunks.put(location, chunk);
-        MainWindow.getRenderer().prepareChunk(location, chunk);
+        MainWindow.getRenderer().queueChunk(location, chunk);
     }
 
     public void setChunks(HashMap<ChunkLocation, Chunk> chunkMap) {
         for (Map.Entry<ChunkLocation, Chunk> set : chunkMap.entrySet()) {
             chunks.put(set.getKey(), set.getValue());
         }
-        MainWindow.getRenderer().prepareChunkBulk(chunkMap);
+        MainWindow.getRenderer().queueChunkBulk(chunkMap);
     }
 
     public boolean isHardcore() {

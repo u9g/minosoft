@@ -139,7 +139,8 @@ public class SubBlock {
     public HashSet<Face> getFacesSimple(BlockRotation rotation) {
         HashSet<Face> result = new HashSet<>();
         for (FaceOrientation orientation : FaceOrientation.values()) {
-            result.add(prepareFace(orientation, rotation, new HashMap<>()));
+            result.add(new Face(textureCoordinates.get(orientation), uv.get(orientation),
+                    cuboid.getFacePositions(orientation, rotation)));
         }
         return result;
     }

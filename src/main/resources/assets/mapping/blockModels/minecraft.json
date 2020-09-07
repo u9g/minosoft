@@ -445,38 +445,6 @@
         }
       ]
     },
-    "sticky_piston": {
-      "states": [
-        {
-          "properties": {
-            "extended": "true"
-          },
-          "blockModel": "piston_extended"
-        },
-        {
-          "properties": {
-            "extended": "false"
-          },
-          "blockModel": "sticky_piston"
-        }
-      ]
-    },
-    "piston": {
-      "states": [
-        {
-          "properties": {
-            "extended": "true"
-          },
-          "blockModel": "piston_extended"
-        },
-        {
-          "properties": {
-            "extended": "false"
-          },
-          "blockModel": "piston"
-        }
-      ]
-    },
     "cobweb": {
       "blockModel": "cobweb"
     },
@@ -662,10 +630,42 @@
     },
     "fire": {
       "type": "fire",
-      "floor": "fire_floor_0",
+      "floor": "fire_floor0",
       "side": "fire_side0",
-      "up": "fire_up_0"
+      "up": "fire_up0"
     }
+  },
+  "sticky_piston": {
+    "states": [
+      {
+        "properties": {
+          "extended": "true"
+        },
+        "blockModel": "piston_extended"
+      },
+      {
+        "properties": {
+          "extended": "false"
+        },
+        "blockModel": "sticky_piston"
+      }
+    ]
+  },
+  "piston": {
+    "states": [
+      {
+        "properties": {
+          "extended": "true"
+        },
+        "blockModel": "piston_extended"
+      },
+      {
+        "properties": {
+          "extended": "false"
+        },
+        "blockModel": "piston"
+      }
+    ]
   },
   "tinted_textures": {
     "block/grass_block_top": [0,1,0],
