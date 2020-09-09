@@ -30,6 +30,7 @@ public class SubBlock {
 
     HashMap<FaceOrientation, Float> textureCoordinates;
     HashMap<FaceOrientation, String> textures;
+    HashMap<FaceOrientation, Integer> textureRotations;
     HashMap<FaceOrientation, Boolean> cullFaceTextures;
 
     HashMap<FaceOrientation, InFaceUV> uv;
@@ -41,7 +42,8 @@ public class SubBlock {
     public SubBlock(JsonObject json, HashMap<String, String> variables) {
         uv = new HashMap<>();
         textures = new HashMap<>();
-        textureCoordinates = new HashMap<FaceOrientation, Float>();
+        textureRotations = new HashMap<>();
+        textureCoordinates = new HashMap<>();
         cullFaceTextures = new HashMap<>();
 
         SubBlockPosition from = new SubBlockPosition(json.getAsJsonArray("from"));
@@ -54,7 +56,7 @@ public class SubBlock {
         JsonObject faces = json.getAsJsonObject("faces");
         for (FaceOrientation orientation : FaceOrientation.values()) {
             if (faces.has(orientation.name().toLowerCase())) {
-                applyTexture(faces.getAsJsonObject(orientation.name().toLowerCase()),
+                putTexture(faces.getAsJsonObject(orientation.name().toLowerCase()),
                         orientation, variables);
             }
         }
@@ -93,15 +95,20 @@ public class SubBlock {
         textures.clear();
     }
 
-    private void applyTexture(JsonObject faceJson, FaceOrientation orientation, HashMap<String, String> variables) {
-        try {
+    private void putTexture(JsonObject faceJson, FaceOrientation orientation, HashMap<String, String> variables) {
+        if (faceJson.has("uv")) {
             uv.put(orientation, new InFaceUV(faceJson.getAsJsonArray("uv")));
-        } catch (Exception e) {
+        } else {
             uv.put(orientation, new InFaceUV());
+        }
+        if (faceJson.has("rotation")) {
+            int rotation = (360 - faceJson.get("rotation").getAsInt()) / 90;
+            textureRotations.put(orientation, rotation);
+        } else {
+            textureRotations.put(orientation, 0);
         }
         String textureName = getRealTextureName(faceJson.get("texture").getAsString(), variables);
         textures.put(orientation, textureName);
-        cullFaceTextures.put(orientation, faceJson.has("cullface"));
     }
 
     public HashSet<Face> getFaces(Block block, HashMap<FaceOrientation, Boolean> adjacentBlocks) {
@@ -117,11 +124,12 @@ public class SubBlock {
 
     private Face prepareFace(FaceOrientation faceDirection, BlockRotation rotation,
                              HashMap<FaceOrientation, Boolean> adjacentBlocks) {
-        if (adjacentBlocks.get(faceDirection) && !cullFaceTextures.get(faceDirection)) {
+        Boolean cullface = cullFaceTextures.get(faceDirection);
+        if (adjacentBlocks.get(faceDirection) && cullface != null && !cullface) {
             return new Face();
         }
         return new Face(textureCoordinates.get(faceDirection), uv.get(faceDirection),
-                cuboid.getFacePositions(faceDirection, rotation));
+                cuboid.getFacePositions(faceDirection, rotation), textureRotations.get(faceDirection));
     }
 
     public boolean isFull() {

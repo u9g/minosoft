@@ -19,12 +19,18 @@ import de.bixilon.minosoft.render.texture.InFaceUV;
 
 public class Face {
     final SubBlockPosition[] positions;
+    int rotation;
     InFaceUV uv;
 
     public Face(float texture, InFaceUV uv, SubBlockPosition[] facePositions) {
+        this(texture, uv, facePositions, 0);
+    }
+
+    public Face(float texture, InFaceUV uv, SubBlockPosition[] facePositions, Integer rotation) {
         positions = facePositions;
         this.uv = uv;
         this.uv.prepare(texture);
+        this.rotation = rotation;
     }
 
     public Face() {
@@ -33,7 +39,7 @@ public class Face {
 
     public void draw(BlockPosition pos) {
         for (int i = 0; i < positions.length; i++) {
-            uv.draw(i);
+            uv.draw(i + rotation);
             positions[i].draw(pos);
         }
     }

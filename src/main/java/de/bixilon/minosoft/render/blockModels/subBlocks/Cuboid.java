@@ -25,7 +25,7 @@ public class Cuboid {
     public static final Map<FaceOrientation, int[]> facePositionMapTemplate = Map.of(
             FaceOrientation.EAST, new int[]{7, 5, 1, 3},
             FaceOrientation.WEST, new int[]{4, 6, 2, 0},
-            FaceOrientation.UP, new int[]{7, 6, 4, 5},
+            FaceOrientation.UP, new int[]{4, 5, 7, 6},
             FaceOrientation.DOWN, new int[]{2, 3, 1, 0},
             FaceOrientation.SOUTH, new int[]{6, 7, 3, 2},
             FaceOrientation.NORTH, new int[]{5, 4, 0, 1}
