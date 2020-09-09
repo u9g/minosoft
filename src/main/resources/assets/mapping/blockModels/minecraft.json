@@ -476,6 +476,38 @@
         }
       ]
     },
+    "sticky_piston": {
+      "states": [
+        {
+          "properties": {
+            "extended": "true"
+          },
+          "blockModel": "piston_base"
+        },
+        {
+          "properties": {
+            "extended": "false"
+          },
+          "blockModel": "sticky_piston"
+        }
+      ]
+    },
+    "piston": {
+      "states": [
+        {
+          "properties": {
+            "extended": "true"
+          },
+          "blockModel": "piston_base"
+        },
+        {
+          "properties": {
+            "extended": "false"
+          },
+          "blockModel": "piston"
+        }
+      ]
+    },
     "piston_head": {
       "states": [
         {
@@ -634,38 +666,6 @@
       "side": "fire_side0",
       "up": "fire_up0"
     }
-  },
-  "sticky_piston": {
-    "states": [
-      {
-        "properties": {
-          "extended": "true"
-        },
-        "blockModel": "piston_extended"
-      },
-      {
-        "properties": {
-          "extended": "false"
-        },
-        "blockModel": "sticky_piston"
-      }
-    ]
-  },
-  "piston": {
-    "states": [
-      {
-        "properties": {
-          "extended": "true"
-        },
-        "blockModel": "piston_extended"
-      },
-      {
-        "properties": {
-          "extended": "false"
-        },
-        "blockModel": "piston"
-      }
-    ]
   },
   "tinted_textures": {
     "block/grass_block_top": [0,1,0],

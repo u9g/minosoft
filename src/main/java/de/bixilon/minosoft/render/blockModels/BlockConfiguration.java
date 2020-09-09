@@ -73,11 +73,8 @@ public class BlockConfiguration {
     }
 
     public boolean contains(Block block) {
-        if (block.getRotation() != BlockRotation.NONE && !block.getRotation().equals(rotation)) {
+        if (rotation != null && block.getRotation() != rotation) {
             return false;
-        }
-        if (blockProperties.size() == 0 && block.getProperties().size() == 0) {
-            return true;
         }
         for (BlockProperties property : blockProperties) {
             if (!block.getProperties().contains(property)) {

@@ -36,7 +36,6 @@ public class MainWindow {
     static Connection connection;
     private static PlayerController playerController;
 
-
     public static void start(Connection serverConnection) {
         Thread guiThread = new Thread(() -> {
             connection = serverConnection;
