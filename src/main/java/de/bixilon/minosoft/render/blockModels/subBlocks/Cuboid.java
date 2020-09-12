@@ -15,6 +15,7 @@ package de.bixilon.minosoft.render.blockModels.subBlocks;
 
 // some 3d object with 8 corners, 6 faces and 12 edges (example: cube, but can be deformed)
 
+import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockRotation;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 
@@ -60,14 +61,14 @@ public class Cuboid {
         }
     }
 
-    public SubBlockPosition[] getFacePositions(FaceOrientation orientation, BlockRotation rotation) {
+    public SubBlockPosition[] getFacePositions(FaceOrientation orientation, Block block) {
         SubBlockPosition[] positions = facePositionMap.get(orientation);
-        if (rotation == BlockRotation.NONE || rotation == BlockRotation.NORTH) {
+        if (block.getRotation() == BlockRotation.NONE || block.getRotation() == BlockRotation.NORTH) {
             return positions;
         }
         SubBlockPosition[] result = new SubBlockPosition[positions.length];
         for (int i = 0; i < positions.length; i++) {
-            result[i] = positions[i].rotated(rotation);
+            result[i] = positions[i].rotated(block);
         }
         return result;
     }

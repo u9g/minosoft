@@ -14,8 +14,11 @@
 package de.bixilon.minosoft.render.blockModels.subBlocks;
 
 import com.google.gson.JsonArray;
+import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
+import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockProperties;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockRotation;
 import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
+import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.render.blockModels.Face.Axis;
 
 import static de.bixilon.minosoft.render.blockModels.Face.RenderConstants.blockRes;
@@ -68,8 +71,8 @@ public class SubBlockPosition {
                 pos.getZ() + z / blockRes);
     }
 
-    public SubBlockPosition rotated(BlockRotation rotation) {
-        switch (rotation) {
+    public SubBlockPosition rotated(Block block) {
+        switch (block.getRotation()) {
             case EAST:
                 return eastRotator.apply(this);
             case WEST:
@@ -82,8 +85,7 @@ public class SubBlockPosition {
                 return xAxisRotator.apply(this);
             case AXIS_Z:
                 return zAxisRotator.apply(this);
-            default:
-                return this;
         }
+        return this;
     }
 }

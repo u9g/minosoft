@@ -1,6 +1,6 @@
 /*
  * Codename Minosoft
- * Copyright (C) 2020 Lukas Eisenhauer
+ * Copyright (C) 2020 Moritz Zwerger
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -11,12 +11,13 @@
  *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
-package de.bixilon.minosoft.render.blockModels;
+package de.bixilon.minosoft.render.blockModels.specialModels;
 
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockProperties;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockRotation;
+import de.bixilon.minosoft.render.blockModels.BlockModel;
 import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlock;
@@ -64,14 +65,6 @@ public class FireModel extends BlockModel {
         return result;
     }
 
-    private HashSet<Face> prepareState(HashSet<SubBlock> subBlocks, BlockRotation rotation) {
-        HashSet<Face> result = new HashSet<>();
-        for (SubBlock subBlock : subBlocks) {
-            result.addAll(subBlock.getFacesSimple(rotation));
-        }
-        return result;
-    }
-
     @Override
     public boolean isFull() {
         return false;
@@ -83,14 +76,6 @@ public class FireModel extends BlockModel {
         result.addAll(getTextures(floor));
         result.addAll(getTextures(side));
         result.addAll(getTextures(up));
-        return result;
-    }
-
-    private HashSet<String> getTextures(HashSet<SubBlock> subBlocks) {
-        HashSet<String> result = new HashSet<>();
-        for (SubBlock subBlock : subBlocks) {
-            result.addAll(subBlock.getTextures());
-        }
         return result;
     }
 

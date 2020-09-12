@@ -21,6 +21,8 @@ import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Blocks;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
+import de.bixilon.minosoft.render.blockModels.specialModels.FireModel;
+import de.bixilon.minosoft.render.blockModels.specialModels.StairsModel;
 import de.bixilon.minosoft.render.texture.TextureLoader;
 import org.apache.commons.collections.primitives.ArrayFloatList;
 
@@ -101,6 +103,8 @@ public class BlockModelLoader {
             BlockModel model;
             if (identifier.contains("fire")) {
                 model = new FireModel(block, mod);
+            } else if (identifier.contains("stairs")) {
+                model = new StairsModel(block, mod);
             } else {
                 model = new BlockModel(block, mod);
             }

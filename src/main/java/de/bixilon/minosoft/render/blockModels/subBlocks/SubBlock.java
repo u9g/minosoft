@@ -15,7 +15,6 @@ package de.bixilon.minosoft.render.blockModels.subBlocks;
 
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
-import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockRotation;
 import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.texture.InFaceUV;
@@ -117,19 +116,19 @@ public class SubBlock {
             if (!textureCoordinates.containsKey(orientation)) {
                 continue;
             }
-            result.add(prepareFace(orientation, block.getRotation(), adjacentBlocks));
+            result.add(prepareFace(orientation, block, adjacentBlocks));
         }
         return result;
     }
 
-    private Face prepareFace(FaceOrientation faceDirection, BlockRotation rotation,
+    private Face prepareFace(FaceOrientation faceDirection, Block block,
                              HashMap<FaceOrientation, Boolean> adjacentBlocks) {
         Boolean cullface = cullFaceTextures.get(faceDirection);
         if (adjacentBlocks.get(faceDirection) && cullface != null && !cullface) {
             return new Face();
         }
         return new Face(textureCoordinates.get(faceDirection), uv.get(faceDirection),
-                cuboid.getFacePositions(faceDirection, rotation), textureRotations.get(faceDirection));
+                cuboid.getFacePositions(faceDirection, block), textureRotations.get(faceDirection));
     }
 
     public boolean isFull() {
@@ -144,11 +143,14 @@ public class SubBlock {
         return result;
     }
 
-    public HashSet<Face> getFacesSimple(BlockRotation rotation) {
+    public HashSet<Face> getFacesSimple(Block block) {
         HashSet<Face> result = new HashSet<>();
         for (FaceOrientation orientation : FaceOrientation.values()) {
+            if (textureCoordinates.get(orientation) == null) {
+                continue;
+            }
             result.add(new Face(textureCoordinates.get(orientation), uv.get(orientation),
-                    cuboid.getFacePositions(orientation, rotation)));
+                    cuboid.getFacePositions(orientation, block)));
         }
         return result;
     }

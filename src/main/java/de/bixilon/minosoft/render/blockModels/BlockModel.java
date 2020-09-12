@@ -17,6 +17,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.Config;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
+import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockRotation;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
@@ -114,7 +115,7 @@ public class BlockModel {
         return new HashSet<>();
     }
 
-    HashSet<SubBlock> load(String mod, String identifier) {
+    public HashSet<SubBlock> load(String mod, String identifier) {
         return load(mod, identifier, new HashMap<>());
     }
 
@@ -138,5 +139,21 @@ public class BlockModel {
         for (SubBlock subBlock : subBlocks) {
             subBlock.applyTextures(mod, loader);
         }
+    }
+
+    public static HashSet<Face> prepareState(HashSet<SubBlock> subBlocks, BlockRotation rotation) {
+        HashSet<Face> result = new HashSet<>();
+        for (SubBlock subBlock : subBlocks) {
+            result.addAll(subBlock.getFacesSimple(new Block("", "", rotation)));
+        }
+        return result;
+    }
+
+    public HashSet<String> getTextures(HashSet<SubBlock> subBlocks) {
+        HashSet<String> result = new HashSet<>();
+        for (SubBlock subBlock : subBlocks) {
+            result.addAll(subBlock.getTextures());
+        }
+        return result;
     }
 }

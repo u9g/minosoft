@@ -665,6 +665,15 @@
       "floor": "fire_floor0",
       "side": "fire_side0",
       "up": "fire_up0"
+    },
+    "spawner": {
+      "blockModel": "spawner"
+    },
+    "oak_stairs": {
+      "type": "stairs",
+      "straight": "oak_stairs",
+      "inner": "oak_stairs_inner",
+      "outer": "oak_stairs_outer"
     }
   },
   "tinted_textures": {
