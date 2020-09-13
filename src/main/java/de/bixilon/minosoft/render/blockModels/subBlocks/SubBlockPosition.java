@@ -36,7 +36,10 @@ public class SubBlockPosition {
     public static final SubBlockRotation xAxisRotator = new SubBlockRotation(middlePos, Axis.Z, 90);
     public static final SubBlockRotation zAxisRotator = new SubBlockRotation(middlePos, Axis.X, 90);
 
-    public static final SubBlockRotation downRotator = new SubBlockRotation(middlePos, Axis.X, 180);
+    public static final SubBlockRotation downRotator = new SubBlockRotation(middlePos, Axis.X, 90);
+    public static final SubBlockRotation downAltRotator = new SubBlockRotation(middlePos, Axis.X, 180);
+    public static final SubBlockRotation upRotator = new SubBlockRotation(middlePos, Axis.X, -90);
+
 
     public SubBlockPosition(JsonArray json) {
         x = json.get(0).getAsFloat();
@@ -79,7 +82,15 @@ public class SubBlockPosition {
                 return westRotator.apply(this);
             case SOUTH:
                 return southRotator.apply(this);
+            case UP:
+                if (block.getIdentifier().equals("dispenser") || block.getIdentifier().equals("dropper")) {
+                    return this;
+                }
+                return upRotator.apply(this);
             case DOWN:
+                if (block.getIdentifier().equals("dispenser") || block.getIdentifier().equals("dropper")) {
+                    return downAltRotator.apply(this);
+                }
                 return downRotator.apply(this);
             case AXIS_X:
                 return xAxisRotator.apply(this);

@@ -674,6 +674,32 @@
       "straight": "oak_stairs",
       "inner": "oak_stairs_inner",
       "outer": "oak_stairs_outer"
+    },
+    "chest": {
+      "blockModel": "chest"
+    },
+    "redstone_wire": {
+      "type": "wire",
+      "dot": "redstone_dust_dot",
+      "side": "redstone_dust_side0",
+      "up": "redstone_dust_up"
+    },
+    "diamond_ore": {
+      "blockModel": "diamond_ore"
+    },
+    "diamond_block": {
+      "blockModel": "diamond_block"
+    },
+    "crafting_table": {
+      "blockModel": "crafting_table"
+    },
+    "wheat": {
+      "type": "crop",
+      "stages": 8,
+      "base_name": "wheat_stage"
+    },
+    "farmland": {
+      "blockModel": "farmland"
     }
   },
   "tinted_textures": {
