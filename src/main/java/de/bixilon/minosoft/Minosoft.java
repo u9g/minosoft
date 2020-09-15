@@ -13,37 +13,28 @@
 
 package de.bixilon.minosoft;
 
-import com.google.gson.JsonObject;
+import com.google.common.collect.HashBiMap;
 import de.bixilon.minosoft.config.Configuration;
 import de.bixilon.minosoft.config.GameConfiguration;
-import de.bixilon.minosoft.game.datatypes.Mappings;
-import de.bixilon.minosoft.game.datatypes.Player;
-import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
-import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Blocks;
-import de.bixilon.minosoft.game.datatypes.objectLoader.enchantments.Enchantments;
-import de.bixilon.minosoft.game.datatypes.objectLoader.entities.Entities;
-import de.bixilon.minosoft.game.datatypes.objectLoader.entities.items.Items;
-import de.bixilon.minosoft.game.datatypes.objectLoader.statistics.Statistics;
+import de.bixilon.minosoft.game.datatypes.objectLoader.versions.Versions;
+import de.bixilon.minosoft.gui.main.AccountListCell;
+import de.bixilon.minosoft.gui.main.Server;
 import de.bixilon.minosoft.logging.Log;
-import de.bixilon.minosoft.logging.LogLevel;
-import de.bixilon.minosoft.mojang.api.MojangAccount;
-import de.bixilon.minosoft.protocol.network.Connection;
-import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
-import de.bixilon.minosoft.render.MainWindow;
-import de.bixilon.minosoft.util.FolderUtil;
+import de.bixilon.minosoft.logging.LogLevels;
 import de.bixilon.minosoft.util.OSUtil;
 import de.bixilon.minosoft.util.Util;
+import de.bixilon.minosoft.util.mojang.api.MojangAccount;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 public class Minosoft {
+    public static HashBiMap<String, MojangAccount> accountList;
+    public static MojangAccount selectedAccount;
+    public static ArrayList<Server> serverList;
     static Configuration config;
-    static ArrayList<MojangAccount> accountList;
 
     public static void main(String[] args) {
         // init log thread
@@ -59,38 +50,28 @@ public class Minosoft {
             e.printStackTrace();
             return;
         }
-        Log.info(String.format("Loaded config file (version=%s)", config.getInteger(GameConfiguration.CONFIG_VERSION)));
+        Log.info(String.format("Loaded config file (version=%s)", config.getInt(GameConfiguration.CONFIG_VERSION)));
         // set log level from config
-        Log.setLevel(LogLevel.byName(config.getString(GameConfiguration.GENERAL_LOG_LEVEL)));
+        Log.setLevel(LogLevels.valueOf(config.getString(GameConfiguration.GENERAL_LOG_LEVEL)));
         Log.info(String.format("Logging info with level: %s", Log.getLevel()));
-        Log.info("Checking assets...");
-        checkAssets();
-        Log.info("Assets checking done");
-        Log.info("Loading all mappings...");
-        long mappingsStart = System.currentTimeMillis();
-        loadMappings();
-        Log.info(String.format("Mappings loaded within %sms", (System.currentTimeMillis() - mappingsStart)));
+        Log.info("Loading versions.json...");
+        long mappingStartLoadingTime = System.currentTimeMillis();
+        try {
+            Versions.load(Util.readJsonAsset("mapping/versions.json"));
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+        Log.info(String.format("Loaded versions mapping in %dms", (System.currentTimeMillis() - mappingStartLoadingTime)));
 
+        Log.debug("Refreshing client token...");
         checkClientToken();
-
         accountList = config.getMojangAccounts();
-        if (accountList.size() == 0) {
-            /*
-            MojangAccount account = MojangAuthentication.login("email", "password");
-            account.saveToConfig();
-             */
-            throw new RuntimeException("No accounts in config file!");
-        }
-        MojangAccount account = accountList.get(0);
-        if (!account.refreshToken()) {
-            // could not login
-            account.saveToConfig();
-        } else {
-            Log.mojang("Could not refresh session, you will not be able to join premium servers!");
-        }
-        Connection connection = new Connection(config.getString("debug.host"), config.getInteger("debug.port"));
-        connection.setPlayer(new Player(account));
-        MainWindow.start(connection);
+        selectAccount(accountList.get(config.getString(GameConfiguration.ACCOUNT_SELECTED)));
+
+
+        serverList = config.getServers();
+        Launcher.start();
     }
 
     /**
@@ -102,18 +83,10 @@ public class Minosoft {
             path += "/";
         }
         switch (OSUtil.getOS()) {
-            case LINUX:
-                path += ".local/share/minosoft/";
-                break;
-            case WINDOWS:
-                path += "AppData/Roaming/Minosoft/";
-                break;
-            case MAC:
-                path += "Library/Application Support/Minosoft/";
-                break;
-            case OTHER:
-                path += ".minosoft/";
-                break;
+            case LINUX -> path += ".local/share/minosoft/";
+            case WINDOWS -> path += "AppData/Roaming/Minosoft/";
+            case MAC -> path += "Library/Application Support/Minosoft/";
+            case OTHER -> path += ".minosoft/";
         }
         File folder = new File(path);
         if (!folder.exists() && !folder.mkdirs()) {
@@ -134,50 +107,37 @@ public class Minosoft {
         }
     }
 
-    private static void loadMappings() {
-        HashMap<String, Mappings> mappingsHashMap = new HashMap<>();
-        mappingsHashMap.put("registries", Mappings.REGISTRIES);
-        mappingsHashMap.put("blocks", Mappings.BLOCKS);
-        try {
-            for (ProtocolVersion version : ProtocolVersion.versionMappingArray) {
-                if (version.getVersionNumber() < ProtocolVersion.VERSION_1_12_2.getVersionNumber()) {
-                    // skip them, use mapping of 1.12
-                    continue;
-                }
-                long startTime = System.currentTimeMillis();
-                for (Map.Entry<String, Mappings> mappingSet : mappingsHashMap.entrySet()) {
-                    JsonObject data = Util.readJsonFromFile(Config.homeDir + String.format("assets/mapping/%s/%s.json", version.getVersionString(), mappingSet.getKey()));
-                    for (String mod : data.keySet()) {
-                        JsonObject modJSON = data.getAsJsonObject(mod);
-                        switch (mappingSet.getValue()) {
-                            case REGISTRIES:
-                                Items.load(mod, modJSON.getAsJsonObject("item").getAsJsonObject("entries"), version);
-                                Entities.load(mod, modJSON.getAsJsonObject("entity_type").getAsJsonObject("entries"), version);
-                                Enchantments.load(mod, modJSON.getAsJsonObject("enchantment").getAsJsonObject("entries"), version);
-                                Statistics.load(mod, modJSON.getAsJsonObject("custom_stat").getAsJsonObject("entries"), version);
-                                break;
-                            case BLOCKS:
-                                Blocks.load(mod, modJSON, version);
-                                break;
-                        }
-                    }
-                }
-                Log.verbose(String.format("Loaded mappings for version %s in %dms (%s)", version, (System.currentTimeMillis() - startTime), version.getReleaseName()));
-            }
-            // end, we must set the nullBlock
-            Blocks.nullBlock = new Block("minecraft", "air");
-        } catch (IOException e) {
-            Log.fatal("Error occurred while loading version mapping: " + e.getLocalizedMessage());
-            System.exit(1);
-        }
+    public static ArrayList<Server> getServerList() {
+        return serverList;
     }
 
-    private static void checkAssets() {
-        try {
-            FolderUtil.copyFolder(Minosoft.class.getResource("/assets").toURI(), Config.homeDir + "assets/");
-        } catch (Exception e) {
-            Log.fatal("Error occurred while checking assets: " + e.getLocalizedMessage());
-            System.exit(1);
+    public static HashBiMap<String, MojangAccount> getAccountList() {
+        return accountList;
+    }
+
+    public static MojangAccount getSelectedAccount() {
+        return selectedAccount;
+    }
+
+    public static void selectAccount(MojangAccount account) {
+        if (account == null) {
+            selectedAccount = null;
+            config.putString(GameConfiguration.ACCOUNT_SELECTED, null);
+            config.saveToFile(Config.configFileName);
+            return;
         }
+        MojangAccount.RefreshStates refreshState = account.refreshToken();
+        if (refreshState == MojangAccount.RefreshStates.ERROR) {
+            accountList.remove(account.getUserId());
+            account.delete();
+            if (AccountListCell.listView != null) {
+                AccountListCell.listView.getItems().remove(account);
+            }
+            selectedAccount = null;
+            return;
+        }
+        config.putString(GameConfiguration.ACCOUNT_SELECTED, account.getUserId());
+        selectedAccount = account;
+        account.saveToConfig();
     }
 }

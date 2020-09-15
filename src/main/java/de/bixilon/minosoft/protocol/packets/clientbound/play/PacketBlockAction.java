@@ -13,13 +13,13 @@
 
 package de.bixilon.minosoft.protocol.packets.clientbound.play;
 
+import de.bixilon.minosoft.game.datatypes.objectLoader.blockIds.BlockId;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.actions.*;
 import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.packets.ClientboundPacket;
 import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
 import de.bixilon.minosoft.protocol.protocol.PacketHandler;
-import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -27,89 +27,40 @@ public class PacketBlockAction implements ClientboundPacket {
     BlockPosition position;
     BlockAction data;
 
-
     @Override
     public boolean read(InByteBuffer buffer) {
-        switch (buffer.getVersion()) {
-            case VERSION_1_7_10:
-            case VERSION_1_8:
-            case VERSION_1_9_4:
-            case VERSION_1_10:
-            case VERSION_1_11_2:
-            case VERSION_1_12_2:
-            case VERSION_1_13_2:
-            case VERSION_1_14_4:
-                // that's the only difference here
-                if (buffer.getVersion().getVersionNumber() >= ProtocolVersion.VERSION_1_8.getVersionNumber()) {
-                    position = buffer.readPosition();
-                } else {
-                    position = buffer.readBlockPositionShort();
-                }
-                byte byte1 = buffer.readByte();
-                byte byte2 = buffer.readByte();
-                Class<? extends BlockAction> clazz;
-                int actionId = buffer.readVarInt();
-                switch (actionId) {
-                    case 25:
-                        // noteblock
-                        clazz = NoteBlockAction.class;
-                        break;
-                    case 29:
-                    case 33:
-                        // piston
-                        clazz = PistonAction.class;
-                        break;
-                    case 54:
-                    case 130:
-                    case 146:
-                    case 219:
-                    case 220:
-                    case 221:
-                    case 222:
-                    case 223:
-                    case 224:
-                    case 225:
-                    case 226:
-                    case 227:
-                    case 228:
-                    case 229:
-                    case 230:
-                    case 231:
-                    case 232:
-                    case 233:
-                    case 234:
-                        // chest, shulker box
-                        clazz = ChestAction.class;
-                        break;
-                    case 138:
-                        // beacon
-                        clazz = BeaconAction.class;
-                        break;
-                    case 52:
-                        // mob spawner
-                        clazz = MobSpawnerAction.class;
-                        break;
-                    case 209:
-                        // end gateway
-                        clazz = EndGatewayAction.class;
-                        break;
-                    default:
-                        throw new IllegalStateException(String.format("Unexpected block action value: %d", actionId));
-                }
-                try {
-                    data = clazz.getConstructor(byte.class, byte.class).newInstance(byte1, byte2);
-                } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-                    e.printStackTrace();
-                }
-                return true;
+        // that's the only difference here
+        if (buffer.getProtocolId() < 6) {
+            position = buffer.readBlockPositionShort();
+        } else {
+            position = buffer.readPosition();
         }
-
-        return false;
+        byte byte1 = buffer.readByte();
+        byte byte2 = buffer.readByte();
+        Class<? extends BlockAction> clazz;
+        BlockId blockId = buffer.getConnection().getMapping().getBlockIdById(buffer.readVarInt());
+        // beacon
+        // end gateway
+        clazz = switch (blockId.getIdentifier()) {
+            case "noteblock" -> NoteBlockAction.class; // ToDo: was replaced in 17w47a (346) with the block id
+            case "sticky_piston", "piston" -> PistonAction.class;
+            case "chest", "ender_chest", "trapped_chest", "white_shulkerbox", "orange_shulkerbox", "magenta_shulkerbox", "light_blue_shulkerbox", "yellow_shulkerbox", "lime_shulkerbox", "pink_shulkerbox", "gray_shulkerbox", "silver_shulkerbox", "cyan_shulkerbox", "purple_shulkerbox", "blue_shulkerbox", "brown_shulkerbox", "green_shulkerbox", "red_shulkerbox", "black_shulkerbox" -> ChestAction.class;
+            case "beacon" -> BeaconAction.class;
+            case "mob_spawner" -> MobSpawnerAction.class;
+            case "end_gateway" -> EndGatewayAction.class;
+            default -> throw new IllegalStateException(String.format("Unexpected block action (blockId=%s)", blockId));
+        };
+        try {
+            data = clazz.getConstructor(byte.class, byte.class).newInstance(byte1, byte2);
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return true;
     }
 
     @Override
     public void log() {
-        Log.protocol(String.format("Block action received %s at %s", data.toString(), position.toString()));
+        Log.protocol(String.format("Block action received %s at %s", data, position));
     }
 
     @Override

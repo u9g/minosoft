@@ -13,49 +13,47 @@
 
 package de.bixilon.minosoft.protocol.packets.clientbound.play;
 
+import de.bixilon.minosoft.game.datatypes.ChatTextPositions;
 import de.bixilon.minosoft.game.datatypes.TextComponent;
-import de.bixilon.minosoft.game.datatypes.TextPosition;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.packets.ClientboundPacket;
 import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
 import de.bixilon.minosoft.protocol.protocol.PacketHandler;
 
-public class PacketChatMessageReceiving implements ClientboundPacket {
-    TextComponent c;
-    TextPosition position;
+import java.util.UUID;
 
+public class PacketChatMessageReceiving implements ClientboundPacket {
+    TextComponent message;
+    ChatTextPositions position;
+    UUID sender;
 
     @Override
     public boolean read(InByteBuffer buffer) {
-        switch (buffer.getVersion()) {
-            case VERSION_1_7_10:
-                c = buffer.readTextComponent();
-                position = TextPosition.CHAT_BOX;
-                return true;
-            case VERSION_1_8:
-            case VERSION_1_9_4:
-            case VERSION_1_10:
-            case VERSION_1_11_2:
-            case VERSION_1_12_2:
-            case VERSION_1_13_2:
-            case VERSION_1_14_4:
-                c = buffer.readTextComponent();
-                position = TextPosition.byId(buffer.readByte());
-                return true;
+        if (buffer.getProtocolId() < 7) {
+            message = buffer.readTextComponent();
+            position = ChatTextPositions.CHAT_BOX;
+            return true;
+        }
+        if (buffer.getProtocolId() < 718) {
+            message = buffer.readTextComponent();
+            position = ChatTextPositions.byId(buffer.readByte());
+            return true;
         }
 
-        return false;
+        message = buffer.readTextComponent();
+        position = ChatTextPositions.byId(buffer.readByte());
+        sender = buffer.readUUID();
+        return true;
     }
 
     @Override
     public void log() {
-        Log.game(String.format("[CHAT] %s", c.getColoredMessage()));
+        Log.game(String.format("[CHAT] %s", message.getColoredMessage()));
     }
 
-    public TextComponent getChatComponent() {
-        return c;
+    public TextComponent getMessage() {
+        return message;
     }
-
 
     @Override
     public void handle(PacketHandler h) {

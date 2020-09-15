@@ -14,7 +14,6 @@
 package de.bixilon.minosoft.protocol.packets.clientbound.play;
 
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
-import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Blocks;
 import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.packets.ClientboundPacket;
@@ -28,24 +27,18 @@ public class PacketAcknowledgePlayerDigging implements ClientboundPacket {
     PacketPlayerDigging.DiggingStatus status;
     boolean successful;
 
-
     @Override
     public boolean read(InByteBuffer buffer) {
-        switch (buffer.getVersion()) {
-            case VERSION_1_14_4:
-                position = buffer.readPosition();
-                block = Blocks.getBlock(buffer.readVarInt(), buffer.getVersion());
-                status = PacketPlayerDigging.DiggingStatus.byId(buffer.readVarInt());
-                successful = buffer.readBoolean();
-                return true;
-        }
-
-        return false;
+        position = buffer.readPosition();
+        block = buffer.getConnection().getMapping().getBlockById(buffer.readVarInt());
+        status = PacketPlayerDigging.DiggingStatus.byId(buffer.readVarInt());
+        successful = buffer.readBoolean();
+        return true;
     }
 
     @Override
     public void log() {
-        Log.protocol(String.format("Received acknowledge digging packet (position=%s, block=%s, status=%s, successful=%s)", position.toString(), block, status, successful));
+        Log.protocol(String.format("Received acknowledge digging packet (position=%s, block=%s, status=%s, successful=%s)", position, block, status, successful));
     }
 
     @Override

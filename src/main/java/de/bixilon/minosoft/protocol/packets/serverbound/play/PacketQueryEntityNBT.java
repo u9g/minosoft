@@ -14,10 +14,10 @@
 package de.bixilon.minosoft.protocol.packets.serverbound.play;
 
 import de.bixilon.minosoft.logging.Log;
+import de.bixilon.minosoft.protocol.network.Connection;
 import de.bixilon.minosoft.protocol.packets.ServerboundPacket;
 import de.bixilon.minosoft.protocol.protocol.OutPacketBuffer;
 import de.bixilon.minosoft.protocol.protocol.Packets;
-import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
 
 public class PacketQueryEntityNBT implements ServerboundPacket {
     final int transactionId;
@@ -28,17 +28,11 @@ public class PacketQueryEntityNBT implements ServerboundPacket {
         this.entityId = entityId;
     }
 
-
     @Override
-    public OutPacketBuffer write(ProtocolVersion version) {
-        OutPacketBuffer buffer = new OutPacketBuffer(version, version.getPacketCommand(Packets.Serverbound.PLAY_ENTITY_NBT_REQUEST));
-        switch (version) {
-            case VERSION_1_13_2:
-            case VERSION_1_14_4:
-                buffer.writeVarInt(transactionId);
-                buffer.writeVarInt(entityId);
-                break;
-        }
+    public OutPacketBuffer write(Connection connection) {
+        OutPacketBuffer buffer = new OutPacketBuffer(connection, Packets.Serverbound.PLAY_ENTITY_NBT_REQUEST);
+        buffer.writeVarInt(transactionId);
+        buffer.writeVarInt(entityId);
         return buffer;
     }
 

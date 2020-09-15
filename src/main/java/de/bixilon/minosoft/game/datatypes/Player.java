@@ -13,17 +13,16 @@
 
 package de.bixilon.minosoft.game.datatypes;
 
+import de.bixilon.minosoft.game.datatypes.entities.mob.OtherPlayer;
 import de.bixilon.minosoft.game.datatypes.inventory.Inventory;
 import de.bixilon.minosoft.game.datatypes.inventory.InventoryProperties;
 import de.bixilon.minosoft.game.datatypes.inventory.InventorySlots;
 import de.bixilon.minosoft.game.datatypes.inventory.Slot;
-import de.bixilon.minosoft.game.datatypes.objectLoader.entities.mob.OtherPlayer;
-import de.bixilon.minosoft.game.datatypes.player.PlayerInfo;
+import de.bixilon.minosoft.game.datatypes.player.PlayerListItem;
 import de.bixilon.minosoft.game.datatypes.scoreboard.ScoreboardManager;
 import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
 import de.bixilon.minosoft.game.datatypes.world.World;
-import de.bixilon.minosoft.mojang.api.MojangAccount;
-import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
+import de.bixilon.minosoft.util.mojang.api.MojangAccount;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -31,41 +30,41 @@ import java.util.UUID;
 import static de.bixilon.minosoft.protocol.protocol.ProtocolDefinition.PLAYER_INVENTORY_ID;
 
 public class Player {
-    final MojangAccount acc;
+    final MojangAccount account;
     final ScoreboardManager scoreboardManager = new ScoreboardManager();
-    public HashMap<UUID, PlayerInfo> playerInfos = new HashMap<>();
+    public final HashMap<UUID, PlayerListItem> playerList = new HashMap<>();
     float health;
     int food;
     float saturation;
     BlockPosition spawnLocation;
-    GameMode gameMode;
-    World world = new World("world");
+    GameModes gameMode;
+    final World world = new World("world");
     byte selectedSlot;
     int level;
     int totalExperience;
     OtherPlayer player;
-    HashMap<Integer, Inventory> inventories = new HashMap<>();
+    final HashMap<Integer, Inventory> inventories = new HashMap<>();
     boolean spawnConfirmed = false;
 
     TextComponent tabHeader;
     TextComponent tabFooter;
 
-    public Player(MojangAccount acc) {
-        this.acc = acc;
+    public Player(MojangAccount account) {
+        this.account = account;
         // create our own inventory without any properties
         inventories.put(PLAYER_INVENTORY_ID, new Inventory(null));
     }
 
     public String getPlayerName() {
-        return acc.getPlayerName();
+        return account.getPlayerName();
     }
 
     public UUID getPlayerUUID() {
-        return acc.getUUID();
+        return account.getUUID();
     }
 
     public MojangAccount getAccount() {
-        return this.acc;
+        return this.account;
     }
 
     public float getHealth() {
@@ -100,11 +99,11 @@ public class Player {
         this.spawnLocation = spawnLocation;
     }
 
-    public GameMode getGameMode() {
+    public GameModes getGameMode() {
         return gameMode;
     }
 
-    public void setGameMode(GameMode gameMode) {
+    public void setGameMode(GameModes gameMode) {
         this.gameMode = gameMode;
     }
 
@@ -154,16 +153,16 @@ public class Player {
         }
     }
 
-    public Slot getSlot(int windowId, InventorySlots.InventoryInterface slot, ProtocolVersion version) {
-        return getSlot(windowId, slot.getId(version));
+    public Slot getSlot(int windowId, InventorySlots.InventoryInterface slot, int protocolId) {
+        return getSlot(windowId, slot.getId(protocolId));
     }
 
     public Slot getSlot(int windowId, int slot) {
         return inventories.get(windowId).getSlot(slot);
     }
 
-    public void setSlot(int windowId, InventorySlots.InventoryInterface slot, ProtocolVersion version, Slot data) {
-        setSlot(windowId, slot.getId(version), data);
+    public void setSlot(int windowId, InventorySlots.InventoryInterface slot, int protocolId, Slot data) {
+        setSlot(windowId, slot.getId(protocolId), data);
     }
 
     public void setSlot(int windowId, int slot, Slot data) {
@@ -190,15 +189,15 @@ public class Player {
         return scoreboardManager;
     }
 
-    public HashMap<UUID, PlayerInfo> getPlayerInfos() {
-        return playerInfos;
+    public HashMap<UUID, PlayerListItem> getPlayerList() {
+        return playerList;
     }
 
-    public PlayerInfo getPlayerInfo(String name) {
+    public PlayerListItem getPlayerListItem(String name) {
         // only legacy
-        for (PlayerInfo info : playerInfos.values()) {
-            if (info.getName().equals(name)) {
-                return info;
+        for (PlayerListItem listItem : playerList.values()) {
+            if (listItem.getName().equals(name)) {
+                return listItem;
             }
         }
         return null;

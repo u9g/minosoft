@@ -13,41 +13,24 @@
 
 package de.bixilon.minosoft.protocol.packets.clientbound.play;
 
-import de.bixilon.minosoft.game.datatypes.objectLoader.entities.meta.EntityMetaData;
+import de.bixilon.minosoft.game.datatypes.entities.meta.EntityMetaData;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.packets.ClientboundPacket;
 import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
 import de.bixilon.minosoft.protocol.protocol.PacketHandler;
-import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
 
 public class PacketEntityMetadata implements ClientboundPacket {
-    HashMap<Integer, EntityMetaData.MetaDataSet> sets;
+    EntityMetaData.MetaDataHashMap sets;
     int entityId;
-    ProtocolVersion version;
-
+    int protocolId;
 
     @Override
     public boolean read(InByteBuffer buffer) {
-        this.version = buffer.getVersion();
-        switch (buffer.getVersion()) {
-            case VERSION_1_7_10:
-                entityId = buffer.readInt();
-                break;
-            case VERSION_1_8:
-            case VERSION_1_9_4:
-            case VERSION_1_10:
-            case VERSION_1_11_2:
-            case VERSION_1_12_2:
-            case VERSION_1_13_2:
-            case VERSION_1_14_4:
-                entityId = buffer.readVarInt();
-                break;
-            default:
-                return false;
-        }
+        this.protocolId = buffer.getProtocolId();
+        this.entityId = buffer.readEntityId();
+
         sets = buffer.readMetaData();
         return true;
     }
@@ -66,13 +49,13 @@ public class PacketEntityMetadata implements ClientboundPacket {
         return entityId;
     }
 
-    public HashMap<Integer, EntityMetaData.MetaDataSet> getSets() {
+    public EntityMetaData.MetaDataHashMap getSets() {
         return sets;
     }
 
     public EntityMetaData getEntityData(Class<? extends EntityMetaData> clazz) {
         try {
-            return clazz.getConstructor(HashMap.class, ProtocolVersion.class).newInstance(sets, version);
+            return clazz.getConstructor(EntityMetaData.MetaDataHashMap.class, int.class).newInstance(sets, protocolId);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();
         }

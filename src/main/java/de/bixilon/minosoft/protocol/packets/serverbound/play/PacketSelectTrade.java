@@ -14,10 +14,10 @@
 package de.bixilon.minosoft.protocol.packets.serverbound.play;
 
 import de.bixilon.minosoft.logging.Log;
+import de.bixilon.minosoft.protocol.network.Connection;
 import de.bixilon.minosoft.protocol.packets.ServerboundPacket;
 import de.bixilon.minosoft.protocol.protocol.OutPacketBuffer;
 import de.bixilon.minosoft.protocol.protocol.Packets;
-import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
 
 public class PacketSelectTrade implements ServerboundPacket {
 
@@ -27,16 +27,10 @@ public class PacketSelectTrade implements ServerboundPacket {
         this.id = id;
     }
 
-
     @Override
-    public OutPacketBuffer write(ProtocolVersion version) {
-        OutPacketBuffer buffer = new OutPacketBuffer(version, version.getPacketCommand(Packets.Serverbound.PLAY_SELECT_TRADE));
-        switch (version) {
-            case VERSION_1_13_2:
-            case VERSION_1_14_4:
-                buffer.writeVarInt(id);
-                break;
-        }
+    public OutPacketBuffer write(Connection connection) {
+        OutPacketBuffer buffer = new OutPacketBuffer(connection, Packets.Serverbound.PLAY_SELECT_TRADE);
+        buffer.writeVarInt(id);
         return buffer;
     }
 

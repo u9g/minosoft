@@ -24,34 +24,22 @@ public class PacketBlockBreakAnimation implements ClientboundPacket {
     BlockPosition position;
     byte stage;
 
-
     @Override
     public boolean read(InByteBuffer buffer) {
-        switch (buffer.getVersion()) {
-            case VERSION_1_7_10:
-                entityId = buffer.readVarInt();
-                position = buffer.readBlockPositionInteger();
-                stage = buffer.readByte();
-                return true;
-            case VERSION_1_8:
-            case VERSION_1_9_4:
-            case VERSION_1_10:
-            case VERSION_1_11_2:
-            case VERSION_1_12_2:
-            case VERSION_1_13_2:
-            case VERSION_1_14_4:
-                entityId = buffer.readVarInt();
-                position = buffer.readPosition();
-                stage = buffer.readByte();
-                return true;
+        entityId = buffer.readVarInt();
+        if (buffer.getProtocolId() < 6) {
+            position = buffer.readBlockPositionInteger();
+        } else {
+            position = buffer.readPosition();
         }
+        stage = buffer.readByte();
 
-        return false;
+        return true;
     }
 
     @Override
     public void log() {
-        Log.protocol(String.format("Receiving block break packet (entityId=%d, stage=%d) at %s", entityId, stage, position.toString()));
+        Log.protocol(String.format("Receiving block break packet (entityId=%d, stage=%d) at %s", entityId, stage, position));
     }
 
     @Override

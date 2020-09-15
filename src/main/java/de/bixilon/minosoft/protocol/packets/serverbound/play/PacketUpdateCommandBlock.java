@@ -15,10 +15,10 @@ package de.bixilon.minosoft.protocol.packets.serverbound.play;
 
 import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
 import de.bixilon.minosoft.logging.Log;
+import de.bixilon.minosoft.protocol.network.Connection;
 import de.bixilon.minosoft.protocol.packets.ServerboundPacket;
 import de.bixilon.minosoft.protocol.protocol.OutPacketBuffer;
 import de.bixilon.minosoft.protocol.protocol.Packets;
-import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
 
 public class PacketUpdateCommandBlock implements ServerboundPacket {
 
@@ -39,36 +39,30 @@ public class PacketUpdateCommandBlock implements ServerboundPacket {
     }
 
     @Override
-    public OutPacketBuffer write(ProtocolVersion version) {
-        OutPacketBuffer buffer = new OutPacketBuffer(version, version.getPacketCommand(Packets.Serverbound.PLAY_UPDATE_COMMAND_BLOCK));
-        switch (version) {
-            case VERSION_1_13_2:
-            case VERSION_1_14_4:
-                buffer.writePosition(position);
-                buffer.writeString(command);
-                buffer.writeVarInt(type.getId());
+    public OutPacketBuffer write(Connection connection) {
+        OutPacketBuffer buffer = new OutPacketBuffer(connection, Packets.Serverbound.PLAY_UPDATE_COMMAND_BLOCK);
+        buffer.writePosition(position);
+        buffer.writeString(command);
+        buffer.writeVarInt(type.getId());
 
-                byte flags = 0x00;
-                if (trackOutput) {
-                    flags |= 0x01;
-                }
-                if (isConditional) {
-                    flags |= 0x02;
-                }
-                if (isAutomatic) {
-                    flags |= 0x04;
-                }
-
-
-                buffer.writeByte(flags);
-                break;
+        byte flags = 0x00;
+        if (trackOutput) {
+            flags |= 0x01;
         }
+        if (isConditional) {
+            flags |= 0x02;
+        }
+        if (isAutomatic) {
+            flags |= 0x04;
+        }
+
+        buffer.writeByte(flags);
         return buffer;
     }
 
     @Override
     public void log() {
-        Log.protocol(String.format("Sending update command block packet at %s (command=\"%s\", type=%s, trackOutput=%s, isConditional=%s, isAutomatic=%s)", position.toString(), command, type, trackOutput, isConditional, isAutomatic));
+        Log.protocol(String.format("Sending update command block packet at %s (command=\"%s\", type=%s, trackOutput=%s, isConditional=%s, isAutomatic=%s)", position, command, type, trackOutput, isConditional, isAutomatic));
     }
 
     public enum CommandBlockType {

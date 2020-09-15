@@ -13,10 +13,10 @@
 
 package de.bixilon.minosoft.protocol.packets.clientbound.play;
 
-import de.bixilon.minosoft.game.datatypes.Difficulty;
-import de.bixilon.minosoft.game.datatypes.Dimension;
-import de.bixilon.minosoft.game.datatypes.GameMode;
-import de.bixilon.minosoft.game.datatypes.LevelType;
+import de.bixilon.minosoft.game.datatypes.Difficulties;
+import de.bixilon.minosoft.game.datatypes.GameModes;
+import de.bixilon.minosoft.game.datatypes.LevelTypes;
+import de.bixilon.minosoft.game.datatypes.objectLoader.dimensions.Dimension;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.packets.ClientboundPacket;
 import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
@@ -24,34 +24,51 @@ import de.bixilon.minosoft.protocol.protocol.PacketHandler;
 
 public class PacketRespawn implements ClientboundPacket {
     Dimension dimension;
-    Difficulty difficulty;
-    GameMode gameMode;
-    LevelType levelType;
-
+    Difficulties difficulty;
+    GameModes gameMode;
+    LevelTypes levelType;
+    long hashedSeed;
+    boolean isDebug = false;
+    boolean isFlat = false;
+    boolean copyMetaData = false;
 
     @Override
     public boolean read(InByteBuffer buffer) {
-        switch (buffer.getVersion()) {
-            case VERSION_1_7_10:
-            case VERSION_1_8:
-            case VERSION_1_9_4:
-            case VERSION_1_10:
-            case VERSION_1_11_2:
-            case VERSION_1_12_2:
-            case VERSION_1_13_2:
-                dimension = Dimension.byId(buffer.readInt());
-                difficulty = Difficulty.byId(buffer.readByte());
-                gameMode = GameMode.byId(buffer.readByte());
-                levelType = LevelType.byType(buffer.readString());
-                return true;
-            case VERSION_1_14_4:
-                dimension = Dimension.byId(buffer.readInt());
-                gameMode = GameMode.byId(buffer.readByte());
-                levelType = LevelType.byType(buffer.readString());
-                return true;
+        if (buffer.getProtocolId() < 718) {
+            if (buffer.getProtocolId() < 108) {
+                dimension = buffer.getConnection().getMapping().getDimensionById(buffer.readByte());
+            } else {
+                dimension = buffer.getConnection().getMapping().getDimensionById(buffer.readInt());
+            }
+        } else {
+            dimension = buffer.getConnection().getMapping().getDimensionByIdentifier(buffer.readString());
+        }
+        if (buffer.getProtocolId() < 464) {
+            difficulty = Difficulties.byId(buffer.readByte());
         }
 
-        return false;
+        if (buffer.getProtocolId() >= 719) {
+            buffer.readString(); // world
+        }
+        if (buffer.getProtocolId() >= 552) {
+            hashedSeed = buffer.readLong();
+        }
+        gameMode = GameModes.byId(buffer.readByte());
+
+        if (buffer.getProtocolId() >= 730) {
+            buffer.readByte(); // previous game mode
+        }
+        if (buffer.getProtocolId() >= 1 && buffer.getProtocolId() < 716) {
+            levelType = LevelTypes.byType(buffer.readString());
+        }
+        if (buffer.getProtocolId() >= 716) {
+            isDebug = buffer.readBoolean();
+            isFlat = buffer.readBoolean();
+        }
+        if (buffer.getProtocolId() >= 714) {
+            copyMetaData = buffer.readBoolean();
+        }
+        return true;
     }
 
     @Override
@@ -63,15 +80,15 @@ public class PacketRespawn implements ClientboundPacket {
         return dimension;
     }
 
-    public Difficulty getDifficulty() {
+    public Difficulties getDifficulty() {
         return difficulty;
     }
 
-    public GameMode getGameMode() {
+    public GameModes getGameMode() {
         return gameMode;
     }
 
-    public LevelType getLevelType() {
+    public LevelTypes getLevelType() {
         return levelType;
     }
 

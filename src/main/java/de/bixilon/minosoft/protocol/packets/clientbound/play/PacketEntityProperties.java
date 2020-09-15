@@ -13,8 +13,8 @@
 
 package de.bixilon.minosoft.protocol.packets.clientbound.play;
 
-import de.bixilon.minosoft.game.datatypes.objectLoader.entities.EntityProperty;
-import de.bixilon.minosoft.game.datatypes.objectLoader.entities.EntityPropertyKeys;
+import de.bixilon.minosoft.game.datatypes.entities.EntityProperty;
+import de.bixilon.minosoft.game.datatypes.entities.EntityPropertyKeys;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.packets.ClientboundPacket;
 import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
@@ -29,50 +29,37 @@ public class PacketEntityProperties implements ClientboundPacket {
 
     @Override
     public boolean read(InByteBuffer buffer) {
-        switch (buffer.getVersion()) {
-            case VERSION_1_7_10: {
-                entityId = buffer.readInt();
-                int count = buffer.readInt();
-                for (int i = 0; i < count; i++) {
-                    EntityPropertyKeys key = EntityPropertyKeys.byName(buffer.readString(), buffer.getVersion());
-                    double value = buffer.readDouble();
-                    short listLength = buffer.readShort();
-                    for (int ii = 0; ii < listLength; ii++) {
-                        UUID uuid = buffer.readUUID();
-                        double amount = buffer.readDouble();
-                        ModifierAction operation = ModifierAction.byId(buffer.readByte());
-                        // ToDo: modifiers
-                    }
-                    properties.put(key, new EntityProperty(value));
+        this.entityId = buffer.readEntityId();
+        if (buffer.getProtocolId() < 7) {
+            int count = buffer.readInt();
+            for (int i = 0; i < count; i++) {
+                EntityPropertyKeys key = EntityPropertyKeys.byName(buffer.readString(), buffer.getProtocolId());
+                double value = buffer.readDouble();
+                short listLength = buffer.readShort();
+                for (int ii = 0; ii < listLength; ii++) {
+                    UUID uuid = buffer.readUUID();
+                    double amount = buffer.readDouble();
+                    ModifierActions operation = ModifierActions.byId(buffer.readByte());
+                    // ToDo: modifiers
                 }
-                return true;
+                properties.put(key, new EntityProperty(value));
             }
-            case VERSION_1_8:
-            case VERSION_1_9_4:
-            case VERSION_1_10:
-            case VERSION_1_11_2:
-            case VERSION_1_12_2:
-            case VERSION_1_13_2:
-            case VERSION_1_14_4: {
-                entityId = buffer.readVarInt();
-                int count = buffer.readInt();
-                for (int i = 0; i < count; i++) {
-                    EntityPropertyKeys key = EntityPropertyKeys.byName(buffer.readString(), buffer.getVersion());
-                    double value = buffer.readDouble();
-                    int listLength = buffer.readVarInt();
-                    for (int ii = 0; ii < listLength; ii++) {
-                        UUID uuid = buffer.readUUID();
-                        double amount = buffer.readDouble();
-                        ModifierAction operation = ModifierAction.byId(buffer.readByte());
-                        // ToDo: modifiers
-                    }
-                    properties.put(key, new EntityProperty(value));
-                }
-                return true;
-            }
+            return true;
         }
-
-        return false;
+        int count = buffer.readInt();
+        for (int i = 0; i < count; i++) {
+            EntityPropertyKeys key = EntityPropertyKeys.byName(buffer.readString(), buffer.getProtocolId());
+            double value = buffer.readDouble();
+            int listLength = buffer.readVarInt();
+            for (int ii = 0; ii < listLength; ii++) {
+                UUID uuid = buffer.readUUID();
+                double amount = buffer.readDouble();
+                ModifierActions operation = ModifierActions.byId(buffer.readByte());
+                // ToDo: modifiers
+            }
+            properties.put(key, new EntityProperty(value));
+        }
+        return true;
     }
 
     @Override
@@ -89,28 +76,17 @@ public class PacketEntityProperties implements ClientboundPacket {
         return entityId;
     }
 
-    public enum ModifierAction {
-        ADD(0),
-        ADD_PERCENT(1),
-        MULTIPLY(2);
+    public enum ModifierActions {
+        ADD,
+        ADD_PERCENT,
+        MULTIPLY;
 
-        final int id;
-
-        ModifierAction(int id) {
-            this.id = id;
-        }
-
-        public static ModifierAction byId(int id) {
-            for (ModifierAction a : values()) {
-                if (a.getId() == id) {
-                    return a;
-                }
-            }
-            return null;
+        public static ModifierActions byId(int id) {
+            return values()[id];
         }
 
         public int getId() {
-            return id;
+            return ordinal();
         }
     }
 }

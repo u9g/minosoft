@@ -14,40 +14,30 @@
 package de.bixilon.minosoft.protocol.packets.serverbound.play;
 
 import de.bixilon.minosoft.logging.Log;
+import de.bixilon.minosoft.protocol.network.Connection;
 import de.bixilon.minosoft.protocol.packets.ServerboundPacket;
 import de.bixilon.minosoft.protocol.protocol.OutPacketBuffer;
 import de.bixilon.minosoft.protocol.protocol.Packets;
-import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
 
 public class PacketPlayerAbilitiesSending implements ServerboundPacket {
     final boolean flying;
-
 
     public PacketPlayerAbilitiesSending(boolean flying) {
         this.flying = flying;
     }
 
     @Override
-    public OutPacketBuffer write(ProtocolVersion version) {
-        OutPacketBuffer buffer = new OutPacketBuffer(version, version.getPacketCommand(Packets.Serverbound.PLAY_PLAYER_ABILITIES));
-        switch (version) {
-            case VERSION_1_7_10:
-            case VERSION_1_8:
-            case VERSION_1_9_4:
-            case VERSION_1_10:
-            case VERSION_1_11_2:
-            case VERSION_1_12_2:
-            case VERSION_1_13_2:
-            case VERSION_1_14_4:
-                // only fly matters, everything else ignored
-                byte flags = 0;
-                if (flying) {
-                    flags |= 0b10;
-                }
-                buffer.writeByte(flags);
-                buffer.writeFloat(0.0F);
-                buffer.writeFloat(0.0F);
-                break;
+    public OutPacketBuffer write(Connection connection) {
+        OutPacketBuffer buffer = new OutPacketBuffer(connection, Packets.Serverbound.PLAY_PLAYER_ABILITIES);
+        byte flags = 0;
+        if (flying) {
+            flags |= 0b10;
+        }
+        buffer.writeByte(flags);
+        if (buffer.getProtocolId() < 727) {
+            // only fly matters, everything else ignored
+            buffer.writeFloat(0.0F);
+            buffer.writeFloat(0.0F);
         }
         return buffer;
     }

@@ -15,13 +15,17 @@ package de.bixilon.minosoft.util;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import de.bixilon.minosoft.protocol.network.Connection;
 import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
-import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 
 import java.io.*;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.zip.DataFormatException;
@@ -29,23 +33,21 @@ import java.util.zip.Deflater;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.Inflater;
 
-public class Util {
-    static final Pattern UUID_FIX = Pattern.compile("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})");
-    // thanks https://www.spigotmc.org/threads/free-code-easily-convert-between-trimmed-and-full-uuids.165615
+public final class Util {
+    public static final Pattern UUID_FIX = Pattern.compile("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})"); // thanks https://www.spigotmc.org/threads/free-code-easily-convert-between-trimmed-and-full-uuids.165615
 
-    public static void sleep(int ms) {
-        try {
-            Thread.sleep(ms);
-        } catch (InterruptedException ignored) {
+    public static UUID uuidFromString(String uuid) {
+        if (uuid.length() == 36) {
+            return UUID.fromString(uuid);
         }
+        if (uuid.length() == 32) {
+            return UUID.fromString(UUID_FIX.matcher(uuid.replace("-", "")).replaceAll("$1-$2-$3-$4-$5"));
+        }
+        throw new IllegalArgumentException(String.format("%s is not a valid UUID String", uuid));
     }
 
-    public static UUID formatUUID(String uuid) {
-        return UUID.fromString(UUID_FIX.matcher(uuid.replace("-", "")).replaceAll("$1-$2-$3-$4-$5"));
-    }
-
-    public static InByteBuffer decompress(byte[] bytes, ProtocolVersion version) {
-        return new InByteBuffer(decompress(bytes), version);
+    public static InByteBuffer decompress(byte[] bytes, Connection connection) {
+        return new InByteBuffer(decompress(bytes), connection);
     }
 
     public static byte[] decompress(byte[] bytes) {
@@ -109,21 +111,61 @@ public class Util {
         return null;
     }
 
+    public static HashMap<String, String> readTarGzFile(String fileName) throws IOException {
+        File inputFile = new File(fileName);
+        GZIPInputStream gzipInputStream = new GZIPInputStream(new FileInputStream(inputFile));
+        TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(gzipInputStream);
+        HashMap<String, String> ret = new HashMap<>();
+        TarArchiveEntry entry;
+        while ((entry = tarArchiveInputStream.getNextTarEntry()) != null) {
+            ret.put(entry.getName(), readFile(new BufferedReader(new InputStreamReader(tarArchiveInputStream)), false));
+        }
+
+        return ret;
+    }
+
     public static String readFile(String fileName) throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(fileName));
+        return readFile(new File(fileName));
+    }
+
+    public static String readAsset(String path) throws IOException {
+        return readFile(new BufferedReader((new InputStreamReader(Util.class.getResourceAsStream("/assets/" + path)))), true);
+    }
+
+    public static JsonObject readJsonAsset(String path) throws IOException {
+        return (JsonObject) JsonParser.parseString(readAsset(path));
+    }
+
+    public static String readFile(BufferedReader reader, boolean closeStream) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
-        String line = null;
         String ls = System.getProperty("line.separator");
+        String line;
         while ((line = reader.readLine()) != null) {
             stringBuilder.append(line);
             stringBuilder.append(ls);
         }
         stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-        reader.close();
+        if (closeStream) {
+            reader.close();
+        }
         return stringBuilder.toString();
+    }
+
+    public static String readFile(File file) throws IOException {
+        return readFile(new BufferedReader(new FileReader(file)), true);
     }
 
     public static JsonObject readJsonFromFile(String fileName) throws IOException {
         return JsonParser.parseString(readFile(fileName)).getAsJsonObject();
+    }
+
+    public static void downloadFile(String url, String destination) throws IOException {
+        BufferedInputStream inputStream = new BufferedInputStream(new URL(url).openStream());
+        FileOutputStream fileOutputStream = new FileOutputStream(destination);
+        byte[] buffer = new byte[1024];
+        int length;
+        while ((length = inputStream.read(buffer, 0, 1024)) != -1) {
+            fileOutputStream.write(buffer, 0, length);
+        }
     }
 }

@@ -13,88 +13,72 @@
 
 package de.bixilon.minosoft.protocol.packets.clientbound.play;
 
-import de.bixilon.minosoft.game.datatypes.particle.Particle;
-import de.bixilon.minosoft.game.datatypes.particle.Particles;
+import de.bixilon.minosoft.game.datatypes.objectLoader.particle.Particle;
+import de.bixilon.minosoft.game.datatypes.objectLoader.particle.data.ParticleData;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.packets.ClientboundPacket;
 import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
 import de.bixilon.minosoft.protocol.protocol.PacketHandler;
 
-import java.util.Random;
-
 public class PacketParticle implements ClientboundPacket {
-    Particles particle;
-    Particle particleDataClass;
+    Particle particleType;
+    ParticleData particleData;
     boolean longDistance = false;
-    float x;
-    float y;
-    float z;
-    float particleData;
+    double x;
+    double y;
+    double z;
+    float offsetX;
+    float offsetY;
+    float offsetZ;
+    float particleDataFloat;
     int count;
-    int[] data;
 
     @Override
     public boolean read(InByteBuffer buffer) {
-        Random random = new Random();
-        switch (buffer.getVersion()) {
-            case VERSION_1_7_10:
-                particle = Particles.byName(buffer.readString(), buffer.getVersion());
-                x = buffer.readFloat();
-                y = buffer.readFloat();
-                z = buffer.readFloat();
+        if (buffer.getProtocolId() < 569) {
 
-                // offset
-                x += buffer.readFloat() * random.nextGaussian();
-                y += buffer.readFloat() * random.nextGaussian();
-                z += buffer.readFloat() * random.nextGaussian();
-
-                particleData = buffer.readFloat();
-                count = buffer.readInt();
-                return true;
-            case VERSION_1_8:
-            case VERSION_1_9_4:
-            case VERSION_1_10:
-            case VERSION_1_11_2:
-            case VERSION_1_12_2:
-                particle = Particles.byId(buffer.readInt());
+            if (buffer.getProtocolId() < 17) {
+                particleType = buffer.getConnection().getMapping().getParticleByIdentifier(buffer.readString());
+            } else {
+                particleType = buffer.getConnection().getMapping().getParticleById(buffer.readInt());
+            }
+            if (buffer.getProtocolId() >= 29) {
                 longDistance = buffer.readBoolean();
-                x = buffer.readFloat();
-                y = buffer.readFloat();
-                z = buffer.readFloat();
+            }
+            x = buffer.readFloat();
+            y = buffer.readFloat();
+            z = buffer.readFloat();
 
-                // offset
-                x += buffer.readFloat() * random.nextGaussian();
-                y += buffer.readFloat() * random.nextGaussian();
-                z += buffer.readFloat() * random.nextGaussian();
+            // offset
+            offsetX = buffer.readFloat();
+            offsetY = buffer.readFloat();
+            offsetZ = buffer.readFloat();
 
-                particleData = buffer.readFloat();
-                count = buffer.readInt();
-                return true;
-            case VERSION_1_13_2:
-            case VERSION_1_14_4:
-                particle = Particles.byId(buffer.readInt());
-                longDistance = buffer.readBoolean();
-                x = buffer.readFloat();
-                y = buffer.readFloat();
-                z = buffer.readFloat();
-
-                // offset
-                x += buffer.readFloat() * random.nextGaussian();
-                y += buffer.readFloat() * random.nextGaussian();
-                z += buffer.readFloat() * random.nextGaussian();
-
-                particleData = buffer.readFloat();
-                count = buffer.readInt();
-                particleDataClass = buffer.readParticleData(particle);
-                return true;
+            particleDataFloat = buffer.readFloat();
+            count = buffer.readInt();
+            particleData = buffer.readParticleData(particleType);
+            return true;
         }
+        particleType = buffer.getConnection().getMapping().getParticleById(buffer.readInt());
+        longDistance = buffer.readBoolean();
+        x = buffer.readDouble();
+        y = buffer.readDouble();
+        z = buffer.readDouble();
 
-        return false;
+        // offset
+        offsetX = buffer.readFloat();
+        offsetY = buffer.readFloat();
+        offsetZ = buffer.readFloat();
+
+        particleDataFloat = buffer.readFloat();
+        count = buffer.readInt();
+        particleData = buffer.readParticleData(particleType);
+        return true;
     }
 
     @Override
     public void log() {
-        Log.protocol(String.format("Received particle spawn at %s %s %s (particle=%s, data=%s, count=%d, dataClass=%s)", x, y, z, particle, particleData, count, particleDataClass));
+        Log.protocol(String.format("Received particle spawn at %s %s %s (offsetX=%s, offsetY=%s, offsetZ=%s, particleType=%s, dataFloat=%s, count=%d, particleData=%s)", x, y, z, offsetX, offsetY, offsetZ, particleType, particleDataFloat, count, particleData));
     }
 
     @Override
@@ -102,27 +86,35 @@ public class PacketParticle implements ClientboundPacket {
         h.handle(this);
     }
 
-    public Particles getParticle() {
-        return particle;
-    }
-
-    public float getX() {
+    public double getX() {
         return x;
     }
 
-    public float getY() {
+    public double getY() {
         return y;
     }
 
-    public float getZ() {
+    public double getZ() {
         return z;
-    }
-
-    public float getParticleData() {
-        return particleData;
     }
 
     public int getCount() {
         return count;
+    }
+
+    public Particle getParticleType() {
+        return particleType;
+    }
+
+    public ParticleData getParticleData() {
+        return particleData;
+    }
+
+    public float getParticleDataFloat() {
+        return particleDataFloat;
+    }
+
+    public boolean isLongDistance() {
+        return longDistance;
     }
 }

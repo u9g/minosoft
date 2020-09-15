@@ -25,18 +25,16 @@ public class PacketUpdateLight implements ClientboundPacket {
 
     @Override
     public boolean read(InByteBuffer buffer) {
-        switch (buffer.getVersion()) {
-            case VERSION_1_14_4:
-                location = new ChunkLocation(buffer.readVarInt(), buffer.readVarInt());
-                int skyLightMask = buffer.readVarInt();
-                int blockLightMask = buffer.readVarInt();
-                int emptyBlockLightMask = buffer.readVarInt();
-                int emptySkyLightMask = buffer.readVarInt();
-                ChunkUtil.readSkyLightPacket(buffer, skyLightMask, blockLightMask, emptyBlockLightMask, emptySkyLightMask);
-                return true;
+        location = new ChunkLocation(buffer.readVarInt(), buffer.readVarInt());
+        if (buffer.getProtocolId() >= 725) {
+            boolean trustEdges = buffer.readBoolean();
         }
-
-        return false;
+        int skyLightMask = buffer.readVarInt();
+        int blockLightMask = buffer.readVarInt();
+        int emptyBlockLightMask = buffer.readVarInt();
+        int emptySkyLightMask = buffer.readVarInt();
+        ChunkUtil.readSkyLightPacket(buffer, skyLightMask, blockLightMask, emptyBlockLightMask, emptySkyLightMask);
+        return true;
     }
 
     @Override

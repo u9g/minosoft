@@ -14,12 +14,11 @@
 package de.bixilon.minosoft.protocol.packets.clientbound.play;
 
 import de.bixilon.minosoft.game.datatypes.SoundCategories;
-import de.bixilon.minosoft.game.datatypes.objectLoader.entities.Location;
+import de.bixilon.minosoft.game.datatypes.entities.Location;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.packets.ClientboundPacket;
 import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
 import de.bixilon.minosoft.protocol.protocol.PacketHandler;
-
 
 public class PacketNamedSoundEffect implements ClientboundPacket {
     static final float pitchCalc = 100.0F / 63.0F;
@@ -31,40 +30,37 @@ public class PacketNamedSoundEffect implements ClientboundPacket {
 
     @Override
     public boolean read(InByteBuffer buffer) {
-        switch (buffer.getVersion()) {
-            case VERSION_1_7_10:
-            case VERSION_1_8:
-                sound = buffer.readString();
-                location = new Location(buffer.readInt() * 8, buffer.readInt() * 8, buffer.readInt() * 8); // ToDo: check if it is not * 4
-                volume = buffer.readFloat();
-                pitch = (buffer.readByte() * pitchCalc) / 100F;
-                return true;
-            case VERSION_1_9_4:
-                sound = buffer.readString();
-                category = SoundCategories.byId(buffer.readVarInt());
-                location = new Location(buffer.readFixedPointNumberInteger() * 4, buffer.readFixedPointNumberInteger() * 4, buffer.readFixedPointNumberInteger() * 4);
-                volume = buffer.readFloat();
-                pitch = (buffer.readByte() * pitchCalc) / 100F;
-                return true;
-            case VERSION_1_10:
-            case VERSION_1_11_2:
-            case VERSION_1_12_2:
-            case VERSION_1_13_2:
-            case VERSION_1_14_4:
-                sound = buffer.readString();
-                category = SoundCategories.byId(buffer.readVarInt());
-                location = new Location(buffer.readFixedPointNumberInteger() * 4, buffer.readFixedPointNumberInteger() * 4, buffer.readFixedPointNumberInteger() * 4);
-                volume = buffer.readFloat();
-                pitch = buffer.readFloat();
-                return true;
+        if (buffer.getProtocolId() >= 321 && buffer.getProtocolId() < 326) {
+            // category was moved to the top
+            category = SoundCategories.byId(buffer.readVarInt());
+        }
+        sound = buffer.readString();
+
+        if (buffer.getProtocolId() >= 321 && buffer.getProtocolId() < 326) {
+            buffer.readString(); // parrot entity type
+        }
+        if (buffer.getProtocolId() < 95) {
+            location = new Location(buffer.readInt() * 8, buffer.readInt() * 8, buffer.readInt() * 8); // ToDo: check if it is not * 4
         }
 
-        return false;
+        if (buffer.getProtocolId() >= 95 && (buffer.getProtocolId() < 321 || buffer.getProtocolId() >= 326)) {
+            category = SoundCategories.byId(buffer.readVarInt());
+        }
+        if (buffer.getProtocolId() >= 95) {
+            location = new Location(buffer.readFixedPointNumberInteger() * 4, buffer.readFixedPointNumberInteger() * 4, buffer.readFixedPointNumberInteger() * 4);
+        }
+        volume = buffer.readFloat();
+        if (buffer.getProtocolId() < 201) {
+            pitch = (buffer.readByte() * pitchCalc) / 100F;
+        } else {
+            pitch = buffer.readFloat();
+        }
+        return true;
     }
 
     @Override
     public void log() {
-        Log.protocol(String.format("Play named sound effect %s with volume=%s and pitch=%s at %s", sound, volume, pitch, location.toString()));
+        Log.protocol(String.format("Play sound effect (sound=%s, category=%s, volume=%s, pitch=%s, location=%s)", sound, category, volume, pitch, location));
     }
 
     @Override
@@ -89,5 +85,9 @@ public class PacketNamedSoundEffect implements ClientboundPacket {
 
     public float getVolume() {
         return volume;
+    }
+
+    public SoundCategories getCategory() {
+        return category;
     }
 }

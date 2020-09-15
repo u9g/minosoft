@@ -14,10 +14,10 @@
 package de.bixilon.minosoft.protocol.packets.serverbound.play;
 
 import de.bixilon.minosoft.logging.Log;
+import de.bixilon.minosoft.protocol.network.Connection;
 import de.bixilon.minosoft.protocol.packets.ServerboundPacket;
 import de.bixilon.minosoft.protocol.protocol.OutPacketBuffer;
 import de.bixilon.minosoft.protocol.protocol.Packets;
-import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
 
 public class PacketSteerVehicle implements ServerboundPacket {
 
@@ -33,35 +33,23 @@ public class PacketSteerVehicle implements ServerboundPacket {
         this.unmount = unmount;
     }
 
-
     @Override
-    public OutPacketBuffer write(ProtocolVersion version) {
-        OutPacketBuffer buffer = new OutPacketBuffer(version, version.getPacketCommand(Packets.Serverbound.PLAY_STEER_VEHICLE));
-        switch (version) {
-            case VERSION_1_7_10:
-                buffer.writeFloat(sideways);
-                buffer.writeFloat(forward);
-                buffer.writeBoolean(jump);
-                buffer.writeBoolean(unmount);
-                break;
-            case VERSION_1_8:
-            case VERSION_1_9_4:
-            case VERSION_1_10:
-            case VERSION_1_11_2:
-            case VERSION_1_12_2:
-            case VERSION_1_13_2:
-            case VERSION_1_14_4:
-                buffer.writeFloat(sideways);
-                buffer.writeFloat(forward);
-                byte flags = 0;
-                if (jump) {
-                    flags |= 0x1;
-                }
-                if (unmount) {
-                    flags |= 0x2;
-                }
-                buffer.writeByte(flags);
-                break;
+    public OutPacketBuffer write(Connection connection) {
+        OutPacketBuffer buffer = new OutPacketBuffer(connection, Packets.Serverbound.PLAY_STEER_VEHICLE);
+        buffer.writeFloat(sideways);
+        buffer.writeFloat(forward);
+        if (buffer.getProtocolId() < 7) {
+            buffer.writeBoolean(jump);
+            buffer.writeBoolean(unmount);
+        } else {
+            byte flags = 0;
+            if (jump) {
+                flags |= 0x1;
+            }
+            if (unmount) {
+                flags |= 0x2;
+            }
+            buffer.writeByte(flags);
         }
         return buffer;
     }

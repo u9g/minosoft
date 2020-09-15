@@ -13,12 +13,11 @@
 
 package de.bixilon.minosoft.protocol.packets.clientbound.play;
 
-import de.bixilon.minosoft.game.datatypes.objectLoader.entities.Location;
+import de.bixilon.minosoft.game.datatypes.entities.Location;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.packets.ClientboundPacket;
 import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
 import de.bixilon.minosoft.protocol.protocol.PacketHandler;
-
 
 public class PacketPlayerPositionAndRotation implements ClientboundPacket {
     Location location;
@@ -31,39 +30,24 @@ public class PacketPlayerPositionAndRotation implements ClientboundPacket {
 
     @Override
     public boolean read(InByteBuffer buffer) {
-        switch (buffer.getVersion()) {
-            case VERSION_1_7_10:
-                location = buffer.readLocation();
-                yaw = buffer.readFloat();
-                pitch = buffer.readFloat();
-                onGround = buffer.readBoolean();
-                return true;
-            case VERSION_1_8:
-                location = buffer.readLocation();
-                yaw = buffer.readFloat();
-                pitch = buffer.readFloat();
-                flags = buffer.readByte();
-                return true;
-            case VERSION_1_9_4:
-            case VERSION_1_10:
-            case VERSION_1_11_2:
-            case VERSION_1_12_2:
-            case VERSION_1_13_2:
-            case VERSION_1_14_4:
-                location = buffer.readLocation();
-                yaw = buffer.readFloat();
-                pitch = buffer.readFloat();
-                flags = buffer.readByte();
-                teleportId = buffer.readVarInt();
-                return true;
+        location = buffer.readLocation();
+        yaw = buffer.readFloat();
+        pitch = buffer.readFloat();
+        if (buffer.getProtocolId() < 6) {
+            onGround = buffer.readBoolean();
+            return true;
+        } else {
+            flags = buffer.readByte();
         }
-
-        return false;
+        if (buffer.getProtocolId() >= 79) {
+            teleportId = buffer.readVarInt();
+        }
+        return true;
     }
 
     @Override
     public void log() {
-        Log.protocol(String.format("Received player location: %s (yaw=%s, pitch=%s)", location.toString(), yaw, pitch));
+        Log.protocol(String.format("Received player location: %s (yaw=%s, pitch=%s)", location, yaw, pitch));
     }
 
     public Location getLocation() {

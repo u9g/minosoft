@@ -15,10 +15,10 @@ package de.bixilon.minosoft.protocol.packets.serverbound.play;
 
 import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
 import de.bixilon.minosoft.logging.Log;
+import de.bixilon.minosoft.protocol.network.Connection;
 import de.bixilon.minosoft.protocol.packets.ServerboundPacket;
 import de.bixilon.minosoft.protocol.protocol.OutPacketBuffer;
 import de.bixilon.minosoft.protocol.protocol.Packets;
-import de.bixilon.minosoft.protocol.protocol.ProtocolVersion;
 
 public class PacketUpdateStructureBlock implements ServerboundPacket {
     final BlockPosition position;
@@ -60,31 +60,25 @@ public class PacketUpdateStructureBlock implements ServerboundPacket {
         this.flags = flags;
     }
 
-
     @Override
-    public OutPacketBuffer write(ProtocolVersion version) {
-        OutPacketBuffer buffer = new OutPacketBuffer(version, version.getPacketCommand(Packets.Serverbound.PLAY_UPDATE_STRUCTURE_BLOCK));
-        switch (version) {
-            case VERSION_1_13_2:
-            case VERSION_1_14_4:
-                buffer.writePosition(position);
-                buffer.writeVarInt(action.getId());
-                buffer.writeVarInt(mode.getId());
-                buffer.writeString(name);
-                buffer.writeByte(offsetX);
-                buffer.writeByte(offsetY);
-                buffer.writeByte(offsetZ);
-                buffer.writeByte(sizeX);
-                buffer.writeByte(sizeY);
-                buffer.writeByte(sizeZ);
-                buffer.writeVarInt(mirror.getId());
-                buffer.writeVarInt(rotation.getId());
-                buffer.writeString(metaData);
-                buffer.writeFloat(integrity);
-                buffer.writeVarLong(seed);
-                buffer.writeByte(flags);
-                break;
-        }
+    public OutPacketBuffer write(Connection connection) {
+        OutPacketBuffer buffer = new OutPacketBuffer(connection, Packets.Serverbound.PLAY_UPDATE_STRUCTURE_BLOCK);
+        buffer.writePosition(position);
+        buffer.writeVarInt(action.getId());
+        buffer.writeVarInt(mode.getId());
+        buffer.writeString(name);
+        buffer.writeByte(offsetX);
+        buffer.writeByte(offsetY);
+        buffer.writeByte(offsetZ);
+        buffer.writeByte(sizeX);
+        buffer.writeByte(sizeY);
+        buffer.writeByte(sizeZ);
+        buffer.writeVarInt(mirror.getId());
+        buffer.writeVarInt(rotation.getId());
+        buffer.writeString(metaData);
+        buffer.writeFloat(integrity);
+        buffer.writeVarLong(seed);
+        buffer.writeByte(flags);
         return buffer;
     }
 
@@ -175,7 +169,6 @@ public class PacketUpdateStructureBlock implements ServerboundPacket {
         CLOCKWISE_90(1),
         CLOCKWISE_180(2),
         COUNTERCLOCKWISE_90(3);
-
 
         final int id;
 

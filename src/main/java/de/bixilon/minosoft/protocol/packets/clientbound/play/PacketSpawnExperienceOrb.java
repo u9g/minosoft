@@ -13,48 +13,33 @@
 
 package de.bixilon.minosoft.protocol.packets.clientbound.play;
 
-import de.bixilon.minosoft.game.datatypes.objectLoader.entities.ExperienceOrb;
-import de.bixilon.minosoft.game.datatypes.objectLoader.entities.Location;
+import de.bixilon.minosoft.game.datatypes.entities.Location;
+import de.bixilon.minosoft.game.datatypes.entities.objects.ExperienceOrb;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.packets.ClientboundPacket;
 import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
 import de.bixilon.minosoft.protocol.protocol.PacketHandler;
 
 public class PacketSpawnExperienceOrb implements ClientboundPacket {
-    ExperienceOrb orb;
-
+    ExperienceOrb entity;
 
     @Override
     public boolean read(InByteBuffer buffer) {
-        switch (buffer.getVersion()) {
-            case VERSION_1_7_10:
-            case VERSION_1_8: {
-                int entityId = buffer.readVarInt();
-                Location location = new Location(buffer.readFixedPointNumberInteger(), buffer.readFixedPointNumberInteger(), buffer.readFixedPointNumberInteger());
-                short count = buffer.readShort();
-                orb = new ExperienceOrb(entityId, location, count);
-                return true;
-            }
-            case VERSION_1_9_4:
-            case VERSION_1_10:
-            case VERSION_1_11_2:
-            case VERSION_1_12_2:
-            case VERSION_1_13_2:
-            case VERSION_1_14_4: {
-                int entityId = buffer.readVarInt();
-                Location location = new Location(buffer.readDouble(), buffer.readDouble(), buffer.readDouble());
-                short count = buffer.readShort();
-                orb = new ExperienceOrb(entityId, location, count);
-                return true;
-            }
+        int entityId = buffer.readVarInt();
+        Location location;
+        if (buffer.getProtocolId() < 100) {
+            location = new Location(buffer.readFixedPointNumberInteger(), buffer.readFixedPointNumberInteger(), buffer.readFixedPointNumberInteger());
+        } else {
+            location = buffer.readLocation();
         }
-
-        return false;
+        short count = buffer.readShort();
+        entity = new ExperienceOrb(entityId, location, count);
+        return true;
     }
 
     @Override
     public void log() {
-        Log.protocol(String.format("Experience orb spawned at %s(entityId=%d, count=%d)", orb.getLocation().toString(), orb.getEntityId(), orb.getCount()));
+        Log.protocol(String.format("Experience orb spawned at %s(entityId=%d, count=%d)", entity.getLocation().toString(), entity.getEntityId(), entity.getCount()));
     }
 
     @Override
@@ -62,7 +47,7 @@ public class PacketSpawnExperienceOrb implements ClientboundPacket {
         h.handle(this);
     }
 
-    public ExperienceOrb getOrb() {
-        return orb;
+    public ExperienceOrb getEntity() {
+        return entity;
     }
 }

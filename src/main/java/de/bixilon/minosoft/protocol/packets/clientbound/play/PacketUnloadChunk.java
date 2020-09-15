@@ -22,25 +22,15 @@ import de.bixilon.minosoft.protocol.protocol.PacketHandler;
 public class PacketUnloadChunk implements ClientboundPacket {
     ChunkLocation location;
 
-
     @Override
     public boolean read(InByteBuffer buffer) {
-        switch (buffer.getVersion()) {
-            case VERSION_1_9_4:
-            case VERSION_1_10:
-            case VERSION_1_11_2:
-            case VERSION_1_12_2:
-            case VERSION_1_13_2:
-            case VERSION_1_14_4:
-                location = new ChunkLocation(buffer.readInt(), buffer.readInt());
-                return true;
-        }
-        return false;
+        location = new ChunkLocation(buffer.readInt(), buffer.readInt());
+        return true;
     }
 
     @Override
     public void log() {
-        Log.protocol(String.format("Received unload chunk packet (location=%s)", location.toString()));
+        Log.protocol(String.format("Received unload chunk packet (location=%s)", location));
     }
 
     @Override

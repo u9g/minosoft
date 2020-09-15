@@ -22,27 +22,17 @@ public class PacketPluginMessageReceiving implements ClientboundPacket {
     String channel;
     byte[] data;
 
-
     @Override
     public boolean read(InByteBuffer buffer) {
-        switch (buffer.getVersion()) {
-            case VERSION_1_7_10:
-                channel = buffer.readString();
-                data = buffer.readBytes(buffer.readShort()); // first read length, then the data
-                return true;
-            case VERSION_1_8:
-            case VERSION_1_9_4:
-            case VERSION_1_10:
-            case VERSION_1_11_2:
-            case VERSION_1_12_2:
-            case VERSION_1_13_2:
-            case VERSION_1_14_4:
-                channel = buffer.readString();
-                data = buffer.readBytesLeft();
-                return true;
+        channel = buffer.readString();
+        // "read" length prefix
+        if (buffer.getProtocolId() < 29) {
+            buffer.readShort();
+        } else if (buffer.getProtocolId() < 32) {
+            buffer.readVarInt();
         }
-
-        return false;
+        data = buffer.readBytesLeft();
+        return true;
     }
 
     @Override

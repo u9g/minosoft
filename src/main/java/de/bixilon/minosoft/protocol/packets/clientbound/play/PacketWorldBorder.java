@@ -19,7 +19,7 @@ import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
 import de.bixilon.minosoft.protocol.protocol.PacketHandler;
 
 public class PacketWorldBorder implements ClientboundPacket {
-    WorldBorderAction action;
+    WorldBorderActions action;
 
     //fields depend on action
     double radius;
@@ -35,75 +35,45 @@ public class PacketWorldBorder implements ClientboundPacket {
     int warningTime;
     int warningBlocks;
 
-
     @Override
     public boolean read(InByteBuffer buffer) {
-        switch (buffer.getVersion()) {
-            case VERSION_1_8:
-            case VERSION_1_9_4:
-            case VERSION_1_10:
-            case VERSION_1_11_2:
-            case VERSION_1_12_2:
-            case VERSION_1_13_2:
-            case VERSION_1_14_4:
-                action = WorldBorderAction.byId(buffer.readVarInt());
-                switch (action) {
-                    case SET_SIZE:
-                        radius = buffer.readDouble();
-                        break;
-                    case LERP_SIZE:
-                        oldRadius = buffer.readDouble();
-                        newRadius = buffer.readDouble();
-                        speed = buffer.readVarLong();
-                        break;
-                    case SET_CENTER:
-                        x = buffer.readDouble();
-                        z = buffer.readDouble();
-                        break;
-                    case INITIALIZE:
-                        x = buffer.readDouble();
-                        z = buffer.readDouble();
-                        oldRadius = buffer.readDouble();
-                        newRadius = buffer.readDouble();
-                        speed = buffer.readVarLong();
-                        portalBound = buffer.readVarInt();
-                        warningTime = buffer.readVarInt();
-                        warningBlocks = buffer.readVarInt();
-                        break;
-                    case SET_WARNING_TIME:
-                        warningTime = buffer.readVarInt();
-                        break;
-                    case SET_WARNING_BLOCKS:
-                        warningBlocks = buffer.readVarInt();
-                        break;
-                }
-                return true;
+        action = WorldBorderActions.byId(buffer.readVarInt());
+        switch (action) {
+            case SET_SIZE -> radius = buffer.readDouble();
+            case LERP_SIZE -> {
+                oldRadius = buffer.readDouble();
+                newRadius = buffer.readDouble();
+                speed = buffer.readVarLong();
+            }
+            case SET_CENTER -> {
+                x = buffer.readDouble();
+                z = buffer.readDouble();
+            }
+            case INITIALIZE -> {
+                x = buffer.readDouble();
+                z = buffer.readDouble();
+                oldRadius = buffer.readDouble();
+                newRadius = buffer.readDouble();
+                speed = buffer.readVarLong();
+                portalBound = buffer.readVarInt();
+                warningTime = buffer.readVarInt();
+                warningBlocks = buffer.readVarInt();
+            }
+            case SET_WARNING_TIME -> warningTime = buffer.readVarInt();
+            case SET_WARNING_BLOCKS -> warningBlocks = buffer.readVarInt();
         }
-
-        return false;
+        return true;
     }
 
     @Override
     public void log() {
         switch (action) {
-            case SET_SIZE:
-                Log.protocol(String.format("Receiving world border packet (action=%s, radius=%s)", action, radius));
-                break;
-            case LERP_SIZE:
-                Log.protocol(String.format("Receiving world border packet (action=%s, oldRadius=%s, newRadius=%s, speed=%s", action, oldRadius, newRadius, speed));
-                break;
-            case SET_CENTER:
-                Log.protocol(String.format("Receiving world border packet (action=%s, x=%s, z=%s)", action, x, z));
-                break;
-            case INITIALIZE:
-                Log.protocol(String.format("Receiving world border packet (action=%s, x=%s, z=%s, oldRadius=%s, newRadius=%s, speed=%s, portalBound=%s, warningTime=%s, warningBlocks=%s)", action, x, z, oldRadius, newRadius, speed, portalBound, warningTime, warningBlocks));
-                break;
-            case SET_WARNING_TIME:
-                Log.protocol(String.format("Receiving world border packet (action=%s, warningTime=%s)", action, warningTime));
-                break;
-            case SET_WARNING_BLOCKS:
-                Log.protocol(String.format("Receiving world border packet (action=%s, warningBlocks=%s)", action, warningBlocks));
-                break;
+            case SET_SIZE -> Log.protocol(String.format("Receiving world border packet (action=%s, radius=%s)", action, radius));
+            case LERP_SIZE -> Log.protocol(String.format("Receiving world border packet (action=%s, oldRadius=%s, newRadius=%s, speed=%s", action, oldRadius, newRadius, speed));
+            case SET_CENTER -> Log.protocol(String.format("Receiving world border packet (action=%s, x=%s, z=%s)", action, x, z));
+            case INITIALIZE -> Log.protocol(String.format("Receiving world border packet (action=%s, x=%s, z=%s, oldRadius=%s, newRadius=%s, speed=%s, portalBound=%s, warningTime=%s, warningBlocks=%s)", action, x, z, oldRadius, newRadius, speed, portalBound, warningTime, warningBlocks));
+            case SET_WARNING_TIME -> Log.protocol(String.format("Receiving world border packet (action=%s, warningTime=%s)", action, warningTime));
+            case SET_WARNING_BLOCKS -> Log.protocol(String.format("Receiving world border packet (action=%s, warningBlocks=%s)", action, warningBlocks));
         }
     }
 
@@ -144,31 +114,20 @@ public class PacketWorldBorder implements ClientboundPacket {
         return warningBlocks;
     }
 
-    public enum WorldBorderAction {
-        SET_SIZE(0),
-        LERP_SIZE(1),
-        SET_CENTER(2),
-        INITIALIZE(3),
-        SET_WARNING_TIME(4),
-        SET_WARNING_BLOCKS(5);
+    public enum WorldBorderActions {
+        SET_SIZE,
+        LERP_SIZE,
+        SET_CENTER,
+        INITIALIZE,
+        SET_WARNING_TIME,
+        SET_WARNING_BLOCKS;
 
-        final int id;
-
-        WorldBorderAction(int id) {
-            this.id = id;
-        }
-
-        public static WorldBorderAction byId(int id) {
-            for (WorldBorderAction a : values()) {
-                if (a.getId() == id) {
-                    return a;
-                }
-            }
-            return null;
+        public static WorldBorderActions byId(int id) {
+            return values()[id];
         }
 
         public int getId() {
-            return id;
+            return ordinal();
         }
     }
 }

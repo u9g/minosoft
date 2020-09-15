@@ -13,8 +13,8 @@
 
 package de.bixilon.minosoft.protocol.packets.clientbound.status;
 
-import de.bixilon.minosoft.ServerListPing;
 import de.bixilon.minosoft.logging.Log;
+import de.bixilon.minosoft.ping.ServerListPing;
 import de.bixilon.minosoft.protocol.packets.ClientboundPacket;
 import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
 import de.bixilon.minosoft.protocol.protocol.PacketHandler;
@@ -24,14 +24,13 @@ public class PacketStatusResponse implements ClientboundPacket {
 
     @Override
     public boolean read(InByteBuffer buffer) {
-        // no version checking, is the same in all versions (1.7.x - 1.15.2)
         response = new ServerListPing(buffer.readJSON());
         return true;
     }
 
     @Override
     public void log() {
-        Log.protocol(String.format("Receiving status response packet (online=%d, maxPlayers=%d, protocolNumber=%d)", response.getPlayerOnline(), response.getMaxPlayers(), response.getProtocolNumber()));
+        Log.protocol(String.format("Receiving status response packet (online=%d, maxPlayers=%d, protocolNumber=%d)", response.getPlayerOnline(), response.getMaxPlayers(), response.getProtocolId()));
     }
 
     @Override

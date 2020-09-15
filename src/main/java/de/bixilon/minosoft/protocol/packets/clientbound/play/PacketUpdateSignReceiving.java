@@ -26,30 +26,20 @@ public class PacketUpdateSignReceiving implements ClientboundPacket {
 
     @Override
     public boolean read(InByteBuffer buffer) {
-        // not used anymore ( >= 1.9)
-        switch (buffer.getVersion()) {
-            case VERSION_1_7_10:
-                position = buffer.readBlockPositionShort();
-                for (byte i = 0; i < 4; i++) {
-                    lines[i] = buffer.readTextComponent();
-                }
-                return true;
-            case VERSION_1_8:
-            case VERSION_1_11_2:
-            case VERSION_1_12_2:
-                position = buffer.readPosition();
-                for (byte i = 0; i < 4; i++) {
-                    lines[i] = buffer.readTextComponent();
-                }
-                return true;
+        if (buffer.getProtocolId() < 7) {
+            position = buffer.readBlockPositionShort();
+        } else {
+            position = buffer.readPosition();
         }
-
-        return false;
+        for (byte i = 0; i < 4; i++) {
+            lines[i] = buffer.readTextComponent();
+        }
+        return true;
     }
 
     @Override
     public void log() {
-        Log.game(String.format("Sign data received at: %s", position.toString()));
+        Log.game(String.format("Sign data received at: %s", position));
     }
 
     @Override
