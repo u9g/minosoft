@@ -699,7 +699,97 @@
       "base_name": "wheat_stage"
     },
     "farmland": {
-      "blockModel": "farmland"
+      "states": [
+        {
+          "properties": {
+            "moisture": "0"
+          },
+          "blockModel": "farmland"
+        },
+        {
+          "properties": {
+            "moisture": "1"
+          },
+          "blockModel": "farmland"
+        },
+        {
+          "properties": {
+            "moisture": "2"
+          },
+          "blockModel": "farmland"
+        },
+        {
+          "properties": {
+            "moisture": "3"
+          },
+          "blockModel": "farmland"
+        },
+        {
+          "properties": {
+            "moisture": "4"
+          },
+          "blockModel": "farmland"
+        },
+        {
+          "properties": {
+            "moisture": "5"
+          },
+          "blockModel": "farmland"
+        },
+        {
+          "properties": {
+            "moisture": "6"
+          },
+          "blockModel": "farmland"
+        },
+        {
+          "properties": {
+            "moisture": "7"
+          },
+          "blockModel": "farmland_moist"
+        }
+      ]
+    },
+    "furnace": {
+      "states": [
+        {
+          "properties": {
+            "lit": "false"
+          },
+          "blockModel": "furnace"
+        },
+        {
+          "properties": {
+            "lit": "true"
+          },
+          "blockModel": "furnace_on"
+        }
+      ]
+    },
+    "oak_sign": {
+      "blockModel": "oak_sign"
+    },
+    "spruce_sign": {
+      "blockModel": "spruce_sign"
+    },
+    "birch_sign": {
+      "blockModel": "birch_sign"
+    },
+    "acacia_sign": {
+      "blockModel": "acacia_sign"
+    },
+    "jungle_sign": {
+      "blockModel": "jungle_sign"
+    },
+    "dark_oak_sign": {
+      "blockModel": "dark_oak_sign"
+    },
+    "oak_door": {
+      "type": "door",
+      "bottom": "oak_door_bottom",
+      "bottom_hinge": "oak_door_bottom_hinge",
+      "top": "oak_door_top",
+      "top_hinge": "oak_door_top_hinge"
     }
   },
   "tinted_textures": {

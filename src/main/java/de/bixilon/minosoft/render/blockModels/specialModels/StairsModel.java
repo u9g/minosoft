@@ -25,19 +25,11 @@ import de.bixilon.minosoft.render.texture.TextureLoader;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 
 public class StairsModel extends BlockModel {
     HashSet<SubBlock> straight;
     HashSet<SubBlock> inner;
     HashSet<SubBlock> outer;
-
-    public static final Map<BlockRotation, BlockRotation> rotationAdjust = Map.of(
-            BlockRotation.EAST, BlockRotation.SOUTH,
-            BlockRotation.SOUTH, BlockRotation.WEST,
-            BlockRotation.WEST, BlockRotation.NORTH,
-            BlockRotation.NORTH, BlockRotation.EAST
-    );
 
     public StairsModel(JsonObject block, String mod) {
         straight = super.load(mod, block.get("straight").getAsString());

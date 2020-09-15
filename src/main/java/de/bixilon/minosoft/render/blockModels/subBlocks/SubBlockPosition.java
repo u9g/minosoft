@@ -75,6 +75,9 @@ public class SubBlockPosition {
     }
 
     public SubBlockPosition rotated(Block block) {
+        if (block.getRotation() == null) {
+            return this;
+        }
         switch (block.getRotation()) {
             case EAST:
                 return eastRotator.apply(this);

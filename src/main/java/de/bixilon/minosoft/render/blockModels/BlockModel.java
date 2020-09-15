@@ -13,6 +13,8 @@
 
 package de.bixilon.minosoft.render.blockModels;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.Config;
@@ -32,6 +34,13 @@ import java.util.Map;
 import static de.bixilon.minosoft.util.Util.readJsonFromFile;
 
 public class BlockModel {
+    public static final HashBiMap<BlockRotation, BlockRotation> rotationAdjust = HashBiMap.create(Map.of(
+            BlockRotation.EAST, BlockRotation.SOUTH,
+            BlockRotation.SOUTH, BlockRotation.WEST,
+            BlockRotation.WEST, BlockRotation.NORTH,
+            BlockRotation.NORTH, BlockRotation.EAST
+    ));
+
     HashMap<BlockConfiguration, HashSet<SubBlock>> blockConfigurationStates;
     boolean isFull;
 

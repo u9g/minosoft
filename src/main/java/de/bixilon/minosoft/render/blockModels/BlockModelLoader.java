@@ -21,10 +21,7 @@ import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Blocks;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
-import de.bixilon.minosoft.render.blockModels.specialModels.CropModel;
-import de.bixilon.minosoft.render.blockModels.specialModels.FireModel;
-import de.bixilon.minosoft.render.blockModels.specialModels.WireModel;
-import de.bixilon.minosoft.render.blockModels.specialModels.StairsModel;
+import de.bixilon.minosoft.render.blockModels.specialModels.*;
 import de.bixilon.minosoft.render.texture.TextureLoader;
 import org.apache.commons.collections.primitives.ArrayFloatList;
 
@@ -102,27 +99,19 @@ public class BlockModelLoader {
     private HashSet<String> loadModel(String mod, String identifier, JsonObject block) {
         HashSet<String> result = new HashSet<>();
         try {
-            BlockModel model = null;
+            String type = "";
+
             if (block.has("type")) {
-                String type = block.get("type").getAsString();
-                switch (type) {
-                    case "fire":
-                        model = new FireModel(block, mod);
-                        break;
-                    case "stairs":
-                        model = new StairsModel(block, mod);
-                        break;
-                    case "wire":
-                        model = new WireModel(block, mod);
-                        break;
-                    case "crop":
-                        model = new CropModel(block, mod);
-                        break;
-                }
+                type = block.get("type").getAsString();
             }
-            if (model == null) {
-                model = new BlockModel(block, mod);
-            }
+            BlockModel model = switch (type) {
+                case "fire" -> new FireModel(block, mod);
+                case "stairs" -> new StairsModel(block, mod);
+                case "wire" -> new WireModel(block, mod);
+                case "crop" -> new CropModel(block, mod);
+                case "door" -> new DoorModel(block, mod);
+                default -> new BlockModel(block, mod);
+            };
             result.addAll(model.getAllTextures());
             HashMap<String, BlockModel> modMap = blockDescriptionMap.get(mod);
             modMap.put(identifier, model);

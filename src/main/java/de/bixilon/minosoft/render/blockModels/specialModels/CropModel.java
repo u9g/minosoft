@@ -16,6 +16,7 @@ package de.bixilon.minosoft.render.blockModels.specialModels;
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockProperties;
+import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.render.blockModels.BlockModel;
 import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
@@ -44,6 +45,7 @@ public class CropModel extends BlockModel {
                 return prepareBlockState(modelMap.get(property.name()), adjacentBlocks, block);
             }
         }
+        Log.warn("failed to prepare block: " + block.toString());
         return new HashSet<>();
     }
 
