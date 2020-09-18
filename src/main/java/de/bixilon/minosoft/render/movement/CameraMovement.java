@@ -13,6 +13,7 @@
 
 package de.bixilon.minosoft.render.movement;
 
+import de.bixilon.minosoft.render.GameWindow;
 import de.bixilon.minosoft.render.utility.Vec3;
 
 import static de.bixilon.minosoft.render.utility.Vec3.normalize;
@@ -29,6 +30,10 @@ public class CameraMovement {
     private float pitch;
 
     public void mouseCallback(long l, double xPos, double yPos) {
+        if (GameWindow.paused) {
+            return;
+        }
+
         // variable l is unused but always given by openGL so we need it in the method signature
         if (firstMouse) {
             lastX = (float) xPos;

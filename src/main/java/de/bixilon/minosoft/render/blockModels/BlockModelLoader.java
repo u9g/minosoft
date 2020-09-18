@@ -59,7 +59,6 @@ public class BlockModelLoader {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Log.info("finished loading all blocks");
     }
 
     private void applyTextures() {

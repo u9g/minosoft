@@ -40,9 +40,6 @@ public class PlayerMovement {
     private void processInput(float deltaTime) {
         float cameraSpeed = flySpeed / deltaTime;
 
-        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-            GameWindow.pause();
-        }
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
             playerPos.add(mul(cameraFront, -cameraSpeed * deltaTime));
         }

@@ -13,11 +13,10 @@
 
 package de.bixilon.minosoft.render;
 
+import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.network.Connection;
 import de.bixilon.minosoft.render.movement.PlayerController;
-import de.bixilon.minosoft.render.utility.RenderMode;
 
-import static de.bixilon.minosoft.render.utility.RenderMode.MAIN_MENU;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
@@ -33,8 +32,7 @@ public class GameWindow {
     private static PlayerController playerController;
 
     static boolean running = false;
-
-    static Thread renderLoop;
+    public static boolean paused = false;
 
     public static void prepare() {
         Thread guiLoaderThread = new Thread(() -> {
@@ -42,7 +40,7 @@ public class GameWindow {
             openGLWindow.init();
             renderer = new WorldRenderer();
             renderer.init();
-
+            Log.info("Finished loading game Assets");
             try {
                 while (! running) {
                     Thread.sleep(100);
@@ -55,11 +53,6 @@ public class GameWindow {
         });
         guiLoaderThread.setName("GameWindow");
         guiLoaderThread.start();
-
-        renderLoop = new Thread(() -> {
-            openGLWindow.start();
-            mainLoop();
-        });
     }
 
     private static void mainLoop() {
@@ -68,6 +61,12 @@ public class GameWindow {
             glLoadIdentity();
             glfwPollEvents();
             float deltaTime = openGLWindow.loop();
+
+            if (paused) {
+                glColor4f(0.5f, 0.5f, 0.5f, 1f);
+            } else {
+                glColor4f(1f, 1f, 1f, 1f);
+            }
 
             OpenGLWindow.gluPerspective(FOVY, (float) WIDTH / (float) HEIGHT, 0.1f, 500f);
             playerController.loop(deltaTime);
@@ -101,5 +100,7 @@ public class GameWindow {
     }
 
     public static void pause() {
+        paused = ! paused;
+        openGLWindow.mouseEnable(paused);
     }
 }

@@ -61,7 +61,6 @@ public class WorldRenderer {
         chunkLoadThread.setName(String.format("%d/ChunkLoading", 0)); // TODO: connection ID
         chunkLoadThread.start();
         modelLoader = new BlockModelLoader();
-        Log.info("Finished loading textures");
     }
 
     public void queueChunkBulk(HashMap<ChunkLocation, Chunk> chunks) {

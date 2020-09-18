@@ -114,7 +114,7 @@ public class OpenGLWindow {
 
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        mouseEnable(false);
         glEnable(GL_TEXTURE_2D);
     }
 
@@ -138,7 +138,17 @@ public class OpenGLWindow {
         return mouseY;
     }
 
+    boolean escDown = false;
+
     public float loop() {
+        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+            if (! escDown) {
+                GameWindow.pause();
+                escDown = true;
+            }
+        } else {
+            escDown = false;
+        }
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         float currentFrame = (float) glfwGetTime();
         float deltaTime = currentFrame - lastFrame;
@@ -149,5 +159,13 @@ public class OpenGLWindow {
     public void start() {
         glfwSetCursorPosCallback(window, GameWindow.getPlayerController().getCameraMovement()::mouseCallback);
         glfwShowWindow(window);
+    }
+
+    public void mouseEnable(boolean mouse) {
+        if (mouse) {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        } else {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        }
     }
 }

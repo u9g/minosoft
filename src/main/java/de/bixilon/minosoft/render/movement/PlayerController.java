@@ -44,6 +44,11 @@ public class PlayerController {
         if (!GameWindow.getConnection().getPlayer().isSpawnConfirmed()) {
             return;
         }
+        if (GameWindow.paused) {
+            cameraMovement.loop();
+            glTranslatef(-playerPos.x, -(playerPos.y + playerHeight - 0.2f), -playerPos.z);
+            return;
+        }
         oldPos = playerPos.copy();
 
         GameModes gameMode = GameWindow.getConnection().getPlayer().getGameMode();
