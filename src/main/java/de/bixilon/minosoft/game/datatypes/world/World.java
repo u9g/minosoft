@@ -16,9 +16,7 @@ package de.bixilon.minosoft.game.datatypes.world;
 import de.bixilon.minosoft.game.datatypes.entities.Entity;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Blocks;
-import de.bixilon.minosoft.game.datatypes.objectLoader.entities.Entity;
-import de.bixilon.minosoft.nbt.tag.CompoundTag;
-import de.bixilon.minosoft.render.MainWindow;
+import de.bixilon.minosoft.render.GameWindow;
 import de.bixilon.minosoft.game.datatypes.objectLoader.dimensions.Dimension;
 import de.bixilon.minosoft.util.nbt.tag.CompoundTag;
 
@@ -67,7 +65,7 @@ public class World {
     public void setBlock(BlockPosition pos, Block block) {
         if (getChunk(pos.getChunkLocation()) != null) {
             getChunk(pos.getChunkLocation()).setBlock(pos.getInChunkLocation(), block);
-            MainWindow.getRenderer().prepareBlock(pos, block);
+            GameWindow.getRenderer().prepareBlock(pos, block);
         }
         // do nothing if chunk is unloaded
     }
@@ -78,14 +76,14 @@ public class World {
 
     public void setChunk(ChunkLocation location, Chunk chunk) {
         chunks.put(location, chunk);
-        MainWindow.getRenderer().queueChunk(location, chunk);
+        GameWindow.getRenderer().queueChunk(location, chunk);
     }
 
     public void setChunks(HashMap<ChunkLocation, Chunk> chunkMap) {
         for (Map.Entry<ChunkLocation, Chunk> set : chunkMap.entrySet()) {
             chunks.put(set.getKey(), set.getValue());
         }
-        MainWindow.getRenderer().queueChunkBulk(chunkMap);
+        GameWindow.getRenderer().queueChunkBulk(chunkMap);
     }
 
     public boolean isHardcore() {

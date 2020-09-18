@@ -1,7 +1,7 @@
 package de.bixilon.minosoft.game.datatypes.objectLoader.blocks;
 /*
  * Codename Minosoft
- * Copyright (C) 2020 Moritz Zwerger
+ * Copyright (C) 2020 Moritz Zwerger, Lukas Eisenhauer
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -347,12 +347,6 @@ public class Blocks {
         propertiesMapping.put("hinge", propertyHashMap);
 
         propertyHashMap = new HashMap<>();
-        propertyHashMap.put("x", BlockProperties.AXIS_X);
-        propertyHashMap.put("y", BlockProperties.AXIS_Y);
-        propertyHashMap.put("z", BlockProperties.AXIS_Z);
-        propertiesMapping.put("axis", propertyHashMap);
-
-        propertyHashMap = new HashMap<>();
         propertyHashMap.put("floor", BlockProperties.FLOOR);
         propertyHashMap.put("wall", BlockProperties.WALL);
         propertyHashMap.put("ceiling", BlockProperties.CEILING);
@@ -456,6 +450,9 @@ public class Blocks {
         rotationMapping.put("south_up", BlockRotations.SOUTH_UP);
         rotationMapping.put("north_south", BlockRotations.NORTH_SOUTH);
         rotationMapping.put("east_west", BlockRotations.EAST_WEST);
+        rotationMapping.put("x", BlockRotations.AXIS_X);
+        rotationMapping.put("y", BlockRotations.AXIS_Y);
+        rotationMapping.put("z", BlockRotations.AXIS_Z);
     }
 
     public static HashBiMap<Integer, Block> load(String mod, JsonObject json, boolean metaData) {
@@ -523,5 +520,13 @@ public class Blocks {
         if (versionMapping.containsKey(blockId)) {
             throw new RuntimeException(String.format("Block Id %s is already present for %s! (identifier=%s)", blockId, versionMapping.get(blockId), identifierName));
         }
+    }
+
+    public static HashMap<String, BlockRotations> getRotationMapping() {
+        return rotationMapping;
+    }
+
+    public static HashMap<String, HashMap<String, BlockProperties>> getPropertiesMapping() {
+        return propertiesMapping;
     }
 }

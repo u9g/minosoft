@@ -13,7 +13,7 @@
 
 package de.bixilon.minosoft.render.utility;
 
-import de.bixilon.minosoft.game.datatypes.objectLoader.entities.Location;
+import de.bixilon.minosoft.game.datatypes.entities.Location;
 
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;

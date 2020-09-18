@@ -46,7 +46,6 @@ public enum BlockRotations {
     AXIS_X,
     AXIS_Y,
     AXIS_Z,
-    DOWN,
 
     // 1.16+
 

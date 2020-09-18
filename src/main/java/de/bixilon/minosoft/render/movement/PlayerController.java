@@ -13,9 +13,9 @@
 
 package de.bixilon.minosoft.render.movement;
 
-import de.bixilon.minosoft.game.datatypes.GameMode;
+import de.bixilon.minosoft.game.datatypes.GameModes;
 import de.bixilon.minosoft.game.datatypes.world.World;
-import de.bixilon.minosoft.render.MainWindow;
+import de.bixilon.minosoft.render.GameWindow;
 import de.bixilon.minosoft.render.utility.Vec3;
 
 import static de.bixilon.minosoft.render.utility.Vec3.mul;
@@ -41,22 +41,22 @@ public class PlayerController {
     }
 
     public void loop(float deltaTime) {
-        if (!MainWindow.getConnection().getPlayer().isSpawnConfirmed()) {
+        if (!GameWindow.getConnection().getPlayer().isSpawnConfirmed()) {
             return;
         }
         oldPos = playerPos.copy();
 
-        GameMode gameMode = MainWindow.getConnection().getPlayer().getGameMode();
-        enableGravity = gameMode != GameMode.CREATIVE && gameMode != GameMode.SPECTATOR;
+        GameModes gameMode = GameWindow.getConnection().getPlayer().getGameMode();
+        enableGravity = gameMode != GameModes.CREATIVE && gameMode != GameModes.SPECTATOR;
         handleGravity(deltaTime);
         cameraMovement.loop();
         playerMovement.loop(deltaTime);
         applyVelocity(deltaTime);
 
-        if (gameMode == GameMode.SPECTATOR) {
+        if (gameMode == GameModes.SPECTATOR) {
             return;
         }
-        handleCollisions(MainWindow.getConnection().getPlayer().getWorld());
+        handleCollisions(GameWindow.getConnection().getPlayer().getWorld());
 
         glTranslatef(-playerPos.x, -(playerPos.y + playerHeight - 0.2f), -playerPos.z);
     }

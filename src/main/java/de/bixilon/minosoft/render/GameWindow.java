@@ -14,42 +14,52 @@
 package de.bixilon.minosoft.render;
 
 import de.bixilon.minosoft.protocol.network.Connection;
-import de.bixilon.minosoft.render.MainMenu.MainMenu;
 import de.bixilon.minosoft.render.movement.PlayerController;
 import de.bixilon.minosoft.render.utility.RenderMode;
 
 import static de.bixilon.minosoft.render.utility.RenderMode.MAIN_MENU;
-import static de.bixilon.minosoft.render.utility.RenderMode.PLAY;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
-public class MainWindow {
+public class GameWindow {
 
     private static final float FOVY = 45f;
     static int WIDTH = 800;
     static int HEIGHT = 800;
     static boolean FULLSCREEN = false;
     static OpenGLWindow openGLWindow;
-    static RenderMode renderMode = MAIN_MENU;
-    static MainMenu mainMenu;
     static WorldRenderer renderer;
     static Connection connection;
     private static PlayerController playerController;
 
-    public static void start(Connection serverConnection) {
-        Thread guiThread = new Thread(() -> {
-            connection = serverConnection;
+    static boolean running = false;
+
+    static Thread renderLoop;
+
+    public static void prepare() {
+        Thread guiLoaderThread = new Thread(() -> {
             openGLWindow = new OpenGLWindow(WIDTH, HEIGHT, FULLSCREEN);
             openGLWindow.init();
             renderer = new WorldRenderer();
             renderer.init();
-            playerController = new PlayerController(openGLWindow.getWindow());
-            renderMode = MAIN_MENU;
-            mainMenu = new MainMenu(openGLWindow.getWidth(), openGLWindow.getHeight());
-            mainLoop();
-            System.exit(0);
+
+            try {
+                while (! running) {
+                    Thread.sleep(100);
+                }
+                openGLWindow.start();
+                mainLoop();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         });
-        guiThread.start();
+        guiLoaderThread.setName("GameWindow");
+        guiLoaderThread.start();
+
+        renderLoop = new Thread(() -> {
+            openGLWindow.start();
+            mainLoop();
+        });
     }
 
     private static void mainLoop() {
@@ -58,48 +68,19 @@ public class MainWindow {
             glLoadIdentity();
             glfwPollEvents();
             float deltaTime = openGLWindow.loop();
-            float mouseX = (float) openGLWindow.getMouseX();
-            float mouseY = (float) openGLWindow.getMouseY();
-            switch (renderMode) {
-                case MAIN_MENU:
-                    glOrtho(0.f, openGLWindow.getWidth(), openGLWindow.getHeight(), 0.f, 0.f, 1.f);
-                    mainMenu.draw(mouseX, mouseY);
-                    break;
-                case PLAY:
-                    OpenGLWindow.gluPerspective(FOVY, (float) WIDTH / (float) HEIGHT, 0.1f, 500f);
-                    playerController.loop(deltaTime);
-                    renderer.draw();
-                    break;
-            }
 
+            OpenGLWindow.gluPerspective(FOVY, (float) WIDTH / (float) HEIGHT, 0.1f, 500f);
+            playerController.loop(deltaTime);
+            if (connection != null && connection.getPlayer().isSpawnConfirmed()) {
+                renderer.draw();
+            }
             glPopMatrix();
             glfwSwapBuffers(openGLWindow.getWindow());
         }
     }
 
-    public static OpenGLWindow getOpenGLWindow() {
-        return openGLWindow;
-    }
-
     public static WorldRenderer getRenderer() {
         return renderer;
-    }
-
-    public static void play() {
-        renderMode = PLAY;
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LEQUAL);
-        glfwSetCursorPosCallback(openGLWindow.getWindow(), playerController.getCameraMovement()::mouseCallback);
-        glfwSetInputMode(openGLWindow.getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        glEnable(GL_TEXTURE_2D);
-        connection.connect();
-    }
-
-    public static void pause() {
-        renderMode = MAIN_MENU;
-        glfwSetInputMode(openGLWindow.getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        assert connection != null;
-        connection.disconnect();
     }
 
     public static Connection getConnection() {
@@ -108,5 +89,17 @@ public class MainWindow {
 
     public static PlayerController getPlayerController() {
         return playerController;
+    }
+
+    public static void start(Connection connection) {
+        if (running) {
+            return;
+        }
+        GameWindow.connection = connection;
+        running = true;
+        playerController = new PlayerController(openGLWindow.getWindow());
+    }
+
+    public static void pause() {
     }
 }

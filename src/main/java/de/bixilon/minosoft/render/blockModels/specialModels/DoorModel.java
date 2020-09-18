@@ -16,7 +16,7 @@ package de.bixilon.minosoft.render.blockModels.specialModels;
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockProperties;
-import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockRotation;
+import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockRotations;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.render.blockModels.BlockModel;
 import de.bixilon.minosoft.render.blockModels.Face.Face;
@@ -62,7 +62,7 @@ public class DoorModel extends BlockModel {
 
     private static HashSet<Face> prepareHalf(HashSet<SubBlock> bottom, HashSet<SubBlock> top,
                                              Block block, HashMap<FaceOrientation, Boolean> adjacentBlocks,
-                                             BlockRotation rotation) {
+                                             BlockRotations rotation) {
         if (block.getProperties().contains(BlockProperties.HALF_LOWER)) {
             return prepareBlockState(bottom, adjacentBlocks, new Block("", "",
                     rotation));

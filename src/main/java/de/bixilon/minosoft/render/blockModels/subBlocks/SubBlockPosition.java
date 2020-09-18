@@ -15,10 +15,7 @@ package de.bixilon.minosoft.render.blockModels.subBlocks;
 
 import com.google.gson.JsonArray;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
-import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockProperties;
-import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockRotation;
 import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
-import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.render.blockModels.Face.Axis;
 
 import static de.bixilon.minosoft.render.blockModels.Face.RenderConstants.blockRes;

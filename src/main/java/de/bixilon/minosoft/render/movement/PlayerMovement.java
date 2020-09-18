@@ -17,7 +17,7 @@
 
 package de.bixilon.minosoft.render.movement;
 
-import de.bixilon.minosoft.render.MainWindow;
+import de.bixilon.minosoft.render.GameWindow;
 import de.bixilon.minosoft.render.utility.Vec3;
 
 import static de.bixilon.minosoft.render.utility.Vec3.cross;
@@ -41,7 +41,7 @@ public class PlayerMovement {
         float cameraSpeed = flySpeed / deltaTime;
 
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-            MainWindow.pause();
+            GameWindow.pause();
         }
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
             playerPos.add(mul(cameraFront, -cameraSpeed * deltaTime));
@@ -57,23 +57,23 @@ public class PlayerMovement {
         }
 
         if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-            if (!MainWindow.getPlayerController().isEnableGravity()) {
+            if (!GameWindow.getPlayerController().isEnableGravity()) {
                 playerPos.add(0, -cameraSpeed * deltaTime, 0);
             }
         }
         if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-            if (!MainWindow.getPlayerController().isEnableGravity()) {
+            if (!GameWindow.getPlayerController().isEnableGravity()) {
                 playerPos.add(0, cameraSpeed * deltaTime, 0);
             }
-            if (MainWindow.getPlayerController().isOnGround()) {
-                MainWindow.getPlayerController().jump();
+            if (GameWindow.getPlayerController().isOnGround()) {
+                GameWindow.getPlayerController().jump();
             }
         }
     }
 
     public void loop(float deltaTime) {
-        cameraFront = MainWindow.getPlayerController().getCameraMovement().getCameraFront();
-        playerPos = MainWindow.getPlayerController().getPlayerPos();
+        cameraFront = GameWindow.getPlayerController().getCameraMovement().getCameraFront();
+        playerPos = GameWindow.getPlayerController().getPlayerPos();
         processInput(deltaTime);
     }
 }

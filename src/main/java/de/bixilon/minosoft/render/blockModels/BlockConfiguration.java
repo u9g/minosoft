@@ -16,14 +16,14 @@ package de.bixilon.minosoft.render.blockModels;
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockProperties;
-import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockRotation;
+import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockRotations;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Blocks;
 
 import java.util.HashMap;
 import java.util.HashSet;
 
 public class BlockConfiguration {
-    BlockRotation rotation;
+    BlockRotations rotation;
     HashSet<BlockProperties> blockProperties;
 
 
@@ -59,7 +59,7 @@ public class BlockConfiguration {
     public BlockConfiguration() {
     }
 
-    public BlockRotation getRotation() {
+    public BlockRotations getRotation() {
         return rotation;
     }
 

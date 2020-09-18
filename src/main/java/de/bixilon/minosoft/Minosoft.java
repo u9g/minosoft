@@ -21,6 +21,7 @@ import de.bixilon.minosoft.gui.main.AccountListCell;
 import de.bixilon.minosoft.gui.main.Server;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.logging.LogLevels;
+import de.bixilon.minosoft.render.GameWindow;
 import de.bixilon.minosoft.util.OSUtil;
 import de.bixilon.minosoft.util.Util;
 import de.bixilon.minosoft.util.mojang.api.MojangAccount;
@@ -71,6 +72,7 @@ public class Minosoft {
 
 
         serverList = config.getServers();
+        GameWindow.prepare();
         Launcher.start();
     }
 

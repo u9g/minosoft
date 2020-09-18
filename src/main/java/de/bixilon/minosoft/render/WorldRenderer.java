@@ -42,6 +42,13 @@ public class WorldRenderer {
     public void init() {
         queuedChunks = new LinkedBlockingQueue<>();
         chunkLoadThread = new Thread(() -> {
+            while (GameWindow.getConnection() == null) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
             while (true) {
                 try {
                     Pair<ChunkLocation, Chunk> current = queuedChunks.take();
@@ -90,7 +97,7 @@ public class WorldRenderer {
             BlockPosition neighbourPos = position.add(faceDir[orientation.getId()]);
 
             if (neighbourPos.getY() >= 0) {
-                Block neighbourBlock = MainWindow.getConnection().getPlayer().getWorld().getBlock(neighbourPos);
+                Block neighbourBlock = GameWindow.getConnection().getPlayer().getWorld().getBlock(neighbourPos);
                 boolean isNeighbourFull = modelLoader.isFull(neighbourBlock);
                 adjacentBlocks.put(orientation, isNeighbourFull);
             } else {

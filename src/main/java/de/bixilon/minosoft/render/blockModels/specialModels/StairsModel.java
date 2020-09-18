@@ -16,7 +16,7 @@ package de.bixilon.minosoft.render.blockModels.specialModels;
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockProperties;
-import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockRotation;
+import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockRotations;
 import de.bixilon.minosoft.render.blockModels.BlockModel;
 import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
@@ -52,7 +52,7 @@ public class StairsModel extends BlockModel {
     }
 
     public static HashSet<Face> prepareCorner(HashSet<SubBlock> subBlocks, BlockProperties property,
-                                              BlockRotation rotation) {
+                                              BlockRotations rotation) {
         if (property.name().contains("LEFT")) {
             return prepareState(subBlocks, rotation);
         }

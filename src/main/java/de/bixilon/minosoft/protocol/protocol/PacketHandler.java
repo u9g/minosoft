@@ -40,7 +40,7 @@ import de.bixilon.minosoft.protocol.packets.serverbound.play.PacketKeepAliveResp
 import de.bixilon.minosoft.protocol.packets.serverbound.play.PacketResourcePackStatus;
 import de.bixilon.minosoft.util.nbt.tag.CompoundTag;
 import de.bixilon.minosoft.util.nbt.tag.StringTag;
-import de.bixilon.minosoft.render.MainWindow;
+import de.bixilon.minosoft.render.GameWindow;
 import de.bixilon.minosoft.render.utility.Vec3;
 
 import javax.crypto.SecretKey;
@@ -89,7 +89,7 @@ public class PacketHandler {
             case GET_VERSION:
                 // reconnect...
                 connection.disconnect();
-                Log.info(String.format("Server is running on version %s, reconnecting...", connection.getVersion().getVersionString()));
+                Log.info(String.format("Server is running on version %s, reconnecting...", connection.getVersion().getVersionName()));
                 break;
             case CONNECT:
                 // do nothing
@@ -374,8 +374,10 @@ public class PacketHandler {
     }
 
     public void handle(PacketPlayerPositionAndRotation pkg) {
-        MainWindow.getPlayerController().getCameraMovement().setRotation(pkg.getPitch(), pkg.getYaw());
-        MainWindow.getPlayerController().setPlayerPos(new Vec3(pkg.getLocation()));
+        GameWindow.start(connection);
+        connection.getPlayer().setSpawnConfirmed(true);
+        GameWindow.getPlayerController().getCameraMovement().setRotation(pkg.getPitch(), pkg.getYaw());
+        GameWindow.getPlayerController().setPlayerPos(new Vec3(pkg.getLocation()));
     }
 
     public void handle(PacketAttachEntity pkg) {

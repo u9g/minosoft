@@ -15,7 +15,7 @@ package de.bixilon.minosoft.render.movement;
 
 import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
 import de.bixilon.minosoft.game.datatypes.world.World;
-import de.bixilon.minosoft.render.MainWindow;
+import de.bixilon.minosoft.render.GameWindow;
 import de.bixilon.minosoft.render.blockModels.BlockModelLoader;
 import de.bixilon.minosoft.render.utility.Vec3;
 
@@ -28,8 +28,8 @@ public class CollisionHandler {
     BlockModelLoader modelLoader;
 
     public CollisionHandler(PlayerController controller) {
-        world = MainWindow.getConnection().getPlayer().getWorld();
-        modelLoader = MainWindow.getRenderer().getModelLoader();
+        world = GameWindow.getConnection().getPlayer().getWorld();
+        modelLoader = GameWindow.getRenderer().getModelLoader();
         this.controller = controller;
     }
 

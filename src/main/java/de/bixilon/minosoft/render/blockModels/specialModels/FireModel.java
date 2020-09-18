@@ -16,14 +16,13 @@ package de.bixilon.minosoft.render.blockModels.specialModels;
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockProperties;
-import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockRotation;
+import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockRotations;
 import de.bixilon.minosoft.render.blockModels.BlockModel;
 import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlock;
 import de.bixilon.minosoft.render.texture.TextureLoader;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -45,22 +44,22 @@ public class FireModel extends BlockModel {
 
         HashSet<Face> result = new HashSet<>();
         if (properties.contains(BlockProperties.EAST)) {
-            result.addAll(prepareState(side, BlockRotation.EAST));
+            result.addAll(prepareState(side, BlockRotations.EAST));
         }
         if (properties.contains(BlockProperties.WEST)) {
-            result.addAll(prepareState(side, BlockRotation.WEST));
+            result.addAll(prepareState(side, BlockRotations.WEST));
         }
         if (properties.contains(BlockProperties.NORTH)) {
-            result.addAll(prepareState(side, BlockRotation.NORTH));
+            result.addAll(prepareState(side, BlockRotations.NORTH));
         }
         if (properties.contains(BlockProperties.SOUTH)) {
-            result.addAll(prepareState(side, BlockRotation.SOUTH));
+            result.addAll(prepareState(side, BlockRotations.SOUTH));
         }
         if (properties.contains(BlockProperties.UP)) {
-            result.addAll(prepareState(up, BlockRotation.UP));
+            result.addAll(prepareState(up, BlockRotations.UP));
         }
         if (result.size() == 0) {
-            result.addAll(prepareState(floor, BlockRotation.NONE));
+            result.addAll(prepareState(floor, BlockRotations.NONE));
         }
         return result;
     }

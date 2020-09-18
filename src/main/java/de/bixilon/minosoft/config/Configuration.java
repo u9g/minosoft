@@ -32,7 +32,6 @@ public class Configuration {
     final LinkedHashMap<String, Object> config;
 
     public Configuration(String filename) throws IOException {
-
         File file = new File(Config.homeDir + "config/" + filename);
         if (!file.exists()) {
             // no configuration file
@@ -48,7 +47,9 @@ public class Configuration {
             file = new File(Config.homeDir + "config/" + filename);
         }
         Yaml yml = new Yaml();
-        config = yml.load(new FileInputStream(file));
+        FileInputStream inputStream = new FileInputStream(file);
+        config = yml.load(inputStream);
+        inputStream.close();
     }
 
     public boolean getBoolean(String path) {
@@ -187,6 +188,11 @@ public class Configuration {
             }
             synchronized (config) {
                 yaml.dump(config, writer);
+            }
+            try {
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
             if (!file.delete() || !tempFile.renameTo(file)) {
                 Log.fatal("An error occurred while saving the config file");

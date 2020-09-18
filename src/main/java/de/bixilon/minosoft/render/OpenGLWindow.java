@@ -85,8 +85,7 @@ public class OpenGLWindow {
         }
         glfwMakeContextCurrent(window);
 
-        GLFWCursorPosCallback posCallback;
-        glfwSetCursorPosCallback(window, posCallback = new GLFWCursorPosCallback() {
+        glfwSetCursorPosCallback(window, new GLFWCursorPosCallback() {
             @Override
             public void invoke(long window, double xpos, double ypos) {
                 mouseX = xpos;
@@ -96,8 +95,6 @@ public class OpenGLWindow {
 
         // Enable v-sync
         glfwSwapInterval(1);
-
-        glfwShowWindow(window);
 
         createCapabilities();
 
@@ -114,6 +111,11 @@ public class OpenGLWindow {
 
         glEnable(GL_ALPHA_TEST);
         glAlphaFunc(GL_GREATER, 0.0f);
+
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        glEnable(GL_TEXTURE_2D);
     }
 
     public long getWindow() {
@@ -142,5 +144,10 @@ public class OpenGLWindow {
         float deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
         return deltaTime;
+    }
+
+    public void start() {
+        glfwSetCursorPosCallback(window, GameWindow.getPlayerController().getCameraMovement()::mouseCallback);
+        glfwShowWindow(window);
     }
 }

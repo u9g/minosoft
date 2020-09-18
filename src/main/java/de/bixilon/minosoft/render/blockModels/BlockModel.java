@@ -19,7 +19,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.Config;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
-import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockRotation;
+import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockRotations;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
@@ -34,11 +34,11 @@ import java.util.Map;
 import static de.bixilon.minosoft.util.Util.readJsonFromFile;
 
 public class BlockModel {
-    public static final HashBiMap<BlockRotation, BlockRotation> rotationAdjust = HashBiMap.create(Map.of(
-            BlockRotation.EAST, BlockRotation.SOUTH,
-            BlockRotation.SOUTH, BlockRotation.WEST,
-            BlockRotation.WEST, BlockRotation.NORTH,
-            BlockRotation.NORTH, BlockRotation.EAST
+    public static final HashBiMap<BlockRotations, BlockRotations> rotationAdjust = HashBiMap.create(Map.of(
+            BlockRotations.EAST, BlockRotations.SOUTH,
+            BlockRotations.SOUTH, BlockRotations.WEST,
+            BlockRotations.WEST, BlockRotations.NORTH,
+            BlockRotations.NORTH, BlockRotations.EAST
     ));
 
     HashMap<BlockConfiguration, HashSet<SubBlock>> blockConfigurationStates;
@@ -150,7 +150,7 @@ public class BlockModel {
         }
     }
 
-    public static HashSet<Face> prepareState(HashSet<SubBlock> subBlocks, BlockRotation rotation) {
+    public static HashSet<Face> prepareState(HashSet<SubBlock> subBlocks, BlockRotations rotation) {
         HashSet<Face> result = new HashSet<>();
         for (SubBlock subBlock : subBlocks) {
             result.addAll(subBlock.getFacesSimple(new Block("", "", rotation)));
