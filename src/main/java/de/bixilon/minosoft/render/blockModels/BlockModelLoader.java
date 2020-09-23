@@ -15,26 +15,24 @@ package de.bixilon.minosoft.render.blockModels;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import de.bixilon.minosoft.Config;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Blocks;
-import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.specialModels.*;
 import de.bixilon.minosoft.render.texture.TextureLoader;
 import org.apache.commons.collections.primitives.ArrayFloatList;
 
-import java.io.File;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import static de.bixilon.minosoft.util.Util.readJsonFromFile;
+import static de.bixilon.minosoft.util.Util.readJsonAsset;
 
 public class BlockModelLoader {
-    private final HashMap<String, HashMap<String, BlockModel>> blockDescriptionMap;
+    private final HashMap<String, HashMap<String, BlockModelInterface>> blockDescriptionMap;
     TextureLoader textureLoader;
 
     public BlockModelLoader() {
@@ -42,18 +40,10 @@ public class BlockModelLoader {
         HashMap<String, HashMap<String, float[]>> tints = new HashMap<>();
         HashMap<String, HashSet<String>> textures = new HashMap<>();
         try {
-            String folderPath = Config.homeDir + "assets/mapping/blockModels/";
-            File[] files = new File(folderPath).listFiles();
-            if (files == null) {
-                Log.warn("no mods loaded!");
-            }
-            assert files != null;
-            for (File file : files) {
-                JsonObject json = readJsonFromFile(file.getAbsolutePath());
-                String mod = file.getName().substring(0, file.getName().lastIndexOf('.'));
+                JsonObject json = readJsonAsset("mapping/blockModels.json");
+                String mod = "minecraft";
                 tints.put(mod, readTints(json));
                 textures.put(mod, loadModels(json.get("blocks").getAsJsonObject(), mod));
-            }
             textureLoader = new TextureLoader(textures, tints);
             applyTextures();
         } catch (IOException e) {
@@ -62,8 +52,8 @@ public class BlockModelLoader {
     }
 
     private void applyTextures() {
-        for (Map.Entry<String, HashMap<String, BlockModel>> mod : blockDescriptionMap.entrySet()) {
-            for (Map.Entry<String, BlockModel> block : mod.getValue().entrySet()) {
+        for (Map.Entry<String, HashMap<String, BlockModelInterface>> mod : blockDescriptionMap.entrySet()) {
+            for (Map.Entry<String, BlockModelInterface> block : mod.getValue().entrySet()) {
                 block.getValue().applyTextures(mod.getKey(), textureLoader);
             }
         }
@@ -103,16 +93,17 @@ public class BlockModelLoader {
             if (block.has("type")) {
                 type = block.get("type").getAsString();
             }
-            BlockModel model = switch (type) {
+            BlockModelInterface model = switch (type) {
                 case "fire" -> new FireModel(block, mod);
                 case "stairs" -> new StairsModel(block, mod);
                 case "wire" -> new WireModel(block, mod);
                 case "crop" -> new CropModel(block, mod);
                 case "door" -> new DoorModel(block, mod);
+                case "fence" -> new FenceModel(block, mod);
                 default -> new BlockModel(block, mod);
             };
             result.addAll(model.getAllTextures());
-            HashMap<String, BlockModel> modMap = blockDescriptionMap.get(mod);
+            HashMap<String, BlockModelInterface> modMap = blockDescriptionMap.get(mod);
             modMap.put(identifier, model);
         } catch (Exception e) {
             e.printStackTrace();
@@ -122,8 +113,8 @@ public class BlockModelLoader {
         return result;
     }
 
-    public BlockModel getBlockDescription(Block block) {
-        HashMap<String, BlockModel> modList = blockDescriptionMap.get(block.getMod());
+    public BlockModelInterface getBlockDescription(Block block) {
+        HashMap<String, BlockModelInterface> modList = blockDescriptionMap.get(block.getMod());
 
         if (modList == null || !modList.containsKey(block.getIdentifier())) {
             throw new IllegalArgumentException(String.format("No block %s:%s found", block.getMod(), block.getIdentifier()));
@@ -135,7 +126,7 @@ public class BlockModelLoader {
         if (block == Blocks.nullBlock || block == null) {
             return false;
         }
-        BlockModel description = getBlockDescription(block);
+        BlockModelInterface description = getBlockDescription(block);
         if (description == null) {
             return false;
         }
@@ -143,7 +134,7 @@ public class BlockModelLoader {
     }
 
     public HashSet<Face> prepare(Block block, HashMap<FaceOrientation, Boolean> adjacentBlocks) {
-        BlockModel description = getBlockDescription(block);
+        BlockModelInterface description = getBlockDescription(block);
         if (description == null) {
             return new HashSet<>();
         }

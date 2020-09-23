@@ -790,6 +790,349 @@
       "bottom_hinge": "oak_door_bottom_hinge",
       "top": "oak_door_top",
       "top_hinge": "oak_door_top_hinge"
+    },
+    "ladder": {
+      "blockModel": "ladder"
+    },
+    "rail": {
+      "states": [
+        {
+          "properties": {
+            "shape": "north_south"
+          },
+          "blockModel": "rail"
+        },
+        {
+          "properties": {
+            "shape": "east_west"
+          },
+          "blockModel": "rail"
+        },
+        {
+          "properties": {
+            "shape": "ascending_east"
+          },
+          "blockModel": "rail_raised_ne"
+        },
+        {
+          "properties": {
+            "shape": "ascending_west"
+          },
+          "blockModel": "rail_raised_ne"
+        },
+        {
+          "properties": {
+            "shape": "ascending_north"
+          },
+          "blockModel": "rail_raised_ne"
+        },
+        {
+          "properties": {
+            "shape": "ascending_south"
+          },
+          "blockModel": "rail_raised_ne"
+        },
+        {
+          "properties": {
+            "shape": "south_east"
+          },
+          "blockModel": "rail_corner"
+        },
+        {
+          "properties": {
+            "shape": "south_west"
+          },
+          "blockModel": "rail_corner"
+        },
+        {
+          "properties": {
+            "shape": "north_east"
+          },
+          "blockModel": "rail_corner"
+        },
+        {
+          "properties": {
+            "shape": "north_west"
+          },
+          "blockModel": "rail_corner"
+        }
+      ]
+    },
+    "cobblestone_stairs": {
+      "type": "stairs",
+      "straight": "cobblestone_stairs",
+      "inner": "cobblestone_stairs_inner",
+      "outer": "cobblestone_stairs_outer"
+    },
+    "oak_wall_sign": {
+      "blockModel": "oak_sign"
+    },
+    "spruce_wall_sign": {
+      "blockModel": "spruce_sign"
+    },
+    "birch_wall_sign": {
+      "blockModel": "birch_sign"
+    },
+    "acacia_wall_sign": {
+      "blockModel": "acacia_sign"
+    },
+    "jungle_wall_sign": {
+      "blockModel": "jungle_sign"
+    },
+    "dark_oak_wall_sign": {
+      "blockModel": "dark_oak_sign"
+    },
+    "lever": {
+      "states": [
+        {
+          "properties": {
+            "powered": "true"
+          },
+          "blockModel": "lever_on"
+        },
+        {
+          "properties": {
+            "powered": "false"
+          },
+          "blockModel": "lever"
+        }
+      ]
+    },
+    "stone_pressure_plate": {
+      "states": [
+        {
+          "properties": {
+            "powered": "true"
+          },
+          "blockModel": "stone_pressure_plate_down"
+        },
+        {
+          "properties": {
+            "powered": "false"
+          },
+          "blockModel": "stone_pressure_plate"
+        }
+      ]
+    },
+    "iron_door": {
+      "type": "door",
+      "bottom": "iron_door_bottom",
+      "bottom_hinge": "iron_door_bottom_hinge",
+      "top": "iron_door_top",
+      "top_hinge": "iron_door_bottom_hinge"
+    },
+    "oak_pressure_plate": {
+      "states": [
+        {
+          "properties": {
+            "powered": "true"
+          },
+          "blockModel": "oak_pressure_plate_down"
+        },
+        {
+          "properties": {
+            "powered": "false"
+          },
+          "blockModel": "oak_pressure_plate"
+        }
+      ]
+    },
+    "spruce_pressure_plate": {
+      "states": [
+        {
+          "properties": {
+            "powered": "true"
+          },
+          "blockModel": "spruce_pressure_plate_down"
+        },
+        {
+          "properties": {
+            "powered": "false"
+          },
+          "blockModel": "spruce_pressure_plate"
+        }
+      ]
+    },
+    "jungle_pressure_plate": {
+      "states": [
+        {
+          "properties": {
+            "powered": "true"
+          },
+          "blockModel": "jungle_pressure_plate_down"
+        },
+        {
+          "properties": {
+            "powered": "false"
+          },
+          "blockModel": "jungle_pressure_plate"
+        }
+      ]
+    },
+    "acacia_pressure_plate": {
+      "states": [
+        {
+          "properties": {
+            "powered": "true"
+          },
+          "blockModel": "acacia_pressure_plate_down"
+        },
+        {
+          "properties": {
+            "powered": "false"
+          },
+          "blockModel": "acacia_pressure_plate"
+        }
+      ]
+    },
+    "dark_oak_pressure_plate": {
+      "states": [
+        {
+          "properties": {
+            "powered": "true"
+          },
+          "blockModel": "dark_oak_pressure_plate_down"
+        },
+        {
+          "properties": {
+            "powered": "false"
+          },
+          "blockModel": "dark_oak_pressure_plate"
+        }
+      ]
+    },
+    "redstone_ore": {
+      "states": [
+        {
+          "properties": {
+            "lit": "true"
+          },
+          "blockModel": "redstone_ore_on"
+        },
+        {
+          "properties": {
+            "lit": "false"
+          },
+          "blockModel": "redstone_ore"
+        }
+      ]
+    },
+    "redstone_torch": {
+      "states": [
+        {
+          "properties": {
+            "lit": "true"
+          },
+          "blockModel": "redstone_torch"
+        },
+        {
+          "properties": {
+            "lit": "false"
+          },
+          "blockModel": "redstone_torch_off"
+        }
+      ]
+    },
+    "redstone_wall_torch": {
+      "states": [
+        {
+          "properties": {
+            "lit": "true"
+          },
+          "blockModel": "redstone_wall_torch"
+        },
+        {
+          "properties": {
+            "lit": "false"
+          },
+          "blockModel": "redstone_wall_torch_off"
+        }
+      ]
+    },
+    "stone_button": {
+      "states": [
+        {
+          "properties": {
+            "powered": "true"
+          },
+          "blockModel": "stone_button_pressed"
+        },
+        {
+          "properties": {
+            "powered": "false"
+          },
+          "blockModel": "stone_button"
+        }
+      ]
+    },
+    "snow": {
+      "states": [
+        {
+          "properties": {
+            "layers": "1"
+          },
+          "blockModel": "snow_height2"
+        },
+        {
+          "properties": {
+            "layers": "2"
+          },
+          "blockModel": "snow_height4"
+        },
+        {
+          "properties": {
+            "layers": "3"
+          },
+          "blockModel": "snow_height6"
+        },
+        {
+          "properties": {
+            "layers": "4"
+          },
+          "blockModel": "snow_height8"
+        },
+        {
+          "properties": {
+            "layers": "5"
+          },
+          "blockModel": "snow_height10"
+        },
+        {
+          "properties": {
+            "layers": "6"
+          },
+          "blockModel": "snow_height12"
+        },
+        {
+          "properties": {
+            "layers": "7"
+          },
+          "blockModel": "snow_height14"
+        }
+      ]
+    },
+    "ice": {
+      "blockModel": "ice"
+    },
+    "snow_block": {
+      "blockModel": "snow_block"
+    },
+    "cactus": {
+      "blockModel": "cactus"
+    },
+    "clay": {
+      "blockModel": "clay"
+    },
+    "sugar_cane": {
+      "blockModel": "sugar_cane"
+    },
+    "jukebox": {
+      "blockModel": "jukebox"
+    },
+    "oak_fence": {
+      "type": "fence",
+      "post": "oak_fence_post",
+      "side": "oak_fence_side"
     }
   },
   "tinted_textures": {

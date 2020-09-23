@@ -18,7 +18,7 @@ import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockProperties;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockRotations;
 import de.bixilon.minosoft.logging.Log;
-import de.bixilon.minosoft.render.blockModels.BlockModel;
+import de.bixilon.minosoft.render.blockModels.BlockModelInterface;
 import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlock;
@@ -27,7 +27,9 @@ import de.bixilon.minosoft.render.texture.TextureLoader;
 import java.util.HashMap;
 import java.util.HashSet;
 
-public class DoorModel extends BlockModel {
+import static de.bixilon.minosoft.render.blockModels.specialModels.BlockModel.*;
+
+public class DoorModel implements BlockModelInterface {
     HashSet<SubBlock> bottom;
     HashSet<SubBlock> bottom_hinge;
 
@@ -35,14 +37,13 @@ public class DoorModel extends BlockModel {
     HashSet<SubBlock> top_hinge;
 
     public DoorModel(JsonObject block, String mod) {
-        bottom = super.load(mod, block.get("bottom").getAsString());
-        bottom_hinge = super.load(mod, block.get("bottom_hinge").getAsString());
+        bottom = BlockModelInterface.load(mod, block.get("bottom").getAsString());
+        bottom_hinge = BlockModelInterface.load(mod, block.get("bottom_hinge").getAsString());
 
-        top = super.load(mod, block.get("top").getAsString());
-        top_hinge = super.load(mod, block.get("top_hinge").getAsString());
+        top = BlockModelInterface.load(mod, block.get("top").getAsString());
+        top_hinge = BlockModelInterface.load(mod, block.get("top_hinge").getAsString());
     }
 
-    @Override
     public HashSet<Face> prepare(Block block, HashMap<FaceOrientation, Boolean> adjacentBlocks) {
         if (block.getProperties().contains(BlockProperties.HINGE_LEFT)) {
             return prepareHinge(bottom, top, block, adjacentBlocks);
@@ -75,26 +76,23 @@ public class DoorModel extends BlockModel {
         return null;
     }
 
-    @Override
     public boolean isFull() {
         return false;
     }
 
-    @Override
     public HashSet<String> getAllTextures() {
         HashSet<String> result = new HashSet<>();
-        result.addAll(getTextures(bottom));
-        result.addAll(getTextures(bottom_hinge));
-        result.addAll(getTextures(top));
-        result.addAll(getTextures(top_hinge));
+        result.addAll(BlockModelInterface.getTextures(bottom));
+        result.addAll(BlockModelInterface.getTextures(bottom_hinge));
+        result.addAll(BlockModelInterface.getTextures(top));
+        result.addAll(BlockModelInterface.getTextures(top_hinge));
         return result;
     }
 
-    @Override
     public void applyTextures(String mod, TextureLoader loader) {
-        applyConfigurationTextures(bottom, mod, loader);
-        applyConfigurationTextures(bottom_hinge, mod, loader);
-        applyConfigurationTextures(top, mod, loader);
-        applyConfigurationTextures(top_hinge, mod, loader);
+        BlockModelInterface.applyConfigurationTextures(bottom, mod, loader);
+        BlockModelInterface.applyConfigurationTextures(bottom_hinge, mod, loader);
+        BlockModelInterface.applyConfigurationTextures(top, mod, loader);
+        BlockModelInterface.applyConfigurationTextures(top_hinge, mod, loader);
     }
 }

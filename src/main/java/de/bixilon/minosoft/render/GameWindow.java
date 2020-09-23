@@ -21,14 +21,13 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
 public class GameWindow {
-
-    private static final float FOVY = 45f;
-    static int WIDTH = 800;
-    static int HEIGHT = 800;
-    static boolean FULLSCREEN = false;
-    static OpenGLWindow openGLWindow;
-    static WorldRenderer renderer;
-    static Connection connection;
+    private static float FOVY = 45f;
+    private static int WIDTH = 800;
+    private static int HEIGHT = 800;
+    private static boolean FULLSCREEN = false;
+    private static OpenGLWindow openGLWindow;
+    private static WorldRenderer renderer;
+    private static Connection connection;
     private static PlayerController playerController;
 
     static boolean running = false;
@@ -37,6 +36,7 @@ public class GameWindow {
     public static void prepare() {
         Thread guiLoaderThread = new Thread(() -> {
             openGLWindow = new OpenGLWindow(WIDTH, HEIGHT, FULLSCREEN);
+            playerController = new PlayerController(openGLWindow.getWindow());
             openGLWindow.init();
             renderer = new WorldRenderer();
             renderer.init();

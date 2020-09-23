@@ -17,7 +17,7 @@ import com.google.gson.JsonObject;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockProperties;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockRotations;
-import de.bixilon.minosoft.render.blockModels.BlockModel;
+import de.bixilon.minosoft.render.blockModels.BlockModelInterface;
 import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlock;
@@ -26,16 +26,16 @@ import de.bixilon.minosoft.render.texture.TextureLoader;
 import java.util.HashMap;
 import java.util.HashSet;
 
-public class FireModel extends BlockModel {
+public class FireModel implements BlockModelInterface {
     HashSet<SubBlock> floor;
     HashSet<SubBlock> side;
     HashSet<SubBlock> up;
 
 
     public FireModel(JsonObject block, String mod) {
-        floor = super.load(mod, block.get("floor").getAsString());
-        side = super.load(mod, block.get("side").getAsString());
-        up = super.load(mod, block.get("up").getAsString());
+        floor = BlockModelInterface.load(mod, block.get("floor").getAsString());
+        side = BlockModelInterface.load(mod, block.get("side").getAsString());
+        up = BlockModelInterface.load(mod, block.get("up").getAsString());
     }
 
     @Override
@@ -44,22 +44,22 @@ public class FireModel extends BlockModel {
 
         HashSet<Face> result = new HashSet<>();
         if (properties.contains(BlockProperties.EAST)) {
-            result.addAll(prepareState(side, BlockRotations.EAST));
+            result.addAll(BlockModelInterface.prepareState(side, BlockRotations.EAST));
         }
         if (properties.contains(BlockProperties.WEST)) {
-            result.addAll(prepareState(side, BlockRotations.WEST));
+            result.addAll(BlockModelInterface.prepareState(side, BlockRotations.WEST));
         }
         if (properties.contains(BlockProperties.NORTH)) {
-            result.addAll(prepareState(side, BlockRotations.NORTH));
+            result.addAll(BlockModelInterface.prepareState(side, BlockRotations.NORTH));
         }
         if (properties.contains(BlockProperties.SOUTH)) {
-            result.addAll(prepareState(side, BlockRotations.SOUTH));
+            result.addAll(BlockModelInterface.prepareState(side, BlockRotations.SOUTH));
         }
         if (properties.contains(BlockProperties.UP)) {
-            result.addAll(prepareState(up, BlockRotations.UP));
+            result.addAll(BlockModelInterface.prepareState(up, BlockRotations.UP));
         }
         if (result.size() == 0) {
-            result.addAll(prepareState(floor, BlockRotations.NONE));
+            result.addAll(BlockModelInterface.prepareState(floor, BlockRotations.NONE));
         }
         return result;
     }
@@ -72,16 +72,16 @@ public class FireModel extends BlockModel {
     @Override
     public HashSet<String> getAllTextures() {
         HashSet<String> result = new HashSet<>();
-        result.addAll(getTextures(floor));
-        result.addAll(getTextures(side));
-        result.addAll(getTextures(up));
+        result.addAll(BlockModelInterface.getTextures(floor));
+        result.addAll(BlockModelInterface.getTextures(side));
+        result.addAll(BlockModelInterface.getTextures(up));
         return result;
     }
 
     @Override
     public void applyTextures(String mod, TextureLoader loader) {
-        applyConfigurationTextures(floor, mod, loader);
-        applyConfigurationTextures(side, mod, loader);
-        applyConfigurationTextures(up, mod, loader);
+        BlockModelInterface.applyConfigurationTextures(floor, mod, loader);
+        BlockModelInterface.applyConfigurationTextures(side, mod, loader);
+        BlockModelInterface.applyConfigurationTextures(up, mod, loader);
     }
 }

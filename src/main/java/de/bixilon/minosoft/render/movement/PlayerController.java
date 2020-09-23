@@ -31,18 +31,20 @@ public class PlayerController {
     float gravity = 9.81f;
     boolean onGround;
     private boolean enableGravity;
-    private final CollisionHandler collisionHandler;
+    private CollisionHandler collisionHandler;
     public Vec3 oldPos;
 
     public PlayerController(long window) {
         cameraMovement = new CameraMovement();
         playerMovement = new PlayerMovement(window);
-        collisionHandler = new CollisionHandler(this);
     }
 
     public void loop(float deltaTime) {
         if (!GameWindow.getConnection().getPlayer().isSpawnConfirmed()) {
             return;
+        }
+        if (collisionHandler == null) {
+            collisionHandler = new CollisionHandler(this);
         }
         if (GameWindow.paused) {
             cameraMovement.loop();

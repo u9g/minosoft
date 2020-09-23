@@ -15,8 +15,7 @@ package de.bixilon.minosoft.render.blockModels.specialModels;
 
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
-import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockProperties;
-import de.bixilon.minosoft.render.blockModels.BlockModel;
+import de.bixilon.minosoft.render.blockModels.BlockModelInterface;
 import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlock;
@@ -25,15 +24,15 @@ import de.bixilon.minosoft.render.texture.TextureLoader;
 import java.util.HashMap;
 import java.util.HashSet;
 
-public class WireModel extends BlockModel {
+public class WireModel implements BlockModelInterface {
     private final HashSet<SubBlock> dot;
     private final HashSet<SubBlock> side;
     private final HashSet<SubBlock> up;
 
     public WireModel(JsonObject block, String mod) {
-        dot = super.load(mod, block.get("dot").getAsString());
-        side = super.load(mod, block.get("side").getAsString());
-        up = super.load(mod, block.get("up").getAsString());
+        dot = BlockModelInterface.load(mod, block.get("dot").getAsString());
+        side = BlockModelInterface.load(mod, block.get("side").getAsString());
+        up = BlockModelInterface.load(mod, block.get("up").getAsString());
     }
 
     @Override
@@ -50,16 +49,16 @@ public class WireModel extends BlockModel {
     @Override
     public HashSet<String> getAllTextures() {
         HashSet<String> result = new HashSet<>();
-        result.addAll(getTextures(dot));
-        result.addAll(getTextures(side));
-        result.addAll(getTextures(up));
+        result.addAll(BlockModelInterface.getTextures(dot));
+        result.addAll(BlockModelInterface.getTextures(side));
+        result.addAll(BlockModelInterface.getTextures(up));
         return result;
     }
 
     @Override
     public void applyTextures(String mod, TextureLoader loader) {
-        applyConfigurationTextures(dot, mod, loader);
-        applyConfigurationTextures(side, mod, loader);
-        applyConfigurationTextures(up, mod, loader);
+        BlockModelInterface.applyConfigurationTextures(dot, mod, loader);
+        BlockModelInterface.applyConfigurationTextures(side, mod, loader);
+        BlockModelInterface.applyConfigurationTextures(up, mod, loader);
     }
 }

@@ -11,9 +11,8 @@
  *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
-package de.bixilon.minosoft.render.blockModels;
+package de.bixilon.minosoft.render.blockModels.specialModels;
 
-import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -21,6 +20,9 @@ import de.bixilon.minosoft.Config;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockRotations;
 import de.bixilon.minosoft.logging.Log;
+import de.bixilon.minosoft.render.blockModels.BlockConfiguration;
+import de.bixilon.minosoft.render.blockModels.BlockConfigurationTrue;
+import de.bixilon.minosoft.render.blockModels.BlockModelInterface;
 import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlock;
@@ -33,14 +35,7 @@ import java.util.Map;
 
 import static de.bixilon.minosoft.util.Util.readJsonFromFile;
 
-public class BlockModel {
-    public static final HashBiMap<BlockRotations, BlockRotations> rotationAdjust = HashBiMap.create(Map.of(
-            BlockRotations.EAST, BlockRotations.SOUTH,
-            BlockRotations.SOUTH, BlockRotations.WEST,
-            BlockRotations.WEST, BlockRotations.NORTH,
-            BlockRotations.NORTH, BlockRotations.EAST
-    ));
-
+public class BlockModel implements BlockModelInterface {
     HashMap<BlockConfiguration, HashSet<SubBlock>> blockConfigurationStates;
     boolean isFull;
 
@@ -49,13 +44,13 @@ public class BlockModel {
 
         if (block.has("blockModel")) {
             blockConfigurationStates.put(new BlockConfigurationTrue(),
-                    load(mod, block.get("blockModel").getAsString()));
+                    BlockModelInterface.load(mod, block.get("blockModel").getAsString()));
         } else if (block.has("states")) {
             for (JsonElement element : block.get("states").getAsJsonArray()) {
                 JsonObject state = element.getAsJsonObject();
                 BlockConfiguration configuration = new BlockConfiguration(state.get("properties").getAsJsonObject());
                 blockConfigurationStates.put(configuration,
-                        load(mod, state.get("blockModel").getAsString()));
+                        BlockModelInterface.load(mod, state.get("blockModel").getAsString()));
             }
         }
         // TODO
@@ -65,41 +60,6 @@ public class BlockModel {
     public BlockModel() {
     }
 
-    public static HashSet<SubBlock> load(String mod, String identifier, HashMap<String, String> variables) {
-        String path = Config.homeDir + "assets/" + mod + "/models/block/" + identifier + ".json";
-        JsonObject json = null;
-        try {
-            json = readJsonFromFile(path);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        if (json == null) {
-            Log.warn("File not found: " + path);
-            return null;
-        }
-        HashSet<SubBlock> result = new HashSet<>();
-        if (json.has("textures")) {
-            // read the textures into a variable hashmap
-            JsonObject textures = json.getAsJsonObject("textures");
-            for (String texture : textures.keySet()) {
-                if (texture.contains("#") && variables.containsKey(texture)) {
-                    variables.put("#" + texture, variables.get(texture));
-                } else {
-                    variables.put("#" + texture, textures.get(texture).getAsString());
-                }
-            }
-        }
-        if (json.has("elements")) {
-            for (JsonElement subBlockJson : json.get("elements").getAsJsonArray()) {
-                result.add(new SubBlock(subBlockJson.getAsJsonObject(), variables));
-            }
-        } else if (json.has("parent") && !json.get("parent").getAsString().equals("block/block")) {
-            String parent = json.get("parent").getAsString();
-            String parentIdentifier = parent.substring(parent.lastIndexOf("/") + 1);
-            result.addAll(load(mod, parentIdentifier, variables));
-        }
-        return result;
-    }
 
     public static HashSet<Face> prepareBlockState(HashSet<SubBlock> subBlocks,
                                                   HashMap<FaceOrientation, Boolean> adjacentBlocks, Block block) {
@@ -124,10 +84,6 @@ public class BlockModel {
         return new HashSet<>();
     }
 
-    public HashSet<SubBlock> load(String mod, String identifier) {
-        return load(mod, identifier, new HashMap<>());
-    }
-
     public HashSet<String> getAllTextures() {
         HashSet<String> result = new HashSet<>();
         for (HashSet<SubBlock> subBlocks : blockConfigurationStates.values()) {
@@ -140,29 +96,7 @@ public class BlockModel {
 
     public void applyTextures(String mod, TextureLoader loader) {
         for (HashSet<SubBlock> subBlocks : blockConfigurationStates.values()) {
-            applyConfigurationTextures(subBlocks, mod, loader);
+            BlockModelInterface.applyConfigurationTextures(subBlocks, mod, loader);
         }
-    }
-
-    public static void applyConfigurationTextures(HashSet<SubBlock> subBlocks, String mod, TextureLoader loader) {
-        for (SubBlock subBlock : subBlocks) {
-            subBlock.applyTextures(mod, loader);
-        }
-    }
-
-    public static HashSet<Face> prepareState(HashSet<SubBlock> subBlocks, BlockRotations rotation) {
-        HashSet<Face> result = new HashSet<>();
-        for (SubBlock subBlock : subBlocks) {
-            result.addAll(subBlock.getFacesSimple(new Block("", "", rotation)));
-        }
-        return result;
-    }
-
-    public HashSet<String> getTextures(HashSet<SubBlock> subBlocks) {
-        HashSet<String> result = new HashSet<>();
-        for (SubBlock subBlock : subBlocks) {
-            result.addAll(subBlock.getTextures());
-        }
-        return result;
     }
 }

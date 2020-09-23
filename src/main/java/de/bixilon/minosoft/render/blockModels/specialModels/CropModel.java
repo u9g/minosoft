@@ -17,7 +17,7 @@ import com.google.gson.JsonObject;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockProperties;
 import de.bixilon.minosoft.logging.Log;
-import de.bixilon.minosoft.render.blockModels.BlockModel;
+import de.bixilon.minosoft.render.blockModels.BlockModelInterface;
 import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlock;
@@ -26,7 +26,9 @@ import de.bixilon.minosoft.render.texture.TextureLoader;
 import java.util.HashMap;
 import java.util.HashSet;
 
-public class CropModel extends BlockModel {
+import static de.bixilon.minosoft.render.blockModels.specialModels.BlockModel.*;
+
+public class CropModel implements BlockModelInterface {
     HashMap<String, HashSet<SubBlock>> modelMap;
 
     public CropModel(JsonObject block, String mod) {
@@ -34,11 +36,11 @@ public class CropModel extends BlockModel {
         modelMap = new HashMap<>();
         for (int i = 0; i < stages; i++) {
             modelMap.put(String.format("%s%d", "AGE_", i),
-                    super.load(mod, String.format("%s%d", block.get("base_name").getAsString(), i)));
+                    BlockModelInterface.load(mod,
+                            String.format("%s%d", block.get("base_name").getAsString(), i)));
         }
     }
 
-    @Override
     public HashSet<Face> prepare(Block block, HashMap<FaceOrientation, Boolean> adjacentBlocks) {
         for (BlockProperties property : block.getProperties()) {
             if (modelMap.containsKey(property.name())) {
@@ -49,12 +51,10 @@ public class CropModel extends BlockModel {
         return new HashSet<>();
     }
 
-    @Override
     public boolean isFull() {
         return false;
     }
 
-    @Override
     public HashSet<String> getAllTextures() {
         HashSet<String> result = new HashSet<>();
         for (HashSet<SubBlock> subBlocks : modelMap.values()) {
@@ -65,10 +65,9 @@ public class CropModel extends BlockModel {
         return result;
     }
 
-    @Override
     public void applyTextures(String mod, TextureLoader loader) {
         for (HashSet<SubBlock> subBlocks : modelMap.values()) {
-            applyConfigurationTextures(subBlocks, mod, loader);
+            BlockModelInterface.applyConfigurationTextures(subBlocks, mod, loader);
         }
     }
 }

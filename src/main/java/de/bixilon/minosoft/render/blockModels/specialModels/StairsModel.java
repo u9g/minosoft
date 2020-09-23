@@ -17,7 +17,7 @@ import com.google.gson.JsonObject;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockProperties;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockRotations;
-import de.bixilon.minosoft.render.blockModels.BlockModel;
+import de.bixilon.minosoft.render.blockModels.BlockModelInterface;
 import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlock;
@@ -26,15 +26,15 @@ import de.bixilon.minosoft.render.texture.TextureLoader;
 import java.util.HashMap;
 import java.util.HashSet;
 
-public class StairsModel extends BlockModel {
+public class StairsModel implements BlockModelInterface {
     HashSet<SubBlock> straight;
     HashSet<SubBlock> inner;
     HashSet<SubBlock> outer;
 
     public StairsModel(JsonObject block, String mod) {
-        straight = super.load(mod, block.get("straight").getAsString());
-        inner = super.load(mod, block.get("inner").getAsString());
-        outer = super.load(mod, block.get("outer").getAsString());
+        straight = BlockModelInterface.load(mod, block.get("straight").getAsString());
+        inner = BlockModelInterface.load(mod, block.get("inner").getAsString());
+        outer = BlockModelInterface.load(mod, block.get("outer").getAsString());
     }
 
     @Override
@@ -48,15 +48,15 @@ public class StairsModel extends BlockModel {
                 return prepareCorner(inner, property, block.getRotation());
             }
         }
-        return prepareState(straight, rotationAdjust.get(block.getRotation()));
+        return BlockModelInterface.prepareState(straight, rotationAdjust.get(block.getRotation()));
     }
 
     public static HashSet<Face> prepareCorner(HashSet<SubBlock> subBlocks, BlockProperties property,
                                               BlockRotations rotation) {
         if (property.name().contains("LEFT")) {
-            return prepareState(subBlocks, rotation);
+            return BlockModelInterface.prepareState(subBlocks, rotation);
         }
-        return prepareState(subBlocks, rotationAdjust.get(rotation));
+        return BlockModelInterface.prepareState(subBlocks, rotationAdjust.get(rotation));
     }
 
     @Override
@@ -67,16 +67,16 @@ public class StairsModel extends BlockModel {
     @Override
     public HashSet<String> getAllTextures() {
         HashSet<String> result = new HashSet<>();
-        result.addAll(getTextures(straight));
-        result.addAll(getTextures(inner));
-        result.addAll(getTextures(outer));
+        result.addAll(BlockModelInterface.getTextures(straight));
+        result.addAll(BlockModelInterface.getTextures(inner));
+        result.addAll(BlockModelInterface.getTextures(outer));
         return result;
     }
 
     @Override
     public void applyTextures(String mod, TextureLoader loader) {
-        applyConfigurationTextures(straight, mod, loader);
-        applyConfigurationTextures(inner, mod, loader);
-        applyConfigurationTextures(outer, mod, loader);
+        BlockModelInterface.applyConfigurationTextures(straight, mod, loader);
+        BlockModelInterface.applyConfigurationTextures(inner, mod, loader);
+        BlockModelInterface.applyConfigurationTextures(outer, mod, loader);
     }
 }
