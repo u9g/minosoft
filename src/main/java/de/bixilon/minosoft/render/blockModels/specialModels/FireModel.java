@@ -27,10 +27,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class FireModel implements BlockModelInterface {
-    HashSet<SubBlock> floor;
-    HashSet<SubBlock> side;
-    HashSet<SubBlock> up;
-
+    private final HashSet<SubBlock> floor;
+    private final HashSet<SubBlock> side;
+    private final HashSet<SubBlock> up;
 
     public FireModel(JsonObject block, String mod) {
         floor = BlockModelInterface.load(mod, block.get("floor").getAsString());

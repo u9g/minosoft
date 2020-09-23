@@ -29,7 +29,7 @@ import java.util.HashSet;
 import static de.bixilon.minosoft.render.blockModels.specialModels.BlockModel.*;
 
 public class CropModel implements BlockModelInterface {
-    HashMap<String, HashSet<SubBlock>> modelMap;
+    private final HashMap<String, HashSet<SubBlock>> modelMap;
 
     public CropModel(JsonObject block, String mod) {
         int stages = block.get("stages").getAsInt();

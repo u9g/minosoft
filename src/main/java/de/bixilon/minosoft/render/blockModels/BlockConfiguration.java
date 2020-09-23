@@ -23,9 +23,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class BlockConfiguration {
-    BlockRotations rotation;
-    HashSet<BlockProperties> blockProperties;
-
+    private BlockRotations rotation;
+    private HashSet<BlockProperties> blockProperties;
 
     public BlockConfiguration(JsonObject json) {
         if (json.has("facing")) {

@@ -27,9 +27,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class StairsModel implements BlockModelInterface {
-    HashSet<SubBlock> straight;
-    HashSet<SubBlock> inner;
-    HashSet<SubBlock> outer;
+    private final HashSet<SubBlock> straight;
+    private final HashSet<SubBlock> inner;
+    private final HashSet<SubBlock> outer;
 
     public StairsModel(JsonObject block, String mod) {
         straight = BlockModelInterface.load(mod, block.get("straight").getAsString());

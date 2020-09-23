@@ -22,20 +22,22 @@ import static de.bixilon.minosoft.render.blockModels.Face.RenderConstants.blockR
 import static org.lwjgl.opengl.GL11.glVertex3f;
 
 public class SubBlockPosition {
-    float x, y, z;
+    public float x;
+    public float y;
+    public float z;
 
-    public static final SubBlockPosition middlePos = new SubBlockPosition(8, 8, 8);
+    private static final SubBlockPosition middlePos = new SubBlockPosition(8, 8, 8);
 
-    public static final SubBlockRotation westRotator = new SubBlockRotation(middlePos, Axis.Y, 90);
-    public static final SubBlockRotation eastRotator = new SubBlockRotation(middlePos, Axis.Y, 270);
-    public static final SubBlockRotation southRotator = new SubBlockRotation(middlePos, Axis.Y, 180);
+    private static final SubBlockRotation westRotator = new SubBlockRotation(middlePos, Axis.Y, 90);
+    private static final SubBlockRotation eastRotator = new SubBlockRotation(middlePos, Axis.Y, 270);
+    private static final SubBlockRotation southRotator = new SubBlockRotation(middlePos, Axis.Y, 180);
 
-    public static final SubBlockRotation xAxisRotator = new SubBlockRotation(middlePos, Axis.Z, 90);
-    public static final SubBlockRotation zAxisRotator = new SubBlockRotation(middlePos, Axis.X, 90);
+    private static final SubBlockRotation xAxisRotator = new SubBlockRotation(middlePos, Axis.Z, 90);
+    private static final SubBlockRotation zAxisRotator = new SubBlockRotation(middlePos, Axis.X, 90);
 
-    public static final SubBlockRotation downRotator = new SubBlockRotation(middlePos, Axis.X, 90);
-    public static final SubBlockRotation downAltRotator = new SubBlockRotation(middlePos, Axis.X, 180);
-    public static final SubBlockRotation upRotator = new SubBlockRotation(middlePos, Axis.X, -90);
+    private static final SubBlockRotation downRotator = new SubBlockRotation(middlePos, Axis.X, 90);
+    private static final SubBlockRotation downAltRotator = new SubBlockRotation(middlePos, Axis.X, 180);
+    private static final SubBlockRotation upRotator = new SubBlockRotation(middlePos, Axis.X, -90);
 
 
     public SubBlockPosition(JsonArray json) {

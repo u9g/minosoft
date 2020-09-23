@@ -1,6 +1,6 @@
 /*
  * Codename Minosoft
- * Copyright (C) 2020 Moritz Zwerger
+ * Copyright (C) 2020 Lukas Eisenhauer
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -20,7 +20,7 @@ import static de.bixilon.minosoft.render.blockModels.Face.RenderConstants.textur
 import static org.lwjgl.opengl.GL11.glTexCoord2f;
 
 public class InFaceUV {
-    public int u1, v1, u2, v2;
+    public final int u1, v1, u2, v2;
 
     public float realU1, realV1, realU2, realV2;
 

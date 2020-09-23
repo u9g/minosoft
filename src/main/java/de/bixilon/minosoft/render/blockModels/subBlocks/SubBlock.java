@@ -25,16 +25,16 @@ import java.util.HashSet;
 import java.util.Map;
 
 public class SubBlock {
-    SubBlockRotation rotation;
+    private SubBlockRotation rotation;
 
-    HashMap<FaceOrientation, Float> textureCoordinates;
-    HashMap<FaceOrientation, String> textures;
-    HashMap<FaceOrientation, Integer> textureRotations;
-    HashMap<FaceOrientation, Boolean> cullFaceTextures;
+    private final HashMap<FaceOrientation, Float> textureCoordinates;
+    private final HashMap<FaceOrientation, String> textures;
+    private final HashMap<FaceOrientation, Integer> textureRotations;
+    private final HashMap<FaceOrientation, Boolean> cullFaceTextures;
 
-    HashMap<FaceOrientation, InFaceUV> uv;
+    private final HashMap<FaceOrientation, InFaceUV> uv;
 
-    Cuboid cuboid;
+    private final Cuboid cuboid;
 
     private final boolean isFull;
 

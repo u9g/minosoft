@@ -33,7 +33,7 @@ import static de.bixilon.minosoft.util.Util.readJsonAsset;
 
 public class BlockModelLoader {
     private final HashMap<String, HashMap<String, BlockModelInterface>> blockDescriptionMap;
-    TextureLoader textureLoader;
+    private TextureLoader textureLoader;
 
     public BlockModelLoader() {
         blockDescriptionMap = new HashMap<>();

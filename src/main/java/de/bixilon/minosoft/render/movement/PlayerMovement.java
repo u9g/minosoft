@@ -11,10 +11,6 @@
  *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
-/*
- * A simple camera controller to fly around the scene
- */
-
 package de.bixilon.minosoft.render.movement;
 
 import de.bixilon.minosoft.render.GameWindow;
@@ -25,20 +21,19 @@ import static de.bixilon.minosoft.render.utility.Vec3.mul;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class PlayerMovement {
+    private static final float FLY_SPEED = 0.1f;
+    private static final Vec3 CAMERA_UP = new Vec3(0f, 1f, 0f);
+
     private final long window;
-    Vec3 cameraFront;
-    Vec3 cameraUp = new Vec3(0f, 1f, 0f);
-
-    float flySpeed = 0.1f;
-
-    Vec3 playerPos;
+    private Vec3 cameraFront;
+    private Vec3 playerPos;
 
     public PlayerMovement(long window) {
         this.window = window;
     }
 
     private void processInput(float deltaTime) {
-        float cameraSpeed = flySpeed / deltaTime;
+        float cameraSpeed = FLY_SPEED / deltaTime;
 
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
             playerPos.add(mul(cameraFront, -cameraSpeed * deltaTime));
@@ -47,10 +42,10 @@ public class PlayerMovement {
             playerPos.add(mul(cameraFront, cameraSpeed * deltaTime));
         }
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-            playerPos.add(mul(cross(cameraUp, cameraFront), -cameraSpeed * deltaTime));
+            playerPos.add(mul(cross(CAMERA_UP, cameraFront), -cameraSpeed * deltaTime));
         }
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-            playerPos.add(mul(cross(cameraUp, cameraFront), cameraSpeed * deltaTime));
+            playerPos.add(mul(cross(CAMERA_UP, cameraFront), cameraSpeed * deltaTime));
         }
 
         if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {

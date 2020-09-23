@@ -33,10 +33,10 @@ import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 
 public class TextureLoader {
     private final HashMap<String, HashMap<String, Integer>> textureCoordinates;
-    int textureID;
-    float step;
-    int totalTextures = 0;
-    HashMap<String, HashMap<String, BufferedImage>> images;
+    private int textureID;
+    private float step;
+    private int totalTextures = 0;
+    private HashMap<String, HashMap<String, BufferedImage>> images;
 
     public TextureLoader(HashMap<String, HashSet<String>> textures, HashMap<String, HashMap<String, float[]>> tints) {
         textureCoordinates = new HashMap<>();

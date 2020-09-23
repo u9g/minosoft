@@ -1,6 +1,6 @@
 /*
  * Codename Minosoft
- * Copyright (C) 2020 Lukas Eisenhauer
+ * Copyright (C) 2020 Moritz Zwerger
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -13,12 +13,9 @@
 
 package de.bixilon.minosoft.render.blockModels.specialModels;
 
-import com.google.common.collect.HashBiMap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import de.bixilon.minosoft.Config;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
-import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockRotations;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.render.blockModels.BlockConfiguration;
 import de.bixilon.minosoft.render.blockModels.BlockConfigurationTrue;
@@ -28,16 +25,13 @@ import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlock;
 import de.bixilon.minosoft.render.texture.TextureLoader;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import static de.bixilon.minosoft.util.Util.readJsonFromFile;
-
 public class BlockModel implements BlockModelInterface {
-    HashMap<BlockConfiguration, HashSet<SubBlock>> blockConfigurationStates;
-    boolean isFull;
+    private final HashMap<BlockConfiguration, HashSet<SubBlock>> blockConfigurationStates;
+    private final boolean isFull;
 
     public BlockModel(JsonObject block, String mod) {
         blockConfigurationStates = new HashMap<>();
@@ -56,10 +50,6 @@ public class BlockModel implements BlockModelInterface {
         // TODO
         isFull = true;
     }
-
-    public BlockModel() {
-    }
-
 
     public static HashSet<Face> prepareBlockState(HashSet<SubBlock> subBlocks,
                                                   HashMap<FaceOrientation, Boolean> adjacentBlocks, Block block) {

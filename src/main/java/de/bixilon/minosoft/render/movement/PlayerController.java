@@ -22,14 +22,15 @@ import static de.bixilon.minosoft.render.utility.Vec3.mul;
 import static org.lwjgl.opengl.GL11.glTranslatef;
 
 public class PlayerController {
-    private final float playerHeight = 1.8f;
-    private final float playerWidth = 0.25f;
+    private static final float playerHeight = 1.8f;
+    private static final float playerWidth = 0.25f;
+    private static final float gravity = 13;
+
     CameraMovement cameraMovement;
     PlayerMovement playerMovement;
     Vec3 playerPos = new Vec3(); // the feet position of the player
     Vec3 playerVelocity = new Vec3();
-    float gravity = 9.81f;
-    boolean onGround;
+    private boolean onGround;
     private boolean enableGravity;
     private CollisionHandler collisionHandler;
     public Vec3 oldPos;
@@ -120,5 +121,9 @@ public class PlayerController {
 
     public float getPlayerHeight() {
         return playerHeight;
+    }
+
+    public void setOnGround(boolean onGround) {
+        this.onGround = onGround;
     }
 }

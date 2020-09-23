@@ -21,7 +21,8 @@ import static java.lang.StrictMath.*;
 import static org.lwjgl.opengl.GL11.glRotatef;
 
 public class CameraMovement {
-    Vec3 cameraFront = new Vec3(0.0f, 0.0f, -1.0f);
+    private static final float sensitivity = 0.1f;
+    private Vec3 cameraFront = new Vec3(0.0f, 0.0f, -1.0f);
 
     private boolean firstMouse = false;
     private float lastX;
@@ -30,11 +31,11 @@ public class CameraMovement {
     private float pitch;
 
     public void mouseCallback(long l, double xPos, double yPos) {
+        // variable l is unused but always given by openGL so it is needed in the method signature
         if (GameWindow.paused) {
             return;
         }
 
-        // variable l is unused but always given by openGL so we need it in the method signature
         if (firstMouse) {
             lastX = (float) xPos;
             lastY = (float) yPos;
@@ -46,18 +47,18 @@ public class CameraMovement {
         lastX = (float) xPos;
         lastY = (float) yPos;
 
-        float sensitivity = 0.1f; // change this value to your liking
         xoffset *= sensitivity;
         yoffset *= sensitivity;
 
         yaw += xoffset;
         pitch += yoffset;
 
-        // make sure that pitch does not get out of bounds
-        if (pitch > 89.0f)
+        if (pitch > 89.0f) {
             pitch = 89.0f;
-        if (pitch < -89.0f)
+        }
+        if (pitch < -89.0f) {
             pitch = -89.0f;
+        }
 
         Vec3 front = new Vec3();
         front.x = (float) -(sin(toRadians(yaw)) * cos(toRadians(pitch)));

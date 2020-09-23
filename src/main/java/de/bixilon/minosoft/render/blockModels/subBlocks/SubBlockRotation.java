@@ -1,6 +1,6 @@
 /*
  * Codename Minosoft
- * Copyright (C) 2020 Moritz Zwerger
+ * Copyright (C) 2020 Lukas Eisenhauer
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -21,9 +21,9 @@ import static java.lang.StrictMath.cos;
 import static java.lang.StrictMath.sin;
 
 public class SubBlockRotation {
-    SubBlockPosition origin;
-    Axis direction;
-    float angle;
+    private final SubBlockPosition origin;
+    private Axis direction;
+    private final float angle;
 
     public SubBlockRotation(SubBlockPosition origin, Axis direction, float angle) {
         this.origin = origin;
@@ -35,15 +35,9 @@ public class SubBlockRotation {
         origin = new SubBlockPosition(rotation.get("origin").getAsJsonArray());
         String axis = rotation.get("axis").getAsString();
         switch (axis) {
-            case "x":
-                direction = Axis.X;
-                break;
-            case "y":
-                direction = Axis.Y;
-                break;
-            case "z":
-                direction = Axis.Z;
-                break;
+            case "x" -> direction = Axis.X;
+            case "y" -> direction = Axis.Y;
+            case "z" -> direction = Axis.Z;
         }
         angle = rotation.get("angle").getAsFloat();
     }
@@ -63,21 +57,21 @@ public class SubBlockRotation {
         SubBlockPosition transformed = SubBlockPosition.subtract(position, origin);
         Pair<Float, Float> rotated;
         switch (direction) {
-            case X:
+            case X -> {
                 rotated = rotate(transformed.y, transformed.z, angle);
                 transformed.y = rotated.getKey();
                 transformed.z = rotated.getValue();
-                break;
-            case Y:
+            }
+            case Y -> {
                 rotated = rotate(transformed.x, transformed.z, angle);
                 transformed.x = rotated.getKey();
                 transformed.z = rotated.getValue();
-                break;
-            case Z:
+            }
+            case Z -> {
                 rotated = rotate(transformed.x, transformed.y, angle);
                 transformed.x = rotated.getKey();
                 transformed.y = rotated.getValue();
-                break;
+            }
         }
         return SubBlockPosition.add(transformed, origin);
     }

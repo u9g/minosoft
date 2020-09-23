@@ -30,11 +30,11 @@ import java.util.HashSet;
 import static de.bixilon.minosoft.render.blockModels.specialModels.BlockModel.*;
 
 public class DoorModel implements BlockModelInterface {
-    HashSet<SubBlock> bottom;
-    HashSet<SubBlock> bottom_hinge;
+    private final HashSet<SubBlock> bottom;
+    private final HashSet<SubBlock> bottom_hinge;
 
-    HashSet<SubBlock> top;
-    HashSet<SubBlock> top_hinge;
+    private final HashSet<SubBlock> top;
+    private final HashSet<SubBlock> top_hinge;
 
     public DoorModel(JsonObject block, String mod) {
         bottom = BlockModelInterface.load(mod, block.get("bottom").getAsString());

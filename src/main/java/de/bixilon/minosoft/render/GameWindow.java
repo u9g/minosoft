@@ -30,7 +30,7 @@ public class GameWindow {
     private static Connection connection;
     private static PlayerController playerController;
 
-    static boolean running = false;
+    private static boolean running = false;
     public static boolean paused = false;
 
     public static void prepare() {

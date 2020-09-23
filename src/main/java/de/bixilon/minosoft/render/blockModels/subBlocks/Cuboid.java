@@ -32,7 +32,7 @@ public class Cuboid {
             FaceOrientation.NORTH, new int[]{5, 4, 0, 1}
     );
 
-    HashMap<FaceOrientation, SubBlockPosition[]> facePositionMap;
+    private final HashMap<FaceOrientation, SubBlockPosition[]> facePositionMap;
 
     public Cuboid(SubBlockPosition from, SubBlockPosition to, SubBlockRotation rotation) {
         SubBlockPosition[] positions = new SubBlockPosition[8];

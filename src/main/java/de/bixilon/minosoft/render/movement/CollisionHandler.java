@@ -23,9 +23,9 @@ import static de.bixilon.minosoft.render.utility.AdditionalMath.betterRound;
 import static de.bixilon.minosoft.render.utility.AdditionalMath.valuesBetween;
 
 public class CollisionHandler {
-    World world;
-    PlayerController controller;
-    BlockModelLoader modelLoader;
+    private final World world;
+    private final PlayerController controller;
+    private final BlockModelLoader modelLoader;
 
     public CollisionHandler(PlayerController controller) {
         world = GameWindow.getConnection().getPlayer().getWorld();
@@ -35,7 +35,7 @@ public class CollisionHandler {
 
     public void handleCollisions() {
         if (isPositionValid(controller.playerPos)) {
-            // we aren't collided with anything so the player Position does not have to be adjusted
+            // the player currently isn't colliding with with anything so the player Position does not have to be adjusted
             return;
         }
         xAxisCollision();
@@ -73,7 +73,7 @@ public class CollisionHandler {
         controller.playerVelocity.y = 0;
 
         if (deltaY < 0) {
-            controller.onGround = true;
+            controller.setOnGround(true);
         }
     }
 

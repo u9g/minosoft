@@ -32,7 +32,7 @@ public class WorldRenderer {
     private BlockModelLoader modelLoader;
 
     private LinkedBlockingQueue<Pair<ChunkLocation, Chunk>> queuedChunks;
-    Thread chunkLoadThread;
+    private Thread chunkLoadThread;
 
     public WorldRenderer() {
         faces = new HashMap<>();
