@@ -23,7 +23,6 @@ import de.bixilon.minosoft.render.blockModels.specialModels.*;
 import de.bixilon.minosoft.render.texture.TextureLoader;
 import org.apache.commons.collections.primitives.ArrayFloatList;
 
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -123,14 +122,11 @@ public class BlockModelLoader {
 
     public BlockModelInterface getBlockDescription(Block block) {
         HashMap<String, BlockModelInterface> modList = blockDescriptionMap.get(block.getMod());
-        if (modList == null || !modList.containsKey(block.getIdentifier())) {
-            throw new IllegalArgumentException(String.format("No block %s:%s found", block.getMod(), block.getIdentifier()));
-        }
         return modList.get(block.getIdentifier());
     }
 
     public boolean isFull(Block block) {
-        if (block == Blocks.nullBlock || block == null) {
+        if (block == null || block.equals(Blocks.nullBlock)) {
             return false;
         }
         BlockModelInterface description = getBlockDescription(block);

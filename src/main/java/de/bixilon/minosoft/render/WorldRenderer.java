@@ -20,20 +20,23 @@ import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import javafx.util.Pair;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import static de.bixilon.minosoft.render.blockModels.Face.RenderConstants.faceDir;
 import static org.lwjgl.opengl.GL11.*;
 
 public class WorldRenderer {
-    private final HashMap<BlockPosition, HashSet<Face>> faces;
+    private final ConcurrentHashMap<BlockPosition, HashSet<Face>> faces;
     private AssetsLoader assetsLoader;
 
     private LinkedBlockingQueue<Pair<ChunkLocation, Chunk>> queuedChunks;
 
     public WorldRenderer() {
-        faces = new HashMap<>();
+        faces = new ConcurrentHashMap<>();
     }
 
     public void init() {
@@ -85,12 +88,12 @@ public class WorldRenderer {
 
     public void prepareBlock(BlockPosition position, Block block) {
         if (block.equals(Blocks.nullBlock)) {
-            faces.put(position, null);
+            return;
         }
         HashMap<FaceOrientation, Boolean> adjacentBlocks = new HashMap<>();
 
         for (FaceOrientation orientation : FaceOrientation.values()) {
-            BlockPosition neighbourPos = position.add(faceDir[orientation.getId()]);
+            BlockPosition neighbourPos = position.add(faceDir[orientation.ordinal()]);
 
             if (neighbourPos.getY() >= 0 && neighbourPos.getY() <= 255) {
                 Block neighbourBlock = GameWindow.getConnection().getPlayer().getWorld().getBlock(neighbourPos);
@@ -100,22 +103,14 @@ public class WorldRenderer {
                 adjacentBlocks.put(orientation, false);
             }
         }
-        synchronized (faces) {
-            faces.put(position, assetsLoader.getBlockModelLoader().prepare(block, adjacentBlocks));
-        }
+        faces.put(position, assetsLoader.getBlockModelLoader().prepare(block, adjacentBlocks));
     }
 
     public void draw() {
         glPushMatrix();
         glBindTexture(GL_TEXTURE_2D, assetsLoader.getTextureLoader().getTextureID());
         glBegin(GL_QUADS);
-        synchronized (faces) {
-            for (Map.Entry<BlockPosition, HashSet<Face>> entry : faces.entrySet()) {
-                for (Face face : entry.getValue()) {
-                    face.draw(entry.getKey());
-                }
-            }
-        }
+        faces.forEach(((position, faces) -> faces.forEach((face) -> face.draw(position))));
         glEnd();
     }
 
