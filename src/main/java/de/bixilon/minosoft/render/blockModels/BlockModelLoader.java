@@ -100,6 +100,7 @@ public class BlockModelLoader {
                 case "crop" -> new CropModel(block, mod);
                 case "door" -> new DoorModel(block, mod);
                 case "fence" -> new FenceModel(block, mod);
+                case "mushroom" -> new MushroomModel(block, mod);
                 default -> new BlockModel(block, mod);
             };
             result.addAll(model.getAllTextures());
