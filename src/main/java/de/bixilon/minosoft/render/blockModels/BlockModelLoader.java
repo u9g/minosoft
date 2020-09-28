@@ -33,28 +33,35 @@ import static de.bixilon.minosoft.util.Util.readJsonAsset;
 
 public class BlockModelLoader {
     private final HashMap<String, HashMap<String, BlockModelInterface>> blockDescriptionMap;
-    private TextureLoader textureLoader;
+    private final HashMap<String, HashSet<String>> textures;
+    HashMap<String, HashMap<String, float[]>> tints;
 
     public BlockModelLoader() {
         blockDescriptionMap = new HashMap<>();
-        HashMap<String, HashMap<String, float[]>> tints = new HashMap<>();
-        HashMap<String, HashSet<String>> textures = new HashMap<>();
+        tints = new HashMap<>();
+        textures = new HashMap<>();
         try {
-                JsonObject json = readJsonAsset("mapping/blockModels.json");
-                String mod = "minecraft";
-                tints.put(mod, readTints(json));
-                textures.put(mod, loadModels(json.get("blocks").getAsJsonObject(), mod));
-            textureLoader = new TextureLoader(textures, tints);
-            applyTextures();
+            JsonObject json = readJsonAsset("mapping/blockModels.json");
+            String mod = "minecraft";
+            tints.put(mod, readTints(json));
+            textures.put(mod, loadModels(json.get("blocks").getAsJsonObject(), mod));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void applyTextures() {
+    public HashMap<String, HashMap<String, float[]>> getTints() {
+        return tints;
+    }
+
+    public HashMap<String, HashSet<String>> getTextures() {
+        return textures;
+    }
+
+    public void applyTextures(TextureLoader loader) {
         for (Map.Entry<String, HashMap<String, BlockModelInterface>> mod : blockDescriptionMap.entrySet()) {
             for (Map.Entry<String, BlockModelInterface> block : mod.getValue().entrySet()) {
-                block.getValue().applyTextures(mod.getKey(), textureLoader);
+                block.getValue().applyTextures(mod.getKey(), loader);
             }
         }
     }
@@ -116,7 +123,6 @@ public class BlockModelLoader {
 
     public BlockModelInterface getBlockDescription(Block block) {
         HashMap<String, BlockModelInterface> modList = blockDescriptionMap.get(block.getMod());
-
         if (modList == null || !modList.containsKey(block.getIdentifier())) {
             throw new IllegalArgumentException(String.format("No block %s:%s found", block.getMod(), block.getIdentifier()));
         }
@@ -140,9 +146,5 @@ public class BlockModelLoader {
             return new HashSet<>();
         }
         return description.prepare(block, adjacentBlocks);
-    }
-
-    public TextureLoader getTextureLoader() {
-        return textureLoader;
     }
 }

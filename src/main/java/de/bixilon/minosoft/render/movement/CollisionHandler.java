@@ -29,7 +29,7 @@ public class CollisionHandler {
 
     public CollisionHandler(PlayerController controller) {
         world = GameWindow.getConnection().getPlayer().getWorld();
-        modelLoader = GameWindow.getRenderer().getModelLoader();
+        modelLoader = GameWindow.getRenderer().getAssetsLoader().getBlockModelLoader();
         this.controller = controller;
     }
 

@@ -37,9 +37,9 @@ public class InFaceUV {
     }
 
     public void prepare(float texture) {
-        realU1 = texture + u1 * GameWindow.getRenderer().getModelLoader().getTextureLoader().getStep()
+        realU1 = texture + u1 * GameWindow.getRenderer().getAssetsLoader().getTextureLoader().getStep()
                 / texturePackRes;
-        realU2 = texture + u2 * GameWindow.getRenderer().getModelLoader().getTextureLoader().getStep()
+        realU2 = texture + u2 * GameWindow.getRenderer().getAssetsLoader().getTextureLoader().getStep()
                 / texturePackRes;
         realV1 = (float) v1 / texturePackRes;
         realV2 = (float) v2 / texturePackRes;

@@ -3735,6 +3735,22 @@
     },
     "end_gateway": {
     },
+    "command_block": {
+      "states": [
+        {
+          "properties": {
+            "conditional": "false"
+          },
+          "blockModel": "command_block"
+        },
+        {
+          "properties": {
+            "conditional": "true"
+          },
+          "blockModel": "command_block_conditional"
+        }
+      ]
+    },
     "repeating_command_block": {
       "states": [
         {
@@ -4361,28 +4377,6 @@
       "straight": "diorite_stairs",
       "inner": "diorite_stairs_inner",
       "outer": "diorite_stairs_outer"
-    },
-    "polished_granite_slab": {
-      "states": [
-        {
-          "properties": {
-            "type": "top"
-          },
-          "blockModel": "polished_granite_slab_top"
-        },
-        {
-          "properties": {
-            "type": "bottom"
-          },
-          "blockModel": "polished_granite_slab"
-        },
-        {
-          "properties": {
-            "type": "double"
-          },
-          "blockModel": "polished_granite"
-        }
-      ]
     },
     "smooth_red_sandstone_slab": {
       "states": [

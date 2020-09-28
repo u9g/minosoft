@@ -16,7 +16,6 @@ package de.bixilon.minosoft.render;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Blocks;
 import de.bixilon.minosoft.game.datatypes.world.*;
-import de.bixilon.minosoft.render.blockModels.BlockModelLoader;
 import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import javafx.util.Pair;
@@ -29,10 +28,9 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class WorldRenderer {
     private final HashMap<BlockPosition, HashSet<Face>> faces;
-    private BlockModelLoader modelLoader;
+    private AssetsLoader assetsLoader;
 
     private LinkedBlockingQueue<Pair<ChunkLocation, Chunk>> queuedChunks;
-    private Thread chunkLoadThread;
 
     public WorldRenderer() {
         faces = new HashMap<>();
@@ -40,7 +38,7 @@ public class WorldRenderer {
 
     public void init() {
         queuedChunks = new LinkedBlockingQueue<>();
-        chunkLoadThread = new Thread(() -> {
+        Thread chunkLoadThread = new Thread(() -> {
             while (GameWindow.getConnection() == null) {
                 try {
                     Thread.sleep(100);
@@ -59,7 +57,7 @@ public class WorldRenderer {
         });
         chunkLoadThread.setName(String.format("%d/ChunkLoading", 0)); // TODO: connection ID
         chunkLoadThread.start();
-        modelLoader = new BlockModelLoader();
+        assetsLoader = new AssetsLoader();
     }
 
     public void queueChunkBulk(HashMap<ChunkLocation, Chunk> chunks) {
@@ -94,22 +92,22 @@ public class WorldRenderer {
         for (FaceOrientation orientation : FaceOrientation.values()) {
             BlockPosition neighbourPos = position.add(faceDir[orientation.getId()]);
 
-            if (neighbourPos.getY() >= 0) {
+            if (neighbourPos.getY() >= 0 && neighbourPos.getY() <= 255) {
                 Block neighbourBlock = GameWindow.getConnection().getPlayer().getWorld().getBlock(neighbourPos);
-                boolean isNeighbourFull = modelLoader.isFull(neighbourBlock);
+                boolean isNeighbourFull = assetsLoader.getBlockModelLoader().isFull(neighbourBlock);
                 adjacentBlocks.put(orientation, isNeighbourFull);
             } else {
                 adjacentBlocks.put(orientation, false);
             }
         }
         synchronized (faces) {
-            faces.put(position, modelLoader.prepare(block, adjacentBlocks));
+            faces.put(position, assetsLoader.getBlockModelLoader().prepare(block, adjacentBlocks));
         }
     }
 
     public void draw() {
         glPushMatrix();
-        glBindTexture(GL_TEXTURE_2D, modelLoader.getTextureLoader().getTextureID());
+        glBindTexture(GL_TEXTURE_2D, assetsLoader.getTextureLoader().getTextureID());
         glBegin(GL_QUADS);
         synchronized (faces) {
             for (Map.Entry<BlockPosition, HashSet<Face>> entry : faces.entrySet()) {
@@ -119,10 +117,9 @@ public class WorldRenderer {
             }
         }
         glEnd();
-        glPopMatrix();
     }
 
-    public BlockModelLoader getModelLoader() {
-        return modelLoader;
+    public AssetsLoader getAssetsLoader() {
+        return assetsLoader;
     }
 }
