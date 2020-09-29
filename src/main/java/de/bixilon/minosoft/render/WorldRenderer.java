@@ -14,7 +14,6 @@
 package de.bixilon.minosoft.render;
 
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
-import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Blocks;
 import de.bixilon.minosoft.game.datatypes.world.*;
 import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
@@ -22,22 +21,17 @@ import javafx.util.Pair;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import static de.bixilon.minosoft.render.blockModels.Face.RenderConstants.faceDir;
 import static org.lwjgl.opengl.GL11.*;
 
 public class WorldRenderer {
-    private final ConcurrentHashMap<BlockPosition, HashSet<Face>> faces;
+    private final ConcurrentHashMap<ChunkLocation, ConcurrentHashMap<Byte, ConcurrentHashMap<ChunkNibbleLocation, HashSet<Face>>>> faces = new ConcurrentHashMap<>();
     private AssetsLoader assetsLoader;
 
     private LinkedBlockingQueue<Pair<ChunkLocation, Chunk>> queuedChunks;
 
-    public WorldRenderer() {
-        faces = new ConcurrentHashMap<>();
-    }
 
     public void init() {
         queuedChunks = new LinkedBlockingQueue<>();
@@ -64,9 +58,7 @@ public class WorldRenderer {
     }
 
     public void queueChunkBulk(HashMap<ChunkLocation, Chunk> chunks) {
-        for (Map.Entry<ChunkLocation, Chunk> set : chunks.entrySet()) {
-            queueChunk(set.getKey(), set.getValue());
-        }
+        chunks.forEach(this::queueChunk);
     }
 
     public void queueChunk(ChunkLocation location, Chunk chunk) {
@@ -74,43 +66,65 @@ public class WorldRenderer {
     }
 
     public void prepareChunk(ChunkLocation location, Chunk chunk) {
+        // clear or create current chunk
+        faces.put(location, new ConcurrentHashMap<>());
         int xOffset = location.getX() * 16;
         int zOffset = location.getZ() * 16;
-        for (Map.Entry<Byte, ChunkNibble> set : chunk.getNibbles().entrySet()) {
-            for (Map.Entry<ChunkNibbleLocation, Block> blockEntry : set.getValue().getBlocks().entrySet()) {
-                prepareBlock(new BlockPosition(blockEntry.getKey().getX() + xOffset,
-                                (short) (blockEntry.getKey().getY() + set.getKey() * 16),
-                                blockEntry.getKey().getZ() + zOffset),
-                        blockEntry.getValue());
-            }
-        }
+        chunk.getNibbles().forEach(((height, chunkNibble) -> {
+            prepareChunkNibble(location, height, chunkNibble);
+        }));
     }
 
-    public void prepareBlock(BlockPosition position, Block block) {
-        if (block.equals(Blocks.nullBlock)) {
-            return;
-        }
-        HashMap<FaceOrientation, Boolean> adjacentBlocks = new HashMap<>();
+    public void prepareChunkNibble(ChunkLocation chunkLocation, byte height, ChunkNibble nibble) {
+        // clear or create current chunk nibble
+        ConcurrentHashMap<ChunkNibbleLocation, HashSet<Face>> nibbleMap = new ConcurrentHashMap<>();
+        faces.get(chunkLocation).put(height, nibbleMap);
+        int xOffset = chunkLocation.getX() * 16;
+        int zOffset = chunkLocation.getZ() * 16;
+        HashMap<ChunkNibbleLocation, Block> nibbleBlocks = nibble.getBlocks();
+        nibbleBlocks.forEach((location, block) -> {
+            HashSet<FaceOrientation> facesToDraw = new HashSet<>();
 
-        for (FaceOrientation orientation : FaceOrientation.values()) {
-            BlockPosition neighbourPos = position.add(faceDir[orientation.ordinal()]);
+            for (FaceOrientation orientation : FaceOrientation.values()) {
+                if ((location.getX() == 0 && orientation == FaceOrientation.WEST) || (location.getX() == 15 && orientation == FaceOrientation.EAST)) {
+                    facesToDraw.add(orientation);
+                    continue;
+                }
+                if ((location.getY() == 0 && orientation == FaceOrientation.DOWN) || (location.getY() == 15 && orientation == FaceOrientation.UP)) {
+                    facesToDraw.add(orientation);
+                    continue;
+                }
+                if ((location.getZ() == 0 && orientation == FaceOrientation.NORTH) || (location.getZ() == 15 && orientation == FaceOrientation.SOUTH)) {
+                    facesToDraw.add(orientation);
+                    continue;
+                }
+                //BlockPosition neighbourPos = location.add(faceDir[orientation.ordinal()]);
+                boolean isNeighbourFull = switch (orientation) {
+                    case DOWN -> assetsLoader.getBlockModelLoader().isFull(nibbleBlocks.get(new ChunkNibbleLocation(location.getX(), location.getY() - 1, location.getZ())));
+                    case UP -> assetsLoader.getBlockModelLoader().isFull(nibbleBlocks.get(new ChunkNibbleLocation(location.getX(), location.getY() + 1, location.getZ())));
+                    case WEST -> assetsLoader.getBlockModelLoader().isFull(nibbleBlocks.get(new ChunkNibbleLocation(location.getX() - 1, location.getY(), location.getZ())));
+                    case EAST -> assetsLoader.getBlockModelLoader().isFull(nibbleBlocks.get(new ChunkNibbleLocation(location.getX() + 1, location.getY(), location.getZ())));
+                    case NORTH -> assetsLoader.getBlockModelLoader().isFull(nibbleBlocks.get(new ChunkNibbleLocation(location.getX(), location.getY(), location.getZ() - 1)));
+                    case SOUTH -> assetsLoader.getBlockModelLoader().isFull(nibbleBlocks.get(new ChunkNibbleLocation(location.getX(), location.getY(), location.getZ() + 1)));
+                };
+                if (!isNeighbourFull) {
+                    facesToDraw.add(orientation);
+                }
 
-            if (neighbourPos.getY() >= 0 && neighbourPos.getY() <= 255) {
-                Block neighbourBlock = GameWindow.getConnection().getPlayer().getWorld().getBlock(neighbourPos);
-                boolean isNeighbourFull = assetsLoader.getBlockModelLoader().isFull(neighbourBlock);
-                adjacentBlocks.put(orientation, isNeighbourFull);
-            } else {
-                adjacentBlocks.put(orientation, false);
             }
-        }
-        faces.put(position, assetsLoader.getBlockModelLoader().prepare(block, adjacentBlocks));
+            if (facesToDraw.size() > 0) {
+                nibbleMap.put(location, assetsLoader.getBlockModelLoader().prepare(block, facesToDraw));
+            }
+
+        });
     }
+
 
     public void draw() {
         glPushMatrix();
         glBindTexture(GL_TEXTURE_2D, assetsLoader.getTextureLoader().getTextureID());
         glBegin(GL_QUADS);
-        faces.forEach(((position, faces) -> faces.forEach((face) -> face.draw(position))));
+        faces.forEach((chunkLocation, nibbleMap) -> nibbleMap.forEach((height, faceMap) -> faceMap.forEach(((nibbleLocation, faces) -> faces.forEach((face -> face.draw(new BlockPosition(chunkLocation, height, nibbleLocation))))))));
         glEnd();
     }
 

@@ -23,7 +23,6 @@ import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlock;
 import de.bixilon.minosoft.render.texture.TextureLoader;
 
-import java.util.HashMap;
 import java.util.HashSet;
 
 public class StairsModel implements BlockModelInterface {
@@ -38,7 +37,7 @@ public class StairsModel implements BlockModelInterface {
     }
 
     @Override
-    public HashSet<Face> prepare(Block block, HashMap<FaceOrientation, Boolean> adjacentBlocks) {
+    public HashSet<Face> prepare(Block block, HashSet<FaceOrientation> facesToDraw) {
         HashSet<BlockProperties> properties = block.getProperties();
 
         for (BlockProperties property : properties) {

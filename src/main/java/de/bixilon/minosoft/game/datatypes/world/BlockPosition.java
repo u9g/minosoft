@@ -33,6 +33,12 @@ public class BlockPosition {
         z = (int) testPosition.z;
     }
 
+    public BlockPosition(ChunkLocation chunkLocation, Byte height, ChunkNibbleLocation nibbleLocation) {
+        this.x = chunkLocation.getX() * 16 + nibbleLocation.getX();
+        this.y = height * 16 + nibbleLocation.getY();
+        this.z = chunkLocation.getZ() * 16 + nibbleLocation.getZ();
+    }
+
     public int getX() {
         return x;
     }

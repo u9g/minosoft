@@ -25,25 +25,21 @@ import java.util.HashSet;
 import java.util.Map;
 
 public class SubBlock {
-    private SubBlockRotation rotation;
-
     private final HashMap<FaceOrientation, Float> textureCoordinates;
     private final HashMap<FaceOrientation, String> textures;
     private final HashMap<FaceOrientation, Integer> textureRotations;
-    private final HashMap<FaceOrientation, Boolean> cullFaceTextures;
-
+    private final HashSet<FaceOrientation> cullFaceTextures;
     private final HashMap<FaceOrientation, InFaceUV> uv;
-
     private final Cuboid cuboid;
-
     private final boolean isFull;
+    private SubBlockRotation rotation;
 
     public SubBlock(JsonObject json, HashMap<String, String> variables) {
         uv = new HashMap<>();
         textures = new HashMap<>();
         textureRotations = new HashMap<>();
         textureCoordinates = new HashMap<>();
-        cullFaceTextures = new HashMap<>();
+        cullFaceTextures = new HashSet<>();
 
         SubBlockPosition from = new SubBlockPosition(json.getAsJsonArray("from"));
         SubBlockPosition to = new SubBlockPosition(json.getAsJsonArray("to"));
@@ -110,25 +106,22 @@ public class SubBlock {
         textures.put(orientation, textureName);
     }
 
-    public HashSet<Face> getFaces(Block block, HashMap<FaceOrientation, Boolean> adjacentBlocks) {
+    public HashSet<Face> getFaces(Block block, HashSet<FaceOrientation> facesToDraw) {
         HashSet<Face> result = new HashSet<>();
-        for (FaceOrientation orientation : FaceOrientation.values()) {
-            if (!textureCoordinates.containsKey(orientation)) {
-                continue;
+        facesToDraw.forEach((faceOrientation -> {
+            Face face = prepareFace(faceOrientation, block);
+            if (face != null) {
+                result.add(face);
             }
-            result.add(prepareFace(orientation, block, adjacentBlocks));
-        }
+        }));
         return result;
     }
 
-    private Face prepareFace(FaceOrientation faceDirection, Block block,
-                             HashMap<FaceOrientation, Boolean> adjacentBlocks) {
-        Boolean cullface = cullFaceTextures.get(faceDirection);
-        if (adjacentBlocks.get(faceDirection) && cullface != null && !cullface) {
-            return new Face();
+    private Face prepareFace(FaceOrientation faceDirection, Block block) {
+        if (cullFaceTextures.contains(faceDirection) || !textureCoordinates.containsKey(faceDirection)) {
+            return null;
         }
-        return new Face(textureCoordinates.get(faceDirection), uv.get(faceDirection),
-                cuboid.getFacePositions(faceDirection, block), textureRotations.get(faceDirection));
+        return new Face(textureCoordinates.get(faceDirection), uv.get(faceDirection), cuboid.getFacePositions(faceDirection, block), textureRotations.get(faceDirection));
     }
 
     public boolean isFull() {

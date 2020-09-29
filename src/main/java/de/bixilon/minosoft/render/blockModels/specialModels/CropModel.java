@@ -26,7 +26,7 @@ import de.bixilon.minosoft.render.texture.TextureLoader;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import static de.bixilon.minosoft.render.blockModels.specialModels.BlockModel.*;
+import static de.bixilon.minosoft.render.blockModels.specialModels.BlockModel.prepareBlockState;
 
 public class CropModel implements BlockModelInterface {
     private final HashMap<String, HashSet<SubBlock>> modelMap;
@@ -41,10 +41,10 @@ public class CropModel implements BlockModelInterface {
         }
     }
 
-    public HashSet<Face> prepare(Block block, HashMap<FaceOrientation, Boolean> adjacentBlocks) {
+    public HashSet<Face> prepare(Block block, HashSet<FaceOrientation> facesToDraw) {
         for (BlockProperties property : block.getProperties()) {
             if (modelMap.containsKey(property.name())) {
-                return prepareBlockState(modelMap.get(property.name()), adjacentBlocks, block);
+                return prepareBlockState(modelMap.get(property.name()), facesToDraw, block);
             }
         }
         Log.warn("failed to prepare block: " + block.toString());

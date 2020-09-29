@@ -23,7 +23,6 @@ import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlock;
 import de.bixilon.minosoft.render.texture.TextureLoader;
 
-import java.util.HashMap;
 import java.util.HashSet;
 
 public class MushroomModel implements BlockModelInterface {
@@ -34,7 +33,7 @@ public class MushroomModel implements BlockModelInterface {
     }
 
     @Override
-    public HashSet<Face> prepare(Block block, HashMap<FaceOrientation, Boolean> adjacentBlocks) {
+    public HashSet<Face> prepare(Block block, HashSet<FaceOrientation> facesToDraw) {
         HashSet<Face> result = new HashSet<>();
         if (block.getProperties().contains(BlockProperties.DOWN)) {
             result.addAll(BlockModelInterface.prepareState(subBlocks, BlockRotations.DOWN));

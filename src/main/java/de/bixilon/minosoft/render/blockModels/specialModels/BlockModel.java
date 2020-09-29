@@ -16,7 +16,6 @@ package de.bixilon.minosoft.render.blockModels.specialModels;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
-import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.render.blockModels.BlockConfiguration;
 import de.bixilon.minosoft.render.blockModels.BlockConfigurationTrue;
 import de.bixilon.minosoft.render.blockModels.BlockModelInterface;
@@ -51,11 +50,10 @@ public class BlockModel implements BlockModelInterface {
         isFull = true;
     }
 
-    public static HashSet<Face> prepareBlockState(HashSet<SubBlock> subBlocks,
-                                                  HashMap<FaceOrientation, Boolean> adjacentBlocks, Block block) {
+    public static HashSet<Face> prepareBlockState(HashSet<SubBlock> subBlocks, HashSet<FaceOrientation> facesToDraw, Block block) {
         HashSet<Face> result = new HashSet<>();
         for (SubBlock subBlock : subBlocks) {
-            result.addAll(subBlock.getFaces(block, adjacentBlocks));
+            result.addAll(subBlock.getFaces(block, facesToDraw));
         }
         return result;
     }
@@ -64,14 +62,13 @@ public class BlockModel implements BlockModelInterface {
         return isFull;
     }
 
-    public HashSet<Face> prepare(Block block, HashMap<FaceOrientation, Boolean> adjacentBlocks) {
+    public HashSet<Face> prepare(Block block, HashSet<FaceOrientation> facesToDraw) {
         for (Map.Entry<BlockConfiguration, HashSet<SubBlock>> entry : blockConfigurationStates.entrySet()) {
             if (entry.getKey().contains(block)) {
-                return prepareBlockState(entry.getValue(), adjacentBlocks, block);
+                return prepareBlockState(entry.getValue(), facesToDraw, block);
             }
         }
-        Log.warn("no matching blockConfiguration found! Block: " + block.toString());
-        return new HashSet<>();
+        throw new RuntimeException("No matching blockConfiguration found! Block: " + block.toString());
     }
 
     public HashSet<String> getAllTextures() {

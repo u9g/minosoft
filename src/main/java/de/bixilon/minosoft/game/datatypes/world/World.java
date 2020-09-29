@@ -16,8 +16,8 @@ package de.bixilon.minosoft.game.datatypes.world;
 import de.bixilon.minosoft.game.datatypes.entities.Entity;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Blocks;
-import de.bixilon.minosoft.render.GameWindow;
 import de.bixilon.minosoft.game.datatypes.objectLoader.dimensions.Dimension;
+import de.bixilon.minosoft.render.GameWindow;
 import de.bixilon.minosoft.util.nbt.tag.CompoundTag;
 
 import java.util.HashMap;
@@ -65,7 +65,7 @@ public class World {
     public void setBlock(BlockPosition pos, Block block) {
         if (getChunk(pos.getChunkLocation()) != null) {
             getChunk(pos.getChunkLocation()).setBlock(pos.getInChunkLocation(), block);
-            GameWindow.getRenderer().prepareBlock(pos, block);
+            GameWindow.getRenderer().prepareChunkNibble(pos.getChunkLocation(), (byte) (pos.getY() / 16), getChunk(pos.getChunkLocation()).getNibbles().get((byte) (pos.getY() / 16)));
         }
         // do nothing if chunk is unloaded
     }

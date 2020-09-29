@@ -129,18 +129,10 @@ public class BlockModelLoader {
         if (block == null || block.equals(Blocks.nullBlock)) {
             return false;
         }
-        BlockModelInterface description = getBlockDescription(block);
-        if (description == null) {
-            return false;
-        }
-        return description.isFull();
+        return getBlockDescription(block).isFull();
     }
 
-    public HashSet<Face> prepare(Block block, HashMap<FaceOrientation, Boolean> adjacentBlocks) {
-        BlockModelInterface description = getBlockDescription(block);
-        if (description == null) {
-            return new HashSet<>();
-        }
-        return description.prepare(block, adjacentBlocks);
+    public HashSet<Face> prepare(Block block, HashSet<FaceOrientation> facesToDraw) {
+        return getBlockDescription(block).prepare(block, facesToDraw);
     }
 }

@@ -24,10 +24,9 @@ import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlock;
 import de.bixilon.minosoft.render.texture.TextureLoader;
 
-import java.util.HashMap;
 import java.util.HashSet;
 
-import static de.bixilon.minosoft.render.blockModels.specialModels.BlockModel.*;
+import static de.bixilon.minosoft.render.blockModels.specialModels.BlockModel.prepareBlockState;
 
 public class DoorModel implements BlockModelInterface {
     private final HashSet<SubBlock> bottom;
@@ -44,36 +43,35 @@ public class DoorModel implements BlockModelInterface {
         top_hinge = BlockModelInterface.load(mod, block.get("top_hinge").getAsString());
     }
 
-    public HashSet<Face> prepare(Block block, HashMap<FaceOrientation, Boolean> adjacentBlocks) {
-        if (block.getProperties().contains(BlockProperties.HINGE_LEFT)) {
-            return prepareHinge(bottom, top, block, adjacentBlocks);
-        }
-        return prepareHinge(bottom_hinge, top_hinge, block, adjacentBlocks);
-    }
-
     private static HashSet<Face> prepareHinge(HashSet<SubBlock> bottom, HashSet<SubBlock> top, Block block,
-                                       HashMap<FaceOrientation, Boolean> adjacentBlocks) {
+                                              HashSet<FaceOrientation> adjacentBlocks) {
         if (block.getProperties().contains(BlockProperties.OPEN)) {
             return prepareHalf(bottom, top, block, adjacentBlocks,
                     rotationAdjust.inverse().get(block.getRotation()));
         } else {
-            return prepareHalf(bottom,top,  block, adjacentBlocks, block.getRotation());
+            return prepareHalf(bottom, top, block, adjacentBlocks, block.getRotation());
         }
     }
 
     private static HashSet<Face> prepareHalf(HashSet<SubBlock> bottom, HashSet<SubBlock> top,
-                                             Block block, HashMap<FaceOrientation, Boolean> adjacentBlocks,
+                                             Block block, HashSet<FaceOrientation> adjacentBlocks,
                                              BlockRotations rotation) {
         if (block.getProperties().contains(BlockProperties.HALF_LOWER)) {
             return prepareBlockState(bottom, adjacentBlocks, new Block("", "",
                     rotation));
-        }
-        else if (block.getProperties().contains(BlockProperties.HALF_UPPER)) {
+        } else if (block.getProperties().contains(BlockProperties.HALF_UPPER)) {
             return prepareBlockState(top, adjacentBlocks, new Block("", "",
                     rotation));
         }
         Log.warn("now");
         return null;
+    }
+
+    public HashSet<Face> prepare(Block block, HashSet<FaceOrientation> facesToDraw) {
+        if (block.getProperties().contains(BlockProperties.HINGE_LEFT)) {
+            return prepareHinge(bottom, top, block, facesToDraw);
+        }
+        return prepareHinge(bottom_hinge, top_hinge, block, facesToDraw);
     }
 
     public boolean isFull() {

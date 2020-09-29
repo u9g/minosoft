@@ -33,7 +33,8 @@ import java.util.Map;
 import static de.bixilon.minosoft.util.Util.readJsonFromFile;
 
 public interface BlockModelInterface {
-    HashSet<Face> prepare(Block block, HashMap<FaceOrientation, Boolean> adjacentBlocks);
+    HashSet<Face> prepare(Block block, HashSet<FaceOrientation> facesToDraw);
+
     boolean isFull();
     HashSet<String> getAllTextures();
     void applyTextures(String mod, TextureLoader loader);
