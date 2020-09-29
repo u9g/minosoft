@@ -15,6 +15,7 @@ package de.bixilon.minosoft.render;
 
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.world.*;
+import de.bixilon.minosoft.protocol.network.Connection;
 import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import javafx.util.Pair;
@@ -35,14 +36,11 @@ public class WorldRenderer {
 
     public void init() {
         queuedChunks = new LinkedBlockingQueue<>();
+        assetsLoader = new AssetsLoader();
+    }
+
+    public void startChunkPreparation(Connection connection) {
         Thread chunkLoadThread = new Thread(() -> {
-            while (GameWindow.getConnection() == null) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
             while (true) {
                 try {
                     Pair<ChunkLocation, Chunk> current = queuedChunks.take();
@@ -52,9 +50,8 @@ public class WorldRenderer {
                 }
             }
         });
-        chunkLoadThread.setName(String.format("%d/ChunkLoading", 0)); // TODO: connection ID
+        chunkLoadThread.setName(String.format("%d/ChunkLoading", connection.getConnectionId()));
         chunkLoadThread.start();
-        assetsLoader = new AssetsLoader();
     }
 
     public void queueChunkBulk(HashMap<ChunkLocation, Chunk> chunks) {
@@ -68,19 +65,13 @@ public class WorldRenderer {
     public void prepareChunk(ChunkLocation location, Chunk chunk) {
         // clear or create current chunk
         faces.put(location, new ConcurrentHashMap<>());
-        int xOffset = location.getX() * 16;
-        int zOffset = location.getZ() * 16;
-        chunk.getNibbles().forEach(((height, chunkNibble) -> {
-            prepareChunkNibble(location, height, chunkNibble);
-        }));
+        chunk.getNibbles().forEach(((height, chunkNibble) -> prepareChunkNibble(location, height, chunkNibble)));
     }
 
     public void prepareChunkNibble(ChunkLocation chunkLocation, byte height, ChunkNibble nibble) {
         // clear or create current chunk nibble
         ConcurrentHashMap<ChunkNibbleLocation, HashSet<Face>> nibbleMap = new ConcurrentHashMap<>();
         faces.get(chunkLocation).put(height, nibbleMap);
-        int xOffset = chunkLocation.getX() * 16;
-        int zOffset = chunkLocation.getZ() * 16;
         HashMap<ChunkNibbleLocation, Block> nibbleBlocks = nibble.getBlocks();
         nibbleBlocks.forEach((location, block) -> {
             HashSet<FaceOrientation> facesToDraw = new HashSet<>();
