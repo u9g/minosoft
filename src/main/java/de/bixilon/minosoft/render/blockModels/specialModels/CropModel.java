@@ -45,7 +45,6 @@ public class CropModel implements BlockModelInterface {
                 return prepareBlockState(modelMap.get(property.name()), facesToDraw, block, position);
             }
         }
-        throw new RuntimeException("failed to prepare block: " + block.toString());
         throw new RuntimeException("Failed to prepare block: " + block.toString());
     }
 
