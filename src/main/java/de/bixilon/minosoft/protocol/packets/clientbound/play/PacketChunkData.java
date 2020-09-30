@@ -24,10 +24,10 @@ import de.bixilon.minosoft.util.ChunkUtil;
 import de.bixilon.minosoft.util.Util;
 import de.bixilon.minosoft.util.nbt.tag.CompoundTag;
 
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PacketChunkData implements ClientboundPacket {
-    final HashMap<BlockPosition, CompoundTag> blockEntities = new HashMap<>();
+    final ConcurrentHashMap<BlockPosition, CompoundTag> blockEntities = new ConcurrentHashMap<>();
     ChunkLocation location;
     Chunk chunk;
     CompoundTag heightMap;
@@ -122,7 +122,7 @@ public class PacketChunkData implements ClientboundPacket {
         return chunk;
     }
 
-    public HashMap<BlockPosition, CompoundTag> getBlockEntities() {
+    public ConcurrentHashMap<BlockPosition, CompoundTag> getBlockEntities() {
         return blockEntities;
     }
 

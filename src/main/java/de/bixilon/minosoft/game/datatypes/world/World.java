@@ -17,20 +17,20 @@ import de.bixilon.minosoft.game.datatypes.entities.Entity;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Blocks;
 import de.bixilon.minosoft.game.datatypes.objectLoader.dimensions.Dimension;
-import de.bixilon.minosoft.render.GameWindow;
 import de.bixilon.minosoft.util.nbt.tag.CompoundTag;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Collection of ChunkColumns
  */
 public class World {
-    final HashMap<ChunkLocation, Chunk> chunks = new HashMap<>();
-    final HashMap<Integer, Entity> entities = new HashMap<>();
+    final ConcurrentHashMap<ChunkLocation, Chunk> chunks = new ConcurrentHashMap<>();
+    final ConcurrentHashMap<Integer, Entity> entities = new ConcurrentHashMap<>();
     final String name;
-    final HashMap<BlockPosition, CompoundTag> blockEntityMeta = new HashMap<>();
+    final ConcurrentHashMap<BlockPosition, CompoundTag> blockEntityMeta = new ConcurrentHashMap<>();
     boolean hardcore;
     boolean raining;
     Dimension dimension; // used for sky color, etc
@@ -47,7 +47,7 @@ public class World {
         return chunks.get(loc);
     }
 
-    public HashMap<ChunkLocation, Chunk> getAllChunks() {
+    public ConcurrentHashMap<ChunkLocation, Chunk> getAllChunks() {
         return chunks;
     }
 
@@ -65,7 +65,6 @@ public class World {
     public void setBlock(BlockPosition pos, Block block) {
         if (getChunk(pos.getChunkLocation()) != null) {
             getChunk(pos.getChunkLocation()).setBlock(pos.getInChunkLocation(), block);
-            GameWindow.getRenderer().prepareChunkNibble(pos.getChunkLocation(), (byte) (pos.getY() / 16), getChunk(pos.getChunkLocation()).getNibbles().get((byte) (pos.getY() / 16)));
         }
         // do nothing if chunk is unloaded
     }
@@ -76,14 +75,10 @@ public class World {
 
     public void setChunk(ChunkLocation location, Chunk chunk) {
         chunks.put(location, chunk);
-        GameWindow.getRenderer().queueChunk(location, chunk);
     }
 
     public void setChunks(HashMap<ChunkLocation, Chunk> chunkMap) {
-        for (Map.Entry<ChunkLocation, Chunk> set : chunkMap.entrySet()) {
-            chunks.put(set.getKey(), set.getValue());
-        }
-        GameWindow.getRenderer().queueChunkBulk(chunkMap);
+        chunkMap.forEach(chunks::put);
     }
 
     public boolean isHardcore() {
@@ -135,7 +130,7 @@ public class World {
         return blockEntityMeta.get(position);
     }
 
-    public void setBlockEntityData(HashMap<BlockPosition, CompoundTag> blockEntities) {
+    public void setBlockEntityData(ConcurrentHashMap<BlockPosition, CompoundTag> blockEntities) {
         for (Map.Entry<BlockPosition, CompoundTag> entrySet : blockEntities.entrySet()) {
             blockEntityMeta.put(entrySet.getKey(), entrySet.getValue());
         }

@@ -22,8 +22,10 @@ import javafx.util.Pair;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -33,6 +35,11 @@ public class WorldRenderer {
 
     private LinkedBlockingQueue<Pair<ChunkLocation, Chunk>> queuedChunks;
 
+    public int getCountOfFaces() {
+        AtomicInteger count = new AtomicInteger();
+        faces.forEach((chunkLocation, nibbleMap) -> nibbleMap.forEach((height, faceMap) -> faceMap.forEach(((nibbleLocation, faces) -> faces.forEach((face -> count.incrementAndGet()))))));
+        return count.get();
+    }
 
     public void init() {
         queuedChunks = new LinkedBlockingQueue<>();
@@ -44,7 +51,8 @@ public class WorldRenderer {
             while (true) {
                 try {
                     Pair<ChunkLocation, Chunk> current = queuedChunks.take();
-                    prepareChunk(current.getKey(), current.getValue());
+                    prepareChunk(current.getKey(), current.getValue(), true);
+                    //Log.verbose(String.format("Count of faces: %d", getCountOfFaces()));
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -62,52 +70,113 @@ public class WorldRenderer {
         queuedChunks.add(new Pair<>(location, chunk));
     }
 
-    public void prepareChunk(ChunkLocation location, Chunk chunk) {
+    public void prepareChunk(ChunkLocation location, Chunk chunk, boolean checkEdges) {
         // clear or create current chunk
-        faces.put(location, new ConcurrentHashMap<>());
-        chunk.getNibbles().forEach(((height, chunkNibble) -> prepareChunkNibble(location, height, chunkNibble)));
+        ConcurrentHashMap<Byte, ConcurrentHashMap<ChunkNibbleLocation, HashSet<Face>>> chunkFaces = new ConcurrentHashMap<>();
+        chunk.getNibbles().forEach(((height, chunkNibble) -> chunkFaces.put(height, getFacesForChunkNibble(location, height, chunkNibble))));
+        faces.put(location, chunkFaces);
+        if (!checkEdges) {
+            return;
+        }
+        //ToDo
+
     }
 
-    public void prepareChunkNibble(ChunkLocation chunkLocation, byte height, ChunkNibble nibble) {
+    public ConcurrentHashMap<ChunkNibbleLocation, HashSet<Face>> getFacesForChunkNibble(ChunkLocation chunkLocation, byte sectionHeight, ChunkNibble nibble) {
+        ConcurrentHashMap<ChunkLocation, Chunk> world = GameWindow.getConnection().getPlayer().getWorld().getAllChunks();
         // clear or create current chunk nibble
         ConcurrentHashMap<ChunkNibbleLocation, HashSet<Face>> nibbleMap = new ConcurrentHashMap<>();
-        faces.get(chunkLocation).put(height, nibbleMap);
-        HashMap<ChunkNibbleLocation, Block> nibbleBlocks = nibble.getBlocks();
-        nibbleBlocks.forEach((location, block) -> {
+        ConcurrentHashMap<ChunkNibbleLocation, Block> nibbleBlocks = nibble.getBlocks();
+        for (Map.Entry<ChunkNibbleLocation, Block> entry : nibbleBlocks.entrySet()) {
+            ChunkNibbleLocation location = entry.getKey();
+            Block block = entry.getValue();
             HashSet<FaceOrientation> facesToDraw = new HashSet<>();
 
             for (FaceOrientation orientation : FaceOrientation.values()) {
-                if ((location.getX() == 0 && orientation == FaceOrientation.WEST) || (location.getX() == 15 && orientation == FaceOrientation.EAST)) {
-                    facesToDraw.add(orientation);
-                    continue;
-                }
-                if ((location.getY() == 0 && orientation == FaceOrientation.DOWN) || (location.getY() == 15 && orientation == FaceOrientation.UP)) {
-                    facesToDraw.add(orientation);
-                    continue;
-                }
-                if ((location.getZ() == 0 && orientation == FaceOrientation.NORTH) || (location.getZ() == 15 && orientation == FaceOrientation.SOUTH)) {
-                    facesToDraw.add(orientation);
-                    continue;
-                }
-                //BlockPosition neighbourPos = location.add(faceDir[orientation.ordinal()]);
-                boolean isNeighbourFull = switch (orientation) {
-                    case DOWN -> assetsLoader.getBlockModelLoader().isFull(nibbleBlocks.get(new ChunkNibbleLocation(location.getX(), location.getY() - 1, location.getZ())));
-                    case UP -> assetsLoader.getBlockModelLoader().isFull(nibbleBlocks.get(new ChunkNibbleLocation(location.getX(), location.getY() + 1, location.getZ())));
-                    case WEST -> assetsLoader.getBlockModelLoader().isFull(nibbleBlocks.get(new ChunkNibbleLocation(location.getX() - 1, location.getY(), location.getZ())));
-                    case EAST -> assetsLoader.getBlockModelLoader().isFull(nibbleBlocks.get(new ChunkNibbleLocation(location.getX() + 1, location.getY(), location.getZ())));
-                    case NORTH -> assetsLoader.getBlockModelLoader().isFull(nibbleBlocks.get(new ChunkNibbleLocation(location.getX(), location.getY(), location.getZ() - 1)));
-                    case SOUTH -> assetsLoader.getBlockModelLoader().isFull(nibbleBlocks.get(new ChunkNibbleLocation(location.getX(), location.getY(), location.getZ() + 1)));
+                Block dependedBlock = switch (orientation) {
+                    case DOWN -> {
+                        if (location.getY() == 0) {
+                            // need to check upper section (nibble)
+                            if (sectionHeight == 0) {
+                                // y = 0, there can't be any blocks below me
+                                yield null;
+                            }
+                            // check if block over us is a full block
+                            byte bottomSection = (byte) (sectionHeight - 1);
+                            if (!world.get(chunkLocation).getNibbles().containsKey(bottomSection)) {
+                                yield null;
+                            }
+                            yield world.get(chunkLocation).getNibbles().get(bottomSection).getBlock(location.getX(), 15, location.getZ());
+                        }
+                        yield nibbleBlocks.get(new ChunkNibbleLocation(location.getX(), location.getY() - 1, location.getZ()));
+                    }
+                    case UP -> {
+                        if (location.getY() == 15) {
+                            // need to check upper section (nibble)
+                            if (sectionHeight == 15) {
+                                // y = 255, there can't be any blocks above me
+                                yield null;
+                            }
+                            // check if block over us is a full block
+                            byte upperSection = (byte) (sectionHeight + 1);
+                            if (!world.get(chunkLocation).getNibbles().containsKey(upperSection)) {
+                                yield null;
+                            }
+                            yield world.get(chunkLocation).getNibbles().get(upperSection).getBlock(location.getX(), 0, location.getZ());
+                        }
+                        yield nibbleBlocks.get(new ChunkNibbleLocation(location.getX(), location.getY() + 1, location.getZ()));
+                    }
+                    case WEST -> {
+                        if (location.getX() == 0) {
+                            ChunkNibble otherChunkNibble = getChunkNibbleOfWorld(world, new ChunkLocation(chunkLocation.getX() - 1, chunkLocation.getZ()), sectionHeight);
+                            if (otherChunkNibble != null) {
+                                yield otherChunkNibble.getBlock(15, location.getY(), location.getZ());
+                            }
+                        }
+                        yield nibbleBlocks.get(new ChunkNibbleLocation(location.getX() - 1, location.getY(), location.getZ()));
+                    }
+                    case EAST -> {
+                        if (location.getX() == 15) {
+                            ChunkNibble otherChunkNibble = getChunkNibbleOfWorld(world, new ChunkLocation(chunkLocation.getX() + 1, chunkLocation.getZ()), sectionHeight);
+                            if (otherChunkNibble != null) {
+                                yield otherChunkNibble.getBlock(0, location.getY(), location.getZ());
+                            }
+                        }
+                        yield nibbleBlocks.get(new ChunkNibbleLocation(location.getX() + 1, location.getY(), location.getZ()));
+                    }
+                    case NORTH -> {
+                        if (location.getZ() == 0) {
+                            ChunkNibble otherChunkNibble = getChunkNibbleOfWorld(world, new ChunkLocation(chunkLocation.getX(), chunkLocation.getZ() - 1), sectionHeight);
+                            if (otherChunkNibble != null) {
+                                yield otherChunkNibble.getBlock(location.getX(), location.getY(), 15);
+                            }
+                        }
+                        yield nibbleBlocks.get(new ChunkNibbleLocation(location.getX(), location.getY(), location.getZ() - 1));
+                    }
+                    case SOUTH -> {
+                        if (location.getZ() == 15) {
+                            ChunkNibble otherChunkNibble = getChunkNibbleOfWorld(world, new ChunkLocation(chunkLocation.getX(), chunkLocation.getZ() + 1), sectionHeight);
+                            if (otherChunkNibble != null) {
+                                yield otherChunkNibble.getBlock(location.getX(), location.getY(), 0);
+                            }
+                        }
+                        yield nibbleBlocks.get(new ChunkNibbleLocation(location.getX(), location.getY(), location.getZ() + 1));
+                    }
                 };
-                if (!isNeighbourFull) {
+                if (dependedBlock == null || !assetsLoader.getBlockModelLoader().isFull(dependedBlock)) {
                     facesToDraw.add(orientation);
                 }
-
             }
             if (facesToDraw.size() > 0) {
                 nibbleMap.put(location, assetsLoader.getBlockModelLoader().prepare(block, facesToDraw));
             }
 
-        });
+        }
+        return nibbleMap;
+    }
+
+    public void prepareChunkNibble(ChunkLocation chunkLocation, byte sectionHeight, ChunkNibble nibble) {
+        faces.get(chunkLocation).put(sectionHeight, getFacesForChunkNibble(chunkLocation, sectionHeight, nibble));
     }
 
 
@@ -121,5 +190,12 @@ public class WorldRenderer {
 
     public AssetsLoader getAssetsLoader() {
         return assetsLoader;
+    }
+
+    private ChunkNibble getChunkNibbleOfWorld(ConcurrentHashMap<ChunkLocation, Chunk> world, ChunkLocation location, byte sectionHeight) {
+        if (world.containsKey(location) && world.get(location).getNibbles().containsKey(sectionHeight)) {
+            return world.get(location).getNibbles().get(sectionHeight);
+        }
+        return null;
     }
 }

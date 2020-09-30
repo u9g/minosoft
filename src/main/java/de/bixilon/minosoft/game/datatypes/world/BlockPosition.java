@@ -63,6 +63,7 @@ public class BlockPosition {
     public ChunkLocation getChunkLocation() {
         int x = getX() / 16;
         int z = getZ() / 16;
+        //ToDo
         if (getX() < 0) {
             x--;
         }

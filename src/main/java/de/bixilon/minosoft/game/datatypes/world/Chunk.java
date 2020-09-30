@@ -18,14 +18,15 @@ import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Blocks;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Collection of 16 chunks nibbles
  */
 public class Chunk {
-    final HashMap<Byte, ChunkNibble> nibbles;
+    final ConcurrentHashMap<Byte, ChunkNibble> nibbles;
 
-    public Chunk(HashMap<Byte, ChunkNibble> chunks) {
+    public Chunk(ConcurrentHashMap<Byte, ChunkNibble> chunks) {
         this.nibbles = chunks;
     }
 
@@ -46,17 +47,17 @@ public class Chunk {
 
     public void setBlock(int x, int y, int z, Block block) {
         byte section = (byte) (y / 16);
-        createSection(section);
+        createSectionIfNotExist(section);
         nibbles.get(section).setBlock(x, y % 16, z, block);
     }
 
     public void setBlock(InChunkLocation location, Block block) {
         byte section = (byte) (location.getY() / 16);
-        createSection(section);
+        createSectionIfNotExist(section);
         nibbles.get(section).setBlock(location.getChunkNibbleLocation(), block);
     }
 
-    void createSection(byte section) {
+    void createSectionIfNotExist(byte section) {
         if (nibbles.get(section) == null) {
             // nibble was empty before, creating it
             nibbles.put(section, new ChunkNibble());
@@ -69,7 +70,7 @@ public class Chunk {
         }
     }
 
-    public HashMap<Byte, ChunkNibble> getNibbles() {
+    public ConcurrentHashMap<Byte, ChunkNibble> getNibbles() {
         return nibbles;
     }
 }

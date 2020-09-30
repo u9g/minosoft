@@ -23,7 +23,7 @@ import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
 import de.bixilon.minosoft.protocol.protocol.ProtocolDefinition;
 
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class ChunkUtil {
     public static Chunk readChunkPacket(InByteBuffer buffer, short sectionBitMask, short addBitMask, boolean groundUpContinuous, boolean containsSkyLight) {
@@ -51,11 +51,11 @@ public final class ChunkUtil {
 
             //parse data
             int arrayPos = 0;
-            HashMap<Byte, ChunkNibble> nibbleMap = new HashMap<>();
+            ConcurrentHashMap<Byte, ChunkNibble> nibbleMap = new ConcurrentHashMap<>();
             for (byte c = 0; c < 16; c++) { // max sections per chunks in chunk column
                 if (BitByte.isBitSet(sectionBitMask, c)) {
 
-                    HashMap<ChunkNibbleLocation, Block> blockMap = new HashMap<>();
+                    ConcurrentHashMap<ChunkNibbleLocation, Block> blockMap = new ConcurrentHashMap<>();
 
                     for (int nibbleY = 0; nibbleY < 16; nibbleY++) {
                         for (int nibbleZ = 0; nibbleZ < 16; nibbleZ++) {
@@ -115,12 +115,12 @@ public final class ChunkUtil {
             }
 
             int arrayPos = 0;
-            HashMap<Byte, ChunkNibble> nibbleMap = new HashMap<>();
+            ConcurrentHashMap<Byte, ChunkNibble> nibbleMap = new ConcurrentHashMap<>();
             for (byte c = 0; c < 16; c++) { // max sections per chunks in chunk column
                 if (!BitByte.isBitSet(sectionBitMask, c)) {
                     continue;
                 }
-                HashMap<ChunkNibbleLocation, Block> blockMap = new HashMap<>();
+                ConcurrentHashMap<ChunkNibbleLocation, Block> blockMap = new ConcurrentHashMap<>();
 
                 for (int nibbleY = 0; nibbleY < 16; nibbleY++) {
                     for (int nibbleZ = 0; nibbleZ < 16; nibbleZ++) {
@@ -141,7 +141,7 @@ public final class ChunkUtil {
             return new Chunk(nibbleMap);
         }
         // really big thanks to: https://wiki.vg/index.php?title=Chunk_Format&oldid=13712
-        HashMap<Byte, ChunkNibble> nibbleMap = new HashMap<>();
+        ConcurrentHashMap<Byte, ChunkNibble> nibbleMap = new ConcurrentHashMap<>();
         for (byte c = 0; c < 16; c++) { // max sections per chunks in chunk column
             if (!BitByte.isBitSet(sectionBitMask, c)) {
                 continue;
@@ -155,7 +155,7 @@ public final class ChunkUtil {
 
             long[] data = buffer.readLongArray(buffer.readVarInt());
 
-            HashMap<ChunkNibbleLocation, Block> blockMap = new HashMap<>();
+            ConcurrentHashMap<ChunkNibbleLocation, Block> blockMap = new ConcurrentHashMap<>();
             for (int nibbleY = 0; nibbleY < 16; nibbleY++) {
                 for (int nibbleZ = 0; nibbleZ < 16; nibbleZ++) {
                     for (int nibbleX = 0; nibbleX < 16; nibbleX++) {
