@@ -48,8 +48,7 @@ public class BlockConfiguration {
             }
             BlockProperties property = properties.get(json.get(propertyName).getAsString());
             if (property == null) {
-                throw new RuntimeException(String.format("Unknown block property: %s -> %s",
-                        propertyName, json.get(propertyName).getAsString()));
+                throw new RuntimeException(String.format("Unknown block property: %s -> %s", propertyName, json.get(propertyName).getAsString()));
             }
             blockProperties.add(property);
         }
@@ -67,8 +66,7 @@ public class BlockConfiguration {
     }
 
     public boolean equals(BlockConfiguration blockConfiguration) {
-        return rotation.equals(blockConfiguration.getRotation()) &&
-                blockProperties.equals(blockConfiguration.getBlockProperties());
+        return rotation.equals(blockConfiguration.getRotation()) && blockProperties.equals(blockConfiguration.getBlockProperties());
     }
 
     public boolean contains(Block block) {

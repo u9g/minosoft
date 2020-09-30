@@ -15,8 +15,8 @@ package de.bixilon.minosoft.render.texture;
 
 import com.google.gson.JsonArray;
 import de.bixilon.minosoft.render.GameWindow;
+import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
 
-import static de.bixilon.minosoft.render.blockModels.Face.RenderConstants.TEXTURE_PACK_RESOLUTION;
 import static org.lwjgl.opengl.GL11.glTexCoord2f;
 
 public class InFaceUV {
@@ -37,12 +37,10 @@ public class InFaceUV {
     }
 
     public void prepare(float texture) {
-        realU1 = texture + u1 * GameWindow.getRenderer().getAssetsLoader().getTextureLoader().getStep()
-                / TEXTURE_PACK_RESOLUTION;
-        realU2 = texture + u2 * GameWindow.getRenderer().getAssetsLoader().getTextureLoader().getStep()
-                / TEXTURE_PACK_RESOLUTION;
-        realV1 = (float) v1 / TEXTURE_PACK_RESOLUTION;
-        realV2 = (float) v2 / TEXTURE_PACK_RESOLUTION;
+        realU1 = texture + u1 * GameWindow.getRenderer().getAssetsLoader().getTextureLoader().getStep() / RenderConstants.TEXTURE_PACK_RESOLUTION;
+        realU2 = texture + u2 * GameWindow.getRenderer().getAssetsLoader().getTextureLoader().getStep() / RenderConstants.TEXTURE_PACK_RESOLUTION;
+        realV1 = (float) v1 / RenderConstants.TEXTURE_PACK_RESOLUTION;
+        realV2 = (float) v2 / RenderConstants.TEXTURE_PACK_RESOLUTION;
     }
 
     public void draw(int i) {
@@ -50,18 +48,10 @@ public class InFaceUV {
             i -= 4;
         }
         switch (i) {
-            case 0:
-                glTexCoord2f(realU1, realV1);
-                break;
-            case 1:
-                glTexCoord2f(realU2, realV1);
-                break;
-            case 2:
-                glTexCoord2f(realU2, realV2);
-                break;
-            case 3:
-                glTexCoord2f(realU1, realV2);
-                break;
+            case 0 -> glTexCoord2f(realU1, realV1);
+            case 1 -> glTexCoord2f(realU2, realV1);
+            case 2 -> glTexCoord2f(realU2, realV2);
+            case 3 -> glTexCoord2f(realU1, realV2);
         }
     }
 }

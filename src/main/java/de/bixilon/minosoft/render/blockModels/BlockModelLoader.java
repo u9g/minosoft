@@ -21,6 +21,7 @@ import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.specialModels.*;
 import de.bixilon.minosoft.render.texture.TextureLoader;
+import de.bixilon.minosoft.util.Util;
 import org.apache.commons.collections.primitives.ArrayFloatList;
 
 import java.io.IOException;
@@ -28,7 +29,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import static de.bixilon.minosoft.util.Util.readJsonAsset;
 
 public class BlockModelLoader {
     private final HashMap<String, HashMap<String, BlockModelInterface>> blockDescriptionMap;
@@ -40,7 +40,7 @@ public class BlockModelLoader {
         tints = new HashMap<>();
         textures = new HashMap<>();
         try {
-            JsonObject json = readJsonAsset("mapping/blockModels.json");
+            JsonObject json = Util.readJsonAsset("mapping/blockModels.json");
             String mod = "minecraft";
             tints.put(mod, readTints(json));
             textures.put(mod, loadModels(json.get("blocks").getAsJsonObject(), mod));
@@ -95,7 +95,6 @@ public class BlockModelLoader {
         HashSet<String> result = new HashSet<>();
         try {
             String type = "";
-
             if (block.has("type")) {
                 type = block.get("type").getAsString();
             }

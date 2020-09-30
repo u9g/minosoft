@@ -45,7 +45,7 @@ public final class ChunkUtil {
             if (containsSkyLight) {
                 skyLight = buffer.readBytes(halfBytes);
             }
-            byte[] addBlockTypes = buffer.readBytes(Integer.bitCount(addBitMask) * RenderConstants.SECTION_HEIGHT * RenderConstants.SECTION_WIDTH * RenderConstants.SECTION_WIDTH / 2); // 16 * 16 * 16 * addBlocks / 2
+            byte[] addBlockTypes = buffer.readBytes(Integer.bitCount(addBitMask) * RenderConstants.SECTION_HEIGHT * RenderConstants.SECTION_WIDTH * RenderConstants.SECTION_WIDTH / 2);
             if (groundUpContinuous) {
                 byte[] biomes = buffer.readBytes(RenderConstants.SECTION_WIDTH * RenderConstants.SECTION_WIDTH);
             }

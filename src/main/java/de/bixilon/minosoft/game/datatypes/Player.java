@@ -22,12 +22,11 @@ import de.bixilon.minosoft.game.datatypes.player.PlayerListItem;
 import de.bixilon.minosoft.game.datatypes.scoreboard.ScoreboardManager;
 import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
 import de.bixilon.minosoft.game.datatypes.world.World;
+import de.bixilon.minosoft.protocol.protocol.ProtocolDefinition;
 import de.bixilon.minosoft.util.mojang.api.MojangAccount;
 
 import java.util.HashMap;
 import java.util.UUID;
-
-import static de.bixilon.minosoft.protocol.protocol.ProtocolDefinition.PLAYER_INVENTORY_ID;
 
 public class Player {
     final MojangAccount account;
@@ -52,7 +51,7 @@ public class Player {
     public Player(MojangAccount account) {
         this.account = account;
         // create our own inventory without any properties
-        inventories.put(PLAYER_INVENTORY_ID, new Inventory(null));
+        inventories.put(ProtocolDefinition.PLAYER_INVENTORY_ID, new Inventory(null));
     }
 
     public String getPlayerName() {
@@ -136,11 +135,11 @@ public class Player {
     }
 
     public Inventory getPlayerInventory() {
-        return getInventory(PLAYER_INVENTORY_ID);
+        return getInventory(ProtocolDefinition.PLAYER_INVENTORY_ID);
     }
 
     public void setPlayerInventory(Slot[] data) {
-        setInventory(PLAYER_INVENTORY_ID, data);
+        setInventory(ProtocolDefinition.PLAYER_INVENTORY_ID, data);
     }
 
     public Inventory getInventory(int id) {

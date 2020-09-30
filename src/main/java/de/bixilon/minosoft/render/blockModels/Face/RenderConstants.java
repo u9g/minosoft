@@ -30,13 +30,4 @@ public class RenderConstants {
 
     public static final byte CHUNK_MIN_Y = 0;
     public static final int CHUNK_MAX_Y = SECTION_HEIGHT * SECTIONS_PER_CHUNK - 1;
-
-    public static final int[][] FACE_DIRECTIONS = new int[][]{
-            {1, 0, 0},
-            {-1, 0, 0},
-            {0, 1, 0},
-            {0, -1, 0},
-            {0, 0, 1},
-            {0, 0, -1}
-    };
 }

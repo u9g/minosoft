@@ -25,13 +25,12 @@ public class GameWindow {
     private static final int WIDTH = 800;
     private static final int HEIGHT = 800;
     private static final boolean FULLSCREEN = false;
+    public static boolean paused = false;
     private static OpenGLWindow openGLWindow;
     private static WorldRenderer renderer;
     private static Connection connection;
     private static PlayerController playerController;
-
     private static boolean running = false;
-    public static boolean paused = false;
 
     public static void prepare() {
         Thread guiLoaderThread = new Thread(() -> {
@@ -42,7 +41,7 @@ public class GameWindow {
             renderer.init();
             Log.info("Finished loading game Assets");
             try {
-                while (! running) {
+                while (!running) {
                     Thread.sleep(100);
                 }
                 openGLWindow.start();
@@ -101,7 +100,7 @@ public class GameWindow {
     }
 
     public static void pause() {
-        paused = ! paused;
+        paused = !paused;
         openGLWindow.mouseEnable(paused);
     }
 }

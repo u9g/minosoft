@@ -15,8 +15,6 @@ package de.bixilon.minosoft.render.utility;
 
 import de.bixilon.minosoft.game.datatypes.entities.Location;
 
-import static java.lang.Math.pow;
-import static java.lang.Math.sqrt;
 
 public class Vec3 {
     public float x, y, z;
@@ -38,44 +36,27 @@ public class Vec3 {
     }
 
     public static Vec3 add(Vec3 v1, Vec3 v2) {
-        return new Vec3(
-                v1.x + v2.x,
-                v1.y + v2.y,
-                v1.z + v2.z
-        );
+        return new Vec3(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
     }
 
     public static Vec3 mul(Vec3 v, float n) {
-        return new Vec3(
-                v.x * n,
-                v.y * n,
-                v.z * n
-        );
+        return new Vec3(v.x * n, v.y * n, v.z * n);
     }
 
     public static Vec3 mul(Vec3 v1, Vec3 v2) {
-        return new Vec3(
-                v1.x * v2.x,
-                v1.y * v2.y,
-                v1.z * v2.z
-        );
+        return new Vec3(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z);
     }
 
     public static Vec3 normalize(Vec3 v) {
         float l = v.len();
-        Vec3 out = v;
-        out.x /= l;
-        out.y /= l;
-        out.z /= l;
-        return out;
+        v.x /= l;
+        v.y /= l;
+        v.z /= l;
+        return v;
     }
 
     public static Vec3 cross(Vec3 v1, Vec3 v2) {
-        return new Vec3(
-                v1.y * v2.z - v1.z * v2.y,
-                v1.z * v2.x - v1.x * v2.z,
-                v1.x * v2.y - v1.y * v2.x
-        );
+        return new Vec3(v1.y * v2.z - v1.z * v2.y, v1.z * v2.x - v1.x * v2.z, v1.x * v2.y - v1.y * v2.x);
     }
 
     public void add(Vec3 v) {
@@ -92,7 +73,7 @@ public class Vec3 {
     }
 
     public float len() {
-        return (float) sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
+        return (float) Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
     }
 
     public void normalize() {

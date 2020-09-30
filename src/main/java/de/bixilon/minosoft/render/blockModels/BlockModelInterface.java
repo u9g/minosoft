@@ -3,11 +3,11 @@
  * Copyright (C) 2020 Lukas Eisenhauer
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
- *  
+ *
  *  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU General Public License along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *  
+ *
  *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
@@ -24,27 +24,16 @@ import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlock;
 import de.bixilon.minosoft.render.texture.TextureLoader;
+import de.bixilon.minosoft.util.Util;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import static de.bixilon.minosoft.util.Util.readJsonFromFile;
 
 public interface BlockModelInterface {
-    HashSet<Face> prepare(Block block, HashSet<FaceOrientation> facesToDraw);
-
-    boolean isFull();
-    HashSet<String> getAllTextures();
-    void applyTextures(String mod, TextureLoader loader);
-
-    HashBiMap<BlockRotations, BlockRotations> rotationAdjust = HashBiMap.create(Map.of(
-            BlockRotations.EAST, BlockRotations.SOUTH,
-            BlockRotations.SOUTH, BlockRotations.WEST,
-            BlockRotations.WEST, BlockRotations.NORTH,
-            BlockRotations.NORTH, BlockRotations.EAST
-    ));
+    HashBiMap<BlockRotations, BlockRotations> rotationAdjust = HashBiMap.create(Map.of(BlockRotations.EAST, BlockRotations.SOUTH, BlockRotations.SOUTH, BlockRotations.WEST, BlockRotations.WEST, BlockRotations.NORTH, BlockRotations.NORTH, BlockRotations.EAST));
 
     static void applyConfigurationTextures(HashSet<SubBlock> subBlocks, String mod, TextureLoader loader) {
         for (SubBlock subBlock : subBlocks) {
@@ -72,11 +61,9 @@ public interface BlockModelInterface {
         String path = Config.homeDir + "assets/" + mod + "/models/block/" + identifier + ".json";
         JsonObject json = null;
         try {
-            json = readJsonFromFile(path);
+            json = Util.readJsonFromFile(path);
         } catch (IOException e) {
             e.printStackTrace();
-        }
-        if (json == null) {
             Log.warn("File not found: " + path);
             return null;
         }
@@ -107,4 +94,12 @@ public interface BlockModelInterface {
     static HashSet<SubBlock> load(String mod, String identifier) {
         return load(mod, identifier, new HashMap<>());
     }
+
+    HashSet<Face> prepare(Block block, HashSet<FaceOrientation> facesToDraw);
+
+    boolean isFull();
+
+    HashSet<String> getAllTextures();
+
+    void applyTextures(String mod, TextureLoader loader);
 }

@@ -26,7 +26,6 @@ import de.bixilon.minosoft.render.texture.TextureLoader;
 
 import java.util.HashSet;
 
-import static de.bixilon.minosoft.render.blockModels.specialModels.BlockModel.prepareBlockState;
 
 public class DoorModel implements BlockModelInterface {
     private final HashSet<SubBlock> bottom;
@@ -43,25 +42,18 @@ public class DoorModel implements BlockModelInterface {
         top_hinge = BlockModelInterface.load(mod, block.get("top_hinge").getAsString());
     }
 
-    private static HashSet<Face> prepareHinge(HashSet<SubBlock> bottom, HashSet<SubBlock> top, Block block,
-                                              HashSet<FaceOrientation> adjacentBlocks) {
+    private static HashSet<Face> prepareHinge(HashSet<SubBlock> bottom, HashSet<SubBlock> top, Block block, HashSet<FaceOrientation> adjacentBlocks) {
         if (block.getProperties().contains(BlockProperties.OPEN)) {
-            return prepareHalf(bottom, top, block, adjacentBlocks,
-                    rotationAdjust.inverse().get(block.getRotation()));
-        } else {
-            return prepareHalf(bottom, top, block, adjacentBlocks, block.getRotation());
+            return prepareHalf(bottom, top, block, adjacentBlocks, rotationAdjust.inverse().get(block.getRotation()));
         }
+        return prepareHalf(bottom, top, block, adjacentBlocks, block.getRotation());
     }
 
-    private static HashSet<Face> prepareHalf(HashSet<SubBlock> bottom, HashSet<SubBlock> top,
-                                             Block block, HashSet<FaceOrientation> adjacentBlocks,
-                                             BlockRotations rotation) {
+    private static HashSet<Face> prepareHalf(HashSet<SubBlock> bottom, HashSet<SubBlock> top, Block block, HashSet<FaceOrientation> adjacentBlocks, BlockRotations rotation) {
         if (block.getProperties().contains(BlockProperties.HALF_LOWER)) {
-            return prepareBlockState(bottom, adjacentBlocks, new Block("", "",
-                    rotation));
+            return BlockModel.prepareBlockState(bottom, adjacentBlocks, new Block("", "", rotation));
         } else if (block.getProperties().contains(BlockProperties.HALF_UPPER)) {
-            return prepareBlockState(top, adjacentBlocks, new Block("", "",
-                    rotation));
+            return BlockModel.prepareBlockState(top, adjacentBlocks, new Block("", "", rotation));
         }
         Log.warn("now");
         return null;

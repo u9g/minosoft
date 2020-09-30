@@ -49,23 +49,15 @@ public class SubBlockPosition {
     }
 
     public static SubBlockPosition add(SubBlockPosition pos1, SubBlockPosition pos2) {
-        return new SubBlockPosition(
-                pos1.x + pos2.x,
-                pos1.y + pos2.y,
-                pos1.z + pos2.z);
+        return new SubBlockPosition(pos1.x + pos2.x, pos1.y + pos2.y, pos1.z + pos2.z);
     }
 
     public static SubBlockPosition subtract(SubBlockPosition pos1, SubBlockPosition pos2) {
-        return new SubBlockPosition(
-                pos1.x - pos2.x,
-                pos1.y - pos2.y,
-                pos1.z - pos2.z);
+        return new SubBlockPosition(pos1.x - pos2.x, pos1.y - pos2.y, pos1.z - pos2.z);
     }
 
     public void draw(BlockPosition pos) {
-        glVertex3f(pos.getX() + x / RenderConstants.BLOCK_RESOLUTION,
-                pos.getY() + y / RenderConstants.BLOCK_RESOLUTION,
-                pos.getZ() + z / RenderConstants.BLOCK_RESOLUTION);
+        glVertex3f(pos.getX() + x / RenderConstants.BLOCK_RESOLUTION, pos.getY() + y / RenderConstants.BLOCK_RESOLUTION, pos.getZ() + z / RenderConstants.BLOCK_RESOLUTION);
     }
 
     public SubBlockPosition rotated(Block block) {

@@ -16,7 +16,6 @@ package de.bixilon.minosoft.render.blockModels.specialModels;
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockProperties;
-import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.render.blockModels.BlockModelInterface;
 import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
@@ -26,7 +25,6 @@ import de.bixilon.minosoft.render.texture.TextureLoader;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import static de.bixilon.minosoft.render.blockModels.specialModels.BlockModel.prepareBlockState;
 
 public class CropModel implements BlockModelInterface {
     private final HashMap<String, HashSet<SubBlock>> modelMap;
@@ -35,20 +33,17 @@ public class CropModel implements BlockModelInterface {
         int stages = block.get("stages").getAsInt();
         modelMap = new HashMap<>();
         for (int i = 0; i < stages; i++) {
-            modelMap.put(String.format("%s%d", "AGE_", i),
-                    BlockModelInterface.load(mod,
-                            String.format("%s%d", block.get("base_name").getAsString(), i)));
+            modelMap.put(String.format("%s%d", "AGE_", i), BlockModelInterface.load(mod, String.format("%s%d", block.get("base_name").getAsString(), i)));
         }
     }
 
     public HashSet<Face> prepare(Block block, HashSet<FaceOrientation> facesToDraw) {
         for (BlockProperties property : block.getProperties()) {
             if (modelMap.containsKey(property.name())) {
-                return prepareBlockState(modelMap.get(property.name()), facesToDraw, block);
+                return BlockModel.prepareBlockState(modelMap.get(property.name()), facesToDraw, block);
             }
         }
-        Log.warn("failed to prepare block: " + block.toString());
-        return new HashSet<>();
+        throw new RuntimeException("Failed to prepare block: " + block.toString());
     }
 
     public boolean isFull() {

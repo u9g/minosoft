@@ -25,22 +25,16 @@ import java.util.HashSet;
 import java.util.Map;
 
 public class SubBlock {
-    private final HashMap<FaceOrientation, Float> textureCoordinates;
-    private final HashMap<FaceOrientation, String> textures;
-    private final HashMap<FaceOrientation, Integer> textureRotations;
-    private final HashSet<FaceOrientation> cullFaceTextures;
-    private final HashMap<FaceOrientation, InFaceUV> uv;
+    private final HashMap<FaceOrientation, Float> textureCoordinates = new HashMap<>();
+    private final HashMap<FaceOrientation, String> textures = new HashMap<>();
+    private final HashMap<FaceOrientation, Integer> textureRotations = new HashMap<>();
+    private final HashSet<FaceOrientation> cullFaceTextures = new HashSet<>();
+    private final HashMap<FaceOrientation, InFaceUV> uv = new HashMap<>();
     private final Cuboid cuboid;
     private final boolean isFull;
     private SubBlockRotation rotation;
 
     public SubBlock(JsonObject json, HashMap<String, String> variables) {
-        uv = new HashMap<>();
-        textures = new HashMap<>();
-        textureRotations = new HashMap<>();
-        textureCoordinates = new HashMap<>();
-        cullFaceTextures = new HashSet<>();
-
         SubBlockPosition from = new SubBlockPosition(json.getAsJsonArray("from"));
         SubBlockPosition to = new SubBlockPosition(json.getAsJsonArray("to"));
         if (json.has("rotation")) {
@@ -142,8 +136,7 @@ public class SubBlock {
             if (textureCoordinates.get(orientation) == null) {
                 continue;
             }
-            result.add(new Face(textureCoordinates.get(orientation), uv.get(orientation),
-                    cuboid.getFacePositions(orientation, block)));
+            result.add(new Face(textureCoordinates.get(orientation), uv.get(orientation), cuboid.getFacePositions(orientation, block)));
         }
         return result;
     }
