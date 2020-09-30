@@ -17,7 +17,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Blocks;
-import de.bixilon.minosoft.render.blockModels.Face.Face;
+import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.specialModels.*;
 import de.bixilon.minosoft.render.texture.TextureLoader;
@@ -132,7 +132,7 @@ public class BlockModelLoader {
         return getBlockDescription(block).isFull();
     }
 
-    public HashSet<Face> prepare(Block block, HashSet<FaceOrientation> facesToDraw) {
-        return getBlockDescription(block).prepare(block, facesToDraw);
+    public ArrayFloatList prepare(Block block, HashSet<FaceOrientation> facesToDraw, BlockPosition position) {
+        return getBlockDescription(block).prepare(block, facesToDraw, position);
     }
 }

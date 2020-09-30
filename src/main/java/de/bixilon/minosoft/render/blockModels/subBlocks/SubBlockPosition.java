@@ -17,8 +17,9 @@ import com.google.gson.JsonArray;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
 import de.bixilon.minosoft.render.blockModels.Face.Axis;
+import org.apache.commons.collections.primitives.ArrayFloatList;
 
-import static de.bixilon.minosoft.render.blockModels.Face.RenderConstants.blockRes;
+import static de.bixilon.minosoft.render.blockModels.Face.RenderConstants.BLOCK_RES;
 import static org.lwjgl.opengl.GL11.glVertex3f;
 
 public class SubBlockPosition {
@@ -68,9 +69,9 @@ public class SubBlockPosition {
 
     public void draw(BlockPosition pos) {
         glVertex3f(
-                pos.getX() + x / blockRes,
-                pos.getY() + y / blockRes,
-                pos.getZ() + z / blockRes);
+                pos.getX() + x / BLOCK_RES,
+                pos.getY() + y / BLOCK_RES,
+                pos.getZ() + z / BLOCK_RES);
     }
 
     public SubBlockPosition rotated(Block block) {
@@ -100,5 +101,13 @@ public class SubBlockPosition {
                 return zAxisRotator.apply(this);
         }
         return this;
+    }
+
+    public ArrayFloatList getFloats(BlockPosition position) {
+        ArrayFloatList result = new ArrayFloatList();
+        result.add(x / BLOCK_RES + position.getX());
+        result.add(y / BLOCK_RES + position.getY());
+        result.add(z / BLOCK_RES + position.getZ());
+        return result;
     }
 }

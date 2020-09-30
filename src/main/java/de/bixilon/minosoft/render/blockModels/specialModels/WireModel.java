@@ -15,11 +15,12 @@ package de.bixilon.minosoft.render.blockModels.specialModels;
 
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
+import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
 import de.bixilon.minosoft.render.blockModels.BlockModelInterface;
-import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlock;
 import de.bixilon.minosoft.render.texture.TextureLoader;
+import org.apache.commons.collections.primitives.ArrayFloatList;
 
 import java.util.HashSet;
 
@@ -34,10 +35,9 @@ public class WireModel implements BlockModelInterface {
         up = BlockModelInterface.load(mod, block.get("up").getAsString());
     }
 
-    @Override
-    public HashSet<Face> prepare(Block block, HashSet<FaceOrientation> facesToDraw) {
+    public ArrayFloatList prepare(Block block, HashSet<FaceOrientation> facesToDraw, BlockPosition position) {
         // TODO: REDSTONE
-        return new HashSet<>();
+        return new ArrayFloatList();
     }
 
     @Override

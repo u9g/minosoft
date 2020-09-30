@@ -17,11 +17,12 @@ import com.google.gson.JsonObject;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockProperties;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockRotations;
+import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
 import de.bixilon.minosoft.render.blockModels.BlockModelInterface;
-import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlock;
 import de.bixilon.minosoft.render.texture.TextureLoader;
+import org.apache.commons.collections.primitives.ArrayFloatList;
 
 import java.util.HashSet;
 
@@ -36,26 +37,25 @@ public class StairsModel implements BlockModelInterface {
         outer = BlockModelInterface.load(mod, block.get("outer").getAsString());
     }
 
-    @Override
-    public HashSet<Face> prepare(Block block, HashSet<FaceOrientation> facesToDraw) {
+    public ArrayFloatList prepare(Block block, HashSet<FaceOrientation> facesToDraw, BlockPosition position) {
         HashSet<BlockProperties> properties = block.getProperties();
 
         for (BlockProperties property : properties) {
             if (property.name().contains("INNER")) {
-                return prepareCorner(outer, property, block.getRotation());
+                return prepareCorner(outer, property, block.getRotation(), facesToDraw, position);
             } else if (property.name().contains("OUTER")) {
-                return prepareCorner(inner, property, block.getRotation());
+                return prepareCorner(inner, property, block.getRotation(), facesToDraw, position);
             }
         }
-        return BlockModelInterface.prepareState(straight, rotationAdjust.get(block.getRotation()));
+        return BlockModelInterface.prepareState(straight, rotationAdjust.get(block.getRotation()), facesToDraw, position);
     }
 
-    public static HashSet<Face> prepareCorner(HashSet<SubBlock> subBlocks, BlockProperties property,
-                                              BlockRotations rotation) {
+    public static ArrayFloatList prepareCorner(HashSet<SubBlock> subBlocks, BlockProperties property,
+                                               BlockRotations rotation, HashSet<FaceOrientation> facesToDraw, BlockPosition position) {
         if (property.name().contains("LEFT")) {
-            return BlockModelInterface.prepareState(subBlocks, rotation);
+            return BlockModelInterface.prepareState(subBlocks, rotation, facesToDraw, position);
         }
-        return BlockModelInterface.prepareState(subBlocks, rotationAdjust.get(rotation));
+        return BlockModelInterface.prepareState(subBlocks, rotationAdjust.get(rotation), facesToDraw, position);
     }
 
     @Override

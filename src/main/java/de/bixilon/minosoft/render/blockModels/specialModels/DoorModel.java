@@ -17,12 +17,13 @@ import com.google.gson.JsonObject;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockProperties;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockRotations;
+import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.render.blockModels.BlockModelInterface;
-import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlock;
 import de.bixilon.minosoft.render.texture.TextureLoader;
+import org.apache.commons.collections.primitives.ArrayFloatList;
 
 import java.util.HashSet;
 
@@ -43,35 +44,29 @@ public class DoorModel implements BlockModelInterface {
         top_hinge = BlockModelInterface.load(mod, block.get("top_hinge").getAsString());
     }
 
-    private static HashSet<Face> prepareHinge(HashSet<SubBlock> bottom, HashSet<SubBlock> top, Block block,
-                                              HashSet<FaceOrientation> adjacentBlocks) {
+    private static ArrayFloatList prepareHinge(HashSet<SubBlock> bottom, HashSet<SubBlock> top, Block block, HashSet<FaceOrientation> facesToDraw, BlockPosition position) {
         if (block.getProperties().contains(BlockProperties.OPEN)) {
-            return prepareHalf(bottom, top, block, adjacentBlocks,
-                    rotationAdjust.inverse().get(block.getRotation()));
+            return prepareHalf(bottom, top, rotationAdjust.inverse().get(block.getRotation()), block, facesToDraw, position);
         } else {
-            return prepareHalf(bottom, top, block, adjacentBlocks, block.getRotation());
+            return prepareHalf(bottom, top, block.getRotation(), block, facesToDraw, position);
         }
     }
 
-    private static HashSet<Face> prepareHalf(HashSet<SubBlock> bottom, HashSet<SubBlock> top,
-                                             Block block, HashSet<FaceOrientation> adjacentBlocks,
-                                             BlockRotations rotation) {
+    private static ArrayFloatList prepareHalf(HashSet<SubBlock> bottom, HashSet<SubBlock> top, BlockRotations rotation, Block block, HashSet<FaceOrientation> facesToDraw, BlockPosition position) {
         if (block.getProperties().contains(BlockProperties.HALF_LOWER)) {
-            return prepareBlockState(bottom, adjacentBlocks, new Block("", "",
-                    rotation));
+            return prepareBlockState(bottom, facesToDraw, new Block("", "",rotation), position);
         } else if (block.getProperties().contains(BlockProperties.HALF_UPPER)) {
-            return prepareBlockState(top, adjacentBlocks, new Block("", "",
-                    rotation));
+            return prepareBlockState(top, facesToDraw, new Block("", "",rotation), position);
         }
         Log.warn("now");
         return null;
     }
 
-    public HashSet<Face> prepare(Block block, HashSet<FaceOrientation> facesToDraw) {
+    public ArrayFloatList prepare(Block block, HashSet<FaceOrientation> facesToDraw, BlockPosition position) {
         if (block.getProperties().contains(BlockProperties.HINGE_LEFT)) {
-            return prepareHinge(bottom, top, block, facesToDraw);
+            return prepareHinge(bottom, top, block, facesToDraw, position);
         }
-        return prepareHinge(bottom_hinge, top_hinge, block, facesToDraw);
+        return prepareHinge(bottom_hinge, top_hinge, block, facesToDraw, position);
     }
 
     public boolean isFull() {

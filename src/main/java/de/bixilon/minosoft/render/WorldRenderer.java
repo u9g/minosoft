@@ -14,11 +14,12 @@
 package de.bixilon.minosoft.render;
 
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
+import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Blocks;
 import de.bixilon.minosoft.game.datatypes.world.*;
-import de.bixilon.minosoft.protocol.network.Connection;
-import de.bixilon.minosoft.render.blockModels.Face.Face;
+import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import javafx.util.Pair;
+import org.apache.commons.collections.primitives.ArrayFloatList;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,19 +29,25 @@ import java.util.concurrent.LinkedBlockingQueue;
 import static org.lwjgl.opengl.GL11.*;
 
 public class WorldRenderer {
-    private final ConcurrentHashMap<ChunkLocation, ConcurrentHashMap<Byte, ConcurrentHashMap<ChunkNibbleLocation, HashSet<Face>>>> faces = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<ChunkLocation, ConcurrentHashMap<Byte, ArrayFloatList>> faces;
     private AssetsLoader assetsLoader;
 
     private LinkedBlockingQueue<Pair<ChunkLocation, Chunk>> queuedChunks;
 
+    public WorldRenderer() {
+        faces = new ConcurrentHashMap<>();
+    }
 
     public void init() {
         queuedChunks = new LinkedBlockingQueue<>();
-        assetsLoader = new AssetsLoader();
-    }
-
-    public void startChunkPreparation(Connection connection) {
         Thread chunkLoadThread = new Thread(() -> {
+            while (GameWindow.getConnection() == null) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
             while (true) {
                 try {
                     Pair<ChunkLocation, Chunk> current = queuedChunks.take();
@@ -50,8 +57,9 @@ public class WorldRenderer {
                 }
             }
         });
-        chunkLoadThread.setName(String.format("%d/ChunkLoading", connection.getConnectionId()));
+        chunkLoadThread.setName(String.format("%d/ChunkLoading", 0)); // TODO: connection ID
         chunkLoadThread.start();
+        assetsLoader = new AssetsLoader();
     }
 
     public void queueChunkBulk(HashMap<ChunkLocation, Chunk> chunks) {
@@ -65,17 +73,21 @@ public class WorldRenderer {
     public void prepareChunk(ChunkLocation location, Chunk chunk) {
         // clear or create current chunk
         faces.put(location, new ConcurrentHashMap<>());
-        chunk.getNibbles().forEach(((height, chunkNibble) -> prepareChunkNibble(location, height, chunkNibble)));
+        chunk.getNibbles().forEach(((height, chunkNibble) -> {
+            prepareChunkNibble(location, height, chunkNibble);
+        }));
     }
 
     public void prepareChunkNibble(ChunkLocation chunkLocation, byte height, ChunkNibble nibble) {
         // clear or create current chunk nibble
-        ConcurrentHashMap<ChunkNibbleLocation, HashSet<Face>> nibbleMap = new ConcurrentHashMap<>();
+        ArrayFloatList nibbleMap = new ArrayFloatList();
         faces.get(chunkLocation).put(height, nibbleMap);
         HashMap<ChunkNibbleLocation, Block> nibbleBlocks = nibble.getBlocks();
         nibbleBlocks.forEach((location, block) -> {
             HashSet<FaceOrientation> facesToDraw = new HashSet<>();
-
+            if (block.equals(Blocks.nullBlock)) {
+                return;
+            }
             for (FaceOrientation orientation : FaceOrientation.values()) {
                 if ((location.getX() == 0 && orientation == FaceOrientation.WEST) || (location.getX() == 15 && orientation == FaceOrientation.EAST)) {
                     facesToDraw.add(orientation);
@@ -89,7 +101,6 @@ public class WorldRenderer {
                     facesToDraw.add(orientation);
                     continue;
                 }
-                //BlockPosition neighbourPos = location.add(faceDir[orientation.ordinal()]);
                 boolean isNeighbourFull = switch (orientation) {
                     case DOWN -> assetsLoader.getBlockModelLoader().isFull(nibbleBlocks.get(new ChunkNibbleLocation(location.getX(), location.getY() - 1, location.getZ())));
                     case UP -> assetsLoader.getBlockModelLoader().isFull(nibbleBlocks.get(new ChunkNibbleLocation(location.getX(), location.getY() + 1, location.getZ())));
@@ -101,21 +112,30 @@ public class WorldRenderer {
                 if (!isNeighbourFull) {
                     facesToDraw.add(orientation);
                 }
-
             }
             if (facesToDraw.size() > 0) {
-                nibbleMap.put(location, assetsLoader.getBlockModelLoader().prepare(block, facesToDraw));
+                faces.get(chunkLocation).put(height, assetsLoader.getBlockModelLoader().prepare(block, facesToDraw, new BlockPosition(chunkLocation, height, location)));
+                if (!location.equals(new ChunkNibbleLocation(0,0,0))) {
+                    Log.debug(".");
+                }
             }
-
-        });
-    }
+    });
+}
 
 
     public void draw() {
         glPushMatrix();
         glBindTexture(GL_TEXTURE_2D, assetsLoader.getTextureLoader().getTextureID());
         glBegin(GL_QUADS);
-        faces.forEach((chunkLocation, nibbleMap) -> nibbleMap.forEach((height, faceMap) -> faceMap.forEach(((nibbleLocation, faces) -> faces.forEach((face -> face.draw(new BlockPosition(chunkLocation, height, nibbleLocation))))))));
+        for (ConcurrentHashMap<Byte, ArrayFloatList> chunk : faces.values()) {
+            for (ArrayFloatList nibble : chunk.values()) {
+                float[] array = nibble.toArray();
+                for (int i = 0; i < array.length; i+=5) {
+                    glTexCoord2f(array[i], array[i+1]);
+                    glVertex3f(array[i+2], array[i+3], array[i+4]);
+                }
+            }
+        }
         glEnd();
     }
 

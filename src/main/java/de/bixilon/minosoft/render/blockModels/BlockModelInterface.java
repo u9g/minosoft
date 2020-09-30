@@ -19,11 +19,12 @@ import com.google.gson.JsonObject;
 import de.bixilon.minosoft.Config;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockRotations;
+import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
 import de.bixilon.minosoft.logging.Log;
-import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlock;
 import de.bixilon.minosoft.render.texture.TextureLoader;
+import org.apache.commons.collections.primitives.ArrayFloatList;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -33,8 +34,7 @@ import java.util.Map;
 import static de.bixilon.minosoft.util.Util.readJsonFromFile;
 
 public interface BlockModelInterface {
-    HashSet<Face> prepare(Block block, HashSet<FaceOrientation> facesToDraw);
-
+    ArrayFloatList prepare(Block block, HashSet<FaceOrientation> facesToDraw, BlockPosition position);
     boolean isFull();
     HashSet<String> getAllTextures();
     void applyTextures(String mod, TextureLoader loader);
@@ -52,10 +52,10 @@ public interface BlockModelInterface {
         }
     }
 
-    static HashSet<Face> prepareState(HashSet<SubBlock> subBlocks, BlockRotations rotation) {
-        HashSet<Face> result = new HashSet<>();
+    static ArrayFloatList prepareState(HashSet<SubBlock> subBlocks, BlockRotations rotation, HashSet<FaceOrientation> facesToDraw, BlockPosition position) {
+        ArrayFloatList result = new ArrayFloatList();
         for (SubBlock subBlock : subBlocks) {
-            result.addAll(subBlock.getFacesSimple(new Block("", "", rotation)));
+            result.addAll(subBlock.getFaces(new Block("", "", rotation), facesToDraw, position));
         }
         return result;
     }

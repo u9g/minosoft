@@ -18,7 +18,7 @@ public class RenderConstants {
 
     public static final int texturePackRes = 16;
 
-    public static final int blockRes = 16;
+    public static final int BLOCK_RES = 16;
 
     public static final int[][] faceDir = new int[][]{
             {1, 0, 0},

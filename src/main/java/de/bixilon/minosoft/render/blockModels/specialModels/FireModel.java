@@ -17,11 +17,12 @@ import com.google.gson.JsonObject;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockProperties;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockRotations;
+import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
 import de.bixilon.minosoft.render.blockModels.BlockModelInterface;
-import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlock;
 import de.bixilon.minosoft.render.texture.TextureLoader;
+import org.apache.commons.collections.primitives.ArrayFloatList;
 
 import java.util.HashSet;
 
@@ -36,28 +37,27 @@ public class FireModel implements BlockModelInterface {
         up = BlockModelInterface.load(mod, block.get("up").getAsString());
     }
 
-    @Override
-    public HashSet<Face> prepare(Block block, HashSet<FaceOrientation> facesToDraw) {
+    public ArrayFloatList prepare(Block block, HashSet<FaceOrientation> facesToDraw, BlockPosition position) {
         HashSet<BlockProperties> properties = block.getProperties();
 
-        HashSet<Face> result = new HashSet<>();
+        ArrayFloatList result = new ArrayFloatList();
         if (properties.contains(BlockProperties.EAST)) {
-            result.addAll(BlockModelInterface.prepareState(side, BlockRotations.EAST));
+            result.addAll(BlockModelInterface.prepareState(side, BlockRotations.EAST, facesToDraw, position));
         }
         if (properties.contains(BlockProperties.WEST)) {
-            result.addAll(BlockModelInterface.prepareState(side, BlockRotations.WEST));
+            result.addAll(BlockModelInterface.prepareState(side, BlockRotations.WEST, facesToDraw, position));
         }
         if (properties.contains(BlockProperties.NORTH)) {
-            result.addAll(BlockModelInterface.prepareState(side, BlockRotations.NORTH));
+            result.addAll(BlockModelInterface.prepareState(side, BlockRotations.NORTH, facesToDraw, position));
         }
         if (properties.contains(BlockProperties.SOUTH)) {
-            result.addAll(BlockModelInterface.prepareState(side, BlockRotations.SOUTH));
+            result.addAll(BlockModelInterface.prepareState(side, BlockRotations.SOUTH, facesToDraw, position));
         }
         if (properties.contains(BlockProperties.UP)) {
-            result.addAll(BlockModelInterface.prepareState(up, BlockRotations.UP));
+            result.addAll(BlockModelInterface.prepareState(up, BlockRotations.UP, facesToDraw, position));
         }
         if (result.size() == 0) {
-            result.addAll(BlockModelInterface.prepareState(floor, BlockRotations.NONE));
+            result.addAll(BlockModelInterface.prepareState(floor, BlockRotations.NONE, facesToDraw, position));
         }
         return result;
     }

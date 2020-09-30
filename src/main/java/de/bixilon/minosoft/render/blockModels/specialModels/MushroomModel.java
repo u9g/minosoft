@@ -17,11 +17,12 @@ import com.google.gson.JsonObject;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockProperties;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockRotations;
+import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
 import de.bixilon.minosoft.render.blockModels.BlockModelInterface;
-import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlock;
 import de.bixilon.minosoft.render.texture.TextureLoader;
+import org.apache.commons.collections.primitives.ArrayFloatList;
 
 import java.util.HashSet;
 
@@ -32,26 +33,25 @@ public class MushroomModel implements BlockModelInterface {
         subBlocks = BlockModelInterface.load(mod, block.get("block").getAsString());
     }
 
-    @Override
-    public HashSet<Face> prepare(Block block, HashSet<FaceOrientation> facesToDraw) {
-        HashSet<Face> result = new HashSet<>();
+    public ArrayFloatList prepare(Block block, HashSet<FaceOrientation> facesToDraw, BlockPosition position) {
+        ArrayFloatList result = new ArrayFloatList();
         if (block.getProperties().contains(BlockProperties.DOWN)) {
-            result.addAll(BlockModelInterface.prepareState(subBlocks, BlockRotations.DOWN));
+            result.addAll(BlockModelInterface.prepareState(subBlocks, BlockRotations.DOWN, facesToDraw, position));
         }
         if (block.getProperties().contains(BlockProperties.UP)) {
-            result.addAll(BlockModelInterface.prepareState(subBlocks, BlockRotations.UP));
+            result.addAll(BlockModelInterface.prepareState(subBlocks, BlockRotations.UP, facesToDraw, position));
         }
         if (block.getProperties().contains(BlockProperties.EAST)) {
-            result.addAll(BlockModelInterface.prepareState(subBlocks, BlockRotations.EAST));
+            result.addAll(BlockModelInterface.prepareState(subBlocks, BlockRotations.EAST, facesToDraw, position));
         }
         if (block.getProperties().contains(BlockProperties.WEST)) {
-            result.addAll(BlockModelInterface.prepareState(subBlocks, BlockRotations.WEST));
+            result.addAll(BlockModelInterface.prepareState(subBlocks, BlockRotations.WEST, facesToDraw, position));
         }
         if (block.getProperties().contains(BlockProperties.NORTH)) {
-            result.addAll(BlockModelInterface.prepareState(subBlocks, BlockRotations.NORTH));
+            result.addAll(BlockModelInterface.prepareState(subBlocks, BlockRotations.NORTH, facesToDraw, position));
         }
         if (block.getProperties().contains(BlockProperties.SOUTH)) {
-            result.addAll(BlockModelInterface.prepareState(subBlocks, BlockRotations.SOUTH));
+            result.addAll(BlockModelInterface.prepareState(subBlocks, BlockRotations.SOUTH, facesToDraw, position));
         }
         return result;
     }

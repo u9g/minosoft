@@ -16,12 +16,12 @@ package de.bixilon.minosoft.render.blockModels.specialModels;
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.BlockProperties;
-import de.bixilon.minosoft.logging.Log;
+import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
 import de.bixilon.minosoft.render.blockModels.BlockModelInterface;
-import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlock;
 import de.bixilon.minosoft.render.texture.TextureLoader;
+import org.apache.commons.collections.primitives.ArrayFloatList;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,14 +41,13 @@ public class CropModel implements BlockModelInterface {
         }
     }
 
-    public HashSet<Face> prepare(Block block, HashSet<FaceOrientation> facesToDraw) {
+    public ArrayFloatList prepare(Block block, HashSet<FaceOrientation> facesToDraw, BlockPosition position) {
         for (BlockProperties property : block.getProperties()) {
             if (modelMap.containsKey(property.name())) {
-                return prepareBlockState(modelMap.get(property.name()), facesToDraw, block);
+                return prepareBlockState(modelMap.get(property.name()), facesToDraw, block, position);
             }
         }
-        Log.warn("failed to prepare block: " + block.toString());
-        return new HashSet<>();
+        throw new RuntimeException("failed to prepare block: " + block.toString());
     }
 
     public boolean isFull() {

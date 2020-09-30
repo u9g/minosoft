@@ -15,9 +15,9 @@ package de.bixilon.minosoft.render.texture;
 
 import com.google.gson.JsonArray;
 import de.bixilon.minosoft.render.GameWindow;
+import org.apache.commons.collections.primitives.ArrayFloatList;
 
 import static de.bixilon.minosoft.render.blockModels.Face.RenderConstants.texturePackRes;
-import static org.lwjgl.opengl.GL11.glTexCoord2f;
 
 public class InFaceUV {
     public final int u1, v1, u2, v2;
@@ -45,23 +45,33 @@ public class InFaceUV {
         realV2 = (float) v2 / texturePackRes;
     }
 
-    public void draw(int i) {
+    public ArrayFloatList getFloats(int i) {
         if (i > 3) {
             i -= 4;
         }
+        ArrayFloatList result = new ArrayFloatList();
         switch (i) {
-            case 0:
-                glTexCoord2f(realU1, realV1);
-                break;
-            case 1:
-                glTexCoord2f(realU2, realV1);
-                break;
-            case 2:
-                glTexCoord2f(realU2, realV2);
-                break;
-            case 3:
-                glTexCoord2f(realU1, realV2);
-                break;
+            case 0 -> {
+                result.add(realU1);
+                result.add(realV1);
+                return result;
+            }
+            case 1 -> {
+                result.add(realU2);
+                result.add(realV1);
+                return result;
+            }
+            case 2 -> {
+                result.add(realU2);
+                result.add(realV2);
+                return result;
+            }
+            case 3 -> {
+                result.add(realU1);
+                result.add(realV2);
+                return result;
+            }
         }
+        return result;
     }
 }

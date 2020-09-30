@@ -15,10 +15,11 @@ package de.bixilon.minosoft.render.blockModels.subBlocks;
 
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
-import de.bixilon.minosoft.render.blockModels.Face.Face;
+import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.texture.InFaceUV;
 import de.bixilon.minosoft.render.texture.TextureLoader;
+import org.apache.commons.collections.primitives.ArrayFloatList;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -106,22 +107,31 @@ public class SubBlock {
         textures.put(orientation, textureName);
     }
 
-    public HashSet<Face> getFaces(Block block, HashSet<FaceOrientation> facesToDraw) {
-        HashSet<Face> result = new HashSet<>();
+    public ArrayFloatList getFaces(Block block, HashSet<FaceOrientation> facesToDraw, BlockPosition position) {
+        ArrayFloatList result = new ArrayFloatList();
         facesToDraw.forEach((faceOrientation -> {
-            Face face = prepareFace(faceOrientation, block);
+            ArrayFloatList face = prepareFace(faceOrientation, block, position);
             if (face != null) {
-                result.add(face);
+                result.addAll(face);
             }
         }));
         return result;
     }
 
-    private Face prepareFace(FaceOrientation faceDirection, Block block) {
+    private ArrayFloatList prepareFace(FaceOrientation faceDirection, Block block, BlockPosition position) {
         if (cullFaceTextures.contains(faceDirection) || !textureCoordinates.containsKey(faceDirection)) {
             return null;
         }
-        return new Face(textureCoordinates.get(faceDirection), uv.get(faceDirection), cuboid.getFacePositions(faceDirection, block), textureRotations.get(faceDirection));
+        ArrayFloatList result = new ArrayFloatList();
+        SubBlockPosition[] positions = cuboid.getFacePositions(faceDirection, block);
+        InFaceUV inFaceUV = uv.get(faceDirection);
+        inFaceUV.prepare(textureCoordinates.get(faceDirection));
+        int rotation = textureRotations.get(faceDirection);
+        for (int i = 0; i < positions.length; i++) {
+            result.addAll(inFaceUV.getFloats(i + rotation));
+            result.addAll(positions[i].getFloats(position));
+        }
+        return result;
     }
 
     public boolean isFull() {
@@ -132,18 +142,6 @@ public class SubBlock {
         HashSet<String> result = new HashSet<>();
         for (Map.Entry<FaceOrientation, String> texture : textures.entrySet()) {
             result.add(texture.getValue());
-        }
-        return result;
-    }
-
-    public HashSet<Face> getFacesSimple(Block block) {
-        HashSet<Face> result = new HashSet<>();
-        for (FaceOrientation orientation : FaceOrientation.values()) {
-            if (textureCoordinates.get(orientation) == null) {
-                continue;
-            }
-            result.add(new Face(textureCoordinates.get(orientation), uv.get(orientation),
-                    cuboid.getFacePositions(orientation, block)));
         }
         return result;
     }
