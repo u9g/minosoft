@@ -14,6 +14,7 @@
 package de.bixilon.minosoft.render.texture;
 
 import de.bixilon.minosoft.Config;
+import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
 import de.matthiasmann.twl.utils.PNGDecoder;
 
 import javax.imageio.ImageIO;
@@ -27,16 +28,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import static de.bixilon.minosoft.render.blockModels.Face.RenderConstants.TEXTURE_PACK_RES;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 
 public class TextureLoader {
     private final HashMap<String, HashMap<String, Integer>> textureCoordinates;
+    private final HashMap<String, HashMap<String, BufferedImage>> images;
     private int textureID;
     private float step;
     private int totalTextures = 0;
-    private HashMap<String, HashMap<String, BufferedImage>> images;
 
     public TextureLoader(HashMap<String, HashSet<String>> textures, HashMap<String, HashMap<String, float[]>> tints) {
         textureCoordinates = new HashMap<>();
@@ -46,8 +46,7 @@ public class TextureLoader {
         }
         combineTextures();
         try {
-            PNGDecoder decoder = new PNGDecoder(new FileInputStream(
-                    Config.homeDir + "assets/allTextures.png"));
+            PNGDecoder decoder = new PNGDecoder(new FileInputStream(Config.homeDir + "assets/allTextures.png"));
             ByteBuffer buf = ByteBuffer.allocateDirect(decoder.getWidth() * decoder.getHeight() * 4);
             decoder.decode(buf, decoder.getWidth() * 4, PNGDecoder.Format.RGBA);
             textureID = bindTexture(buf, decoder.getWidth(), decoder.getHeight());
@@ -99,20 +98,19 @@ public class TextureLoader {
         // greatly improves performance in opengl
         // TEXTURE_PACK_RESxTEXTURE_PACK_RES textures only
         int imageLength = 1;
-        while (totalTextures * TEXTURE_PACK_RES > imageLength) {
+        while (totalTextures * RenderConstants.TEXTURE_PACK_RESOLUTION > imageLength) {
             imageLength *= 2; //figure out the right length for the image
         }
-        BufferedImage totalImage = new BufferedImage(imageLength, TEXTURE_PACK_RES,
-                BufferedImage.TYPE_4BYTE_ABGR);
+        BufferedImage totalImage = new BufferedImage(imageLength, RenderConstants.TEXTURE_PACK_RESOLUTION, BufferedImage.TYPE_4BYTE_ABGR);
 
         int currentPos = 0;
         for (Map.Entry<String, HashMap<String, BufferedImage>> mod : images.entrySet()) {
             HashMap<String, Integer> modMap = new HashMap<>();
             for (Map.Entry<String, BufferedImage> texture : mod.getValue().entrySet()) {
-                for (int y = 0; y < TEXTURE_PACK_RES; y++) {
-                    for (int xPixel = 0; xPixel < TEXTURE_PACK_RES; xPixel++) {
+                for (int y = 0; y < RenderConstants.TEXTURE_PACK_RESOLUTION; y++) {
+                    for (int xPixel = 0; xPixel < RenderConstants.TEXTURE_PACK_RESOLUTION; xPixel++) {
                         int rgb = texture.getValue().getRGB(xPixel, y);
-                        totalImage.setRGB(currentPos * TEXTURE_PACK_RES + xPixel, y, rgb);
+                        totalImage.setRGB(currentPos * RenderConstants.TEXTURE_PACK_RESOLUTION + xPixel, y, rgb);
                     }
                 }
                 modMap.put(texture.getKey(), currentPos++);
@@ -126,7 +124,7 @@ public class TextureLoader {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        step = (float) 1 / (float) imageLength * TEXTURE_PACK_RES;
+        step = (float) 1 / (float) imageLength * RenderConstants.TEXTURE_PACK_RESOLUTION;
     }
 
     private int bindTexture(ByteBuffer buf, int width, int height) {
@@ -134,8 +132,7 @@ public class TextureLoader {
         int textureID = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, textureID);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width,
-                height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buf);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buf);
         glGenerateMipmap(GL_TEXTURE_2D);
         //disable smoothing out of textures
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);

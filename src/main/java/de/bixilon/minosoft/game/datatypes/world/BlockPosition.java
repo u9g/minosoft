@@ -13,6 +13,7 @@
 
 package de.bixilon.minosoft.game.datatypes.world;
 
+import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
 import de.bixilon.minosoft.render.utility.Vec3;
 
 public class BlockPosition {
@@ -21,7 +22,6 @@ public class BlockPosition {
     final int z;
 
     public BlockPosition(int x, int y, int z) {
-        // y min -2048, max 2047
         this.x = x;
         this.y = y;
         this.z = z;
@@ -34,9 +34,9 @@ public class BlockPosition {
     }
 
     public BlockPosition(ChunkLocation chunkLocation, Byte height, ChunkNibbleLocation nibbleLocation) {
-        this.x = chunkLocation.getX() * 16 + nibbleLocation.getX();
-        this.y = height * 16 + nibbleLocation.getY();
-        this.z = chunkLocation.getZ() * 16 + nibbleLocation.getZ();
+        this.x = chunkLocation.getX() * RenderConstants.SECTION_WIDTH + nibbleLocation.getX();
+        this.y = height * RenderConstants.SECTION_HEIGHT + nibbleLocation.getY();
+        this.z = chunkLocation.getZ() * RenderConstants.SECTION_WIDTH + nibbleLocation.getZ();
     }
 
     public int getX() {
@@ -61,8 +61,9 @@ public class BlockPosition {
     }
 
     public ChunkLocation getChunkLocation() {
-        int x = getX() / 16;
-        int z = getZ() / 16;
+        int x = getX() / RenderConstants.SECTION_WIDTH;
+        int z = getZ() / RenderConstants.SECTION_WIDTH;
+        //ToDo
         if (getX() < 0) {
             x--;
         }
@@ -83,13 +84,13 @@ public class BlockPosition {
     }
 
     public InChunkLocation getInChunkLocation() {
-        int x = getX() % 16;
+        int x = getX() % RenderConstants.SECTION_WIDTH;
         if (x < 0) {
-            x = 16 + x;
+            x += RenderConstants.SECTION_WIDTH;
         }
-        int z = getZ() % 16;
+        int z = getZ() % RenderConstants.SECTION_WIDTH;
         if (z < 0) {
-            z = 16 + z;
+            z += RenderConstants.SECTION_WIDTH;
         }
         return new InChunkLocation(x, getY(), z);
     }

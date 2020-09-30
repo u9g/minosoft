@@ -19,26 +19,21 @@ import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
 import de.bixilon.minosoft.render.blockModels.Face.Axis;
 import org.apache.commons.collections.primitives.ArrayFloatList;
 
-import static de.bixilon.minosoft.render.blockModels.Face.RenderConstants.BLOCK_RES;
-import static org.lwjgl.opengl.GL11.glVertex3f;
+import static de.bixilon.minosoft.render.blockModels.Face.RenderConstants.BLOCK_RESOLUTION;
 
 public class SubBlockPosition {
-    public float x;
-    public float y;
-    public float z;
-
     private static final SubBlockPosition middlePos = new SubBlockPosition(8, 8, 8);
-
     private static final SubBlockRotation westRotator = new SubBlockRotation(middlePos, Axis.Y, 90);
     private static final SubBlockRotation eastRotator = new SubBlockRotation(middlePos, Axis.Y, 270);
     private static final SubBlockRotation southRotator = new SubBlockRotation(middlePos, Axis.Y, 180);
-
     private static final SubBlockRotation xAxisRotator = new SubBlockRotation(middlePos, Axis.Z, 90);
     private static final SubBlockRotation zAxisRotator = new SubBlockRotation(middlePos, Axis.X, 90);
-
     private static final SubBlockRotation downRotator = new SubBlockRotation(middlePos, Axis.X, 90);
     private static final SubBlockRotation downAltRotator = new SubBlockRotation(middlePos, Axis.X, 180);
     private static final SubBlockRotation upRotator = new SubBlockRotation(middlePos, Axis.X, -90);
+    public float x;
+    public float y;
+    public float z;
 
 
     public SubBlockPosition(JsonArray json) {
@@ -54,24 +49,11 @@ public class SubBlockPosition {
     }
 
     public static SubBlockPosition add(SubBlockPosition pos1, SubBlockPosition pos2) {
-        return new SubBlockPosition(
-                pos1.x + pos2.x,
-                pos1.y + pos2.y,
-                pos1.z + pos2.z);
+        return new SubBlockPosition(pos1.x + pos2.x, pos1.y + pos2.y, pos1.z + pos2.z);
     }
 
     public static SubBlockPosition subtract(SubBlockPosition pos1, SubBlockPosition pos2) {
-        return new SubBlockPosition(
-                pos1.x - pos2.x,
-                pos1.y - pos2.y,
-                pos1.z - pos2.z);
-    }
-
-    public void draw(BlockPosition pos) {
-        glVertex3f(
-                pos.getX() + x / BLOCK_RES,
-                pos.getY() + y / BLOCK_RES,
-                pos.getZ() + z / BLOCK_RES);
+        return new SubBlockPosition(pos1.x - pos2.x, pos1.y - pos2.y, pos1.z - pos2.z);
     }
 
     public SubBlockPosition rotated(Block block) {
@@ -105,9 +87,9 @@ public class SubBlockPosition {
 
     public ArrayFloatList getFloats(BlockPosition position) {
         ArrayFloatList result = new ArrayFloatList();
-        result.add(x / BLOCK_RES + position.getX());
-        result.add(y / BLOCK_RES + position.getY());
-        result.add(z / BLOCK_RES + position.getZ());
+        result.add(x / BLOCK_RESOLUTION + position.getX());
+        result.add(y / BLOCK_RESOLUTION + position.getY());
+        result.add(z / BLOCK_RESOLUTION + position.getZ());
         return result;
     }
 }

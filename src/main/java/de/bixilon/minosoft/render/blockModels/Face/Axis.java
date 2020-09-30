@@ -14,5 +14,7 @@
 package de.bixilon.minosoft.render.blockModels.Face;
 
 public enum Axis {
-    X, Y, Z
+    X,
+    Y,
+    Z
 }

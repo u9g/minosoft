@@ -16,8 +16,6 @@ package de.bixilon.minosoft.render.movement;
 import de.bixilon.minosoft.render.GameWindow;
 import de.bixilon.minosoft.render.utility.Vec3;
 
-import static de.bixilon.minosoft.render.utility.Vec3.normalize;
-import static java.lang.StrictMath.*;
 import static org.lwjgl.opengl.GL11.glRotatef;
 
 public class CameraMovement {
@@ -61,10 +59,10 @@ public class CameraMovement {
         }
 
         Vec3 front = new Vec3();
-        front.x = (float) -(sin(toRadians(yaw)) * cos(toRadians(pitch)));
+        front.x = (float) -(StrictMath.sin(StrictMath.toRadians(yaw)) * StrictMath.cos(StrictMath.toRadians(pitch)));
         front.y = 0;
-        front.z = (float) ((cos(toRadians(yaw))) * cos(toRadians(pitch)));
-        cameraFront = normalize(front);
+        front.z = (float) ((StrictMath.cos(StrictMath.toRadians(yaw))) * StrictMath.cos(StrictMath.toRadians(pitch)));
+        cameraFront = Vec3.normalize(front);
     }
 
     public void loop() {

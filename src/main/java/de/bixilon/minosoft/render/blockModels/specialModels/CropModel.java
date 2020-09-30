@@ -35,9 +35,7 @@ public class CropModel implements BlockModelInterface {
         int stages = block.get("stages").getAsInt();
         modelMap = new HashMap<>();
         for (int i = 0; i < stages; i++) {
-            modelMap.put(String.format("%s%d", "AGE_", i),
-                    BlockModelInterface.load(mod,
-                            String.format("%s%d", block.get("base_name").getAsString(), i)));
+            modelMap.put(String.format("%s%d", "AGE_", i), BlockModelInterface.load(mod, String.format("%s%d", block.get("base_name").getAsString(), i)));
         }
     }
 
@@ -48,6 +46,7 @@ public class CropModel implements BlockModelInterface {
             }
         }
         throw new RuntimeException("failed to prepare block: " + block.toString());
+        throw new RuntimeException("Failed to prepare block: " + block.toString());
     }
 
     public boolean isFull() {

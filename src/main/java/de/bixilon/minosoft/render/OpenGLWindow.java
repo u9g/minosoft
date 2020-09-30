@@ -28,6 +28,7 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class OpenGLWindow {
     private final boolean fullscreen;
+    boolean escDown = false;
     private long window;
     private int width, height;
     private double mouseX;
@@ -51,8 +52,9 @@ public class OpenGLWindow {
     public void init() {
         GLFWErrorCallback.createPrint(System.err).set();
 
-        if (!glfwInit())
+        if (!glfwInit()) {
             throw new IllegalStateException("Unable to initialize GLFW");
+        }
 
         glfwDefaultWindowHints();
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
@@ -66,8 +68,9 @@ public class OpenGLWindow {
         }
 
         window = glfwCreateWindow(width, height, "RENDER", NULL, NULL);
-        if (window == NULL)
+        if (window == NULL) {
             throw new RuntimeException("Failed to create the GLFW window");
+        }
 
         try (MemoryStack stack = stackPush()) {
             IntBuffer pWidth = stack.mallocInt(1); // int*
@@ -77,11 +80,7 @@ public class OpenGLWindow {
 
             GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 
-            glfwSetWindowPos(
-                    window,
-                    (vidmode.width() - pWidth.get(0)) / 2,
-                    (vidmode.height() - pHeight.get(0)) / 2
-            );
+            glfwSetWindowPos(window, (vidmode.width() - pWidth.get(0)) / 2, (vidmode.height() - pHeight.get(0)) / 2);
         }
         glfwMakeContextCurrent(window);
 
@@ -138,11 +137,9 @@ public class OpenGLWindow {
         return mouseY;
     }
 
-    boolean escDown = false;
-
     public float loop() {
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-            if (! escDown) {
+            if (!escDown) {
                 GameWindow.pause();
                 escDown = true;
             }

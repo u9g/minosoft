@@ -16,8 +16,6 @@ package de.bixilon.minosoft.render.movement;
 import de.bixilon.minosoft.render.GameWindow;
 import de.bixilon.minosoft.render.utility.Vec3;
 
-import static de.bixilon.minosoft.render.utility.Vec3.cross;
-import static de.bixilon.minosoft.render.utility.Vec3.mul;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class PlayerMovement {
@@ -36,25 +34,25 @@ public class PlayerMovement {
         float cameraSpeed = FLY_SPEED / deltaTime;
 
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-            playerPos.add(mul(cameraFront, -cameraSpeed * deltaTime));
+            playerPos.add(Vec3.mul(cameraFront, -cameraSpeed * deltaTime));
         }
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-            playerPos.add(mul(cameraFront, cameraSpeed * deltaTime));
+            playerPos.add(Vec3.mul(cameraFront, cameraSpeed * deltaTime));
         }
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-            playerPos.add(mul(cross(CAMERA_UP, cameraFront), -cameraSpeed * deltaTime));
+            playerPos.add(Vec3.mul(Vec3.cross(CAMERA_UP, cameraFront), -cameraSpeed * deltaTime));
         }
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-            playerPos.add(mul(cross(CAMERA_UP, cameraFront), cameraSpeed * deltaTime));
+            playerPos.add(Vec3.mul(Vec3.cross(CAMERA_UP, cameraFront), cameraSpeed * deltaTime));
         }
 
         if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-            if (!GameWindow.getPlayerController().isEnableGravity()) {
+            if (!GameWindow.getPlayerController().isGravityEnabled()) {
                 playerPos.add(0, -cameraSpeed * deltaTime, 0);
             }
         }
         if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-            if (!GameWindow.getPlayerController().isEnableGravity()) {
+            if (!GameWindow.getPlayerController().isGravityEnabled()) {
                 playerPos.add(0, cameraSpeed * deltaTime, 0);
             }
             if (GameWindow.getPlayerController().isOnGround()) {

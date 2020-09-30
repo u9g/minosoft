@@ -13,11 +13,10 @@
 
 package de.bixilon.minosoft.render.utility;
 
-import static java.lang.Math.abs;
 
 public class AdditionalMath {
     public static int[] valuesBetween(int x, int y) {
-        int[] result = new int[abs(x - y) + 1];
+        int[] result = new int[Math.abs(x - y) + 1];
         if (x > y) {
             for (int z = y; z <= x; z++) {
                 result[x - z] = z;

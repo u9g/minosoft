@@ -16,9 +16,6 @@ package de.bixilon.minosoft.render.blockModels;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 
 public class BlockConfigurationTrue extends BlockConfiguration {
-    public BlockConfigurationTrue() {
-    }
-
     @Override
     public boolean contains(Block block) {
         return true;

@@ -105,7 +105,7 @@ public class Minosoft {
     public static void checkClientToken() {
         if (config.getString(GameConfiguration.CLIENT_TOKEN) == null || config.getString(GameConfiguration.CLIENT_TOKEN).equals("randomGenerated")) {
             config.putString(GameConfiguration.CLIENT_TOKEN, UUID.randomUUID().toString());
-            config.saveToFile(Config.configFileName);
+            config.saveToFile();
         }
     }
 
@@ -125,7 +125,7 @@ public class Minosoft {
         if (account == null) {
             selectedAccount = null;
             config.putString(GameConfiguration.ACCOUNT_SELECTED, null);
-            config.saveToFile(Config.configFileName);
+            config.saveToFile();
             return;
         }
         MojangAccount.RefreshStates refreshState = account.refreshToken();

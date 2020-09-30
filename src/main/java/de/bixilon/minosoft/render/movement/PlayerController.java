@@ -18,14 +18,13 @@ import de.bixilon.minosoft.game.datatypes.world.World;
 import de.bixilon.minosoft.render.GameWindow;
 import de.bixilon.minosoft.render.utility.Vec3;
 
-import static de.bixilon.minosoft.render.utility.Vec3.mul;
 import static org.lwjgl.opengl.GL11.glTranslatef;
 
 public class PlayerController {
     private static final float playerHeight = 1.8f;
     private static final float playerWidth = 0.25f;
     private static final float gravity = 13;
-
+    public Vec3 oldPos;
     CameraMovement cameraMovement;
     PlayerMovement playerMovement;
     Vec3 playerPos = new Vec3(); // the feet position of the player
@@ -33,7 +32,6 @@ public class PlayerController {
     private boolean onGround;
     private boolean enableGravity;
     private CollisionHandler collisionHandler;
-    public Vec3 oldPos;
 
     public PlayerController(long window) {
         cameraMovement = new CameraMovement();
@@ -78,7 +76,7 @@ public class PlayerController {
         collisionHandler.handleCollisions();
     }
 
-    public boolean isEnableGravity() {
+    public boolean isGravityEnabled() {
         return enableGravity;
     }
 
@@ -91,7 +89,7 @@ public class PlayerController {
     }
 
     private void applyVelocity(float deltaTime) {
-        playerPos.add(mul(playerVelocity, deltaTime));
+        playerPos.add(Vec3.mul(playerVelocity, deltaTime));
     }
 
     private void handleGravity(float deltaTime) {
@@ -110,6 +108,10 @@ public class PlayerController {
         return onGround;
     }
 
+    public void setOnGround(boolean onGround) {
+        this.onGround = onGround;
+    }
+
     public void jump() {
         playerVelocity.y = 10;
         onGround = false;
@@ -121,9 +123,5 @@ public class PlayerController {
 
     public float getPlayerHeight() {
         return playerHeight;
-    }
-
-    public void setOnGround(boolean onGround) {
-        this.onGround = onGround;
     }
 }

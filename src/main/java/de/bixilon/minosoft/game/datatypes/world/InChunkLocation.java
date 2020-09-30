@@ -13,21 +13,14 @@
 
 package de.bixilon.minosoft.game.datatypes.world;
 
-/**
- * Chunk X, Y and Z location (max 16x16x16)
- */
+import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
+
 public class InChunkLocation {
     final int x;
     final int y;
     final int z;
 
     public InChunkLocation(int x, int y, int z) {
-        // x 0 - 16
-        // y 0 - 255
-        // z 0 - 16
-        if (x > 15 || y > 255 || z > 15 || x < 0 || y < 0 || z < 0) {
-            throw new IllegalArgumentException(String.format("Invalid chunk location %s %s %s", x, y, z));
-        }
         this.x = x;
         this.y = y;
         this.z = z;
@@ -55,7 +48,7 @@ public class InChunkLocation {
     }
 
     public ChunkNibbleLocation getChunkNibbleLocation() {
-        return new ChunkNibbleLocation(getX(), getY() % 16, getZ());
+        return new ChunkNibbleLocation(getX(), getY() % RenderConstants.SECTION_HEIGHT, getZ());
     }
 
     @Override

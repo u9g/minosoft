@@ -14,18 +14,20 @@
 package de.bixilon.minosoft.render.blockModels.Face;
 
 public class RenderConstants {
-    public static final int TEXTURE_PACK_RES = 16;
+    public static final int TEXTURE_PACK_RESOLUTION = 16;
+    public static final int BLOCK_RESOLUTION = 16;
 
-    public static final int texturePackRes = 16;
+    public static final byte SECTION_HEIGHT = 16;
+    public static final byte SECTION_WIDTH = 16;
+    public static final byte SECTIONS_PER_CHUNK = 16;
 
-    public static final int BLOCK_RES = 16;
+    public static final byte SECTIONS_MIN_X = 0;
+    public static final byte SECTIONS_MIN_Y = 0;
+    public static final byte SECTIONS_MIN_Z = 0;
+    public static final byte SECTIONS_MAX_X = SECTION_WIDTH - 1;
+    public static final byte SECTIONS_MAX_Y = SECTION_HEIGHT - 1;
+    public static final byte SECTIONS_MAX_Z = SECTION_WIDTH - 1;
 
-    public static final int[][] faceDir = new int[][]{
-            {1, 0, 0},
-            {-1, 0, 0},
-            {0, 1, 0},
-            {0, -1, 0},
-            {0, 0, 1},
-            {0, 0, -1}
-    };
+    public static final byte CHUNK_MIN_Y = 0;
+    public static final int CHUNK_MAX_Y = SECTION_HEIGHT * SECTIONS_PER_CHUNK - 1;
 }

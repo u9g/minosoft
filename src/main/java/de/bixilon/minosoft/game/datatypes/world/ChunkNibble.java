@@ -14,25 +14,29 @@
 package de.bixilon.minosoft.game.datatypes.world;
 
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
+import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Blocks;
 
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Collection of 16x16x16 blocks
  */
 public class ChunkNibble {
-    final HashMap<ChunkNibbleLocation, Block> blocks;
+    final ConcurrentHashMap<ChunkNibbleLocation, Block> blocks;
 
-    public ChunkNibble(HashMap<ChunkNibbleLocation, Block> blocks) {
+    public ChunkNibble(ConcurrentHashMap<ChunkNibbleLocation, Block> blocks) {
         this.blocks = blocks;
     }
 
     public ChunkNibble() {
         // empty
-        this.blocks = new HashMap<>();
+        this.blocks = new ConcurrentHashMap<>();
     }
 
     public Block getBlock(ChunkNibbleLocation loc) {
+        if (!blocks.containsKey(loc)) {
+            return null;
+        }
         return blocks.get(loc);
     }
 
@@ -41,14 +45,18 @@ public class ChunkNibble {
     }
 
     public void setBlock(int x, int y, int z, Block block) {
-        blocks.put(new ChunkNibbleLocation(x, y, z), block);
+        setBlock(new ChunkNibbleLocation(x, y, z), block);
     }
 
     public void setBlock(ChunkNibbleLocation location, Block block) {
+        if (block == null || block.equals(Blocks.nullBlock)) {
+            blocks.remove(location);
+            return;
+        }
         blocks.put(location, block);
     }
 
-    public HashMap<ChunkNibbleLocation, Block> getBlocks() {
+    public ConcurrentHashMap<ChunkNibbleLocation, Block> getBlocks() {
         return blocks;
     }
 }

@@ -17,10 +17,8 @@ import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
 import de.bixilon.minosoft.game.datatypes.world.World;
 import de.bixilon.minosoft.render.GameWindow;
 import de.bixilon.minosoft.render.blockModels.BlockModelLoader;
+import de.bixilon.minosoft.render.utility.AdditionalMath;
 import de.bixilon.minosoft.render.utility.Vec3;
-
-import static de.bixilon.minosoft.render.utility.AdditionalMath.betterRound;
-import static de.bixilon.minosoft.render.utility.AdditionalMath.valuesBetween;
 
 public class CollisionHandler {
     private final World world;
@@ -93,14 +91,11 @@ public class CollisionHandler {
     private boolean isPositionValid(Vec3 testPos) {
         float width = controller.getPlayerWidth();
 
-        int[] xPositions = valuesBetween(betterRound(testPos.x + width),
-                betterRound(testPos.x - width));
+        int[] xPositions = AdditionalMath.valuesBetween(AdditionalMath.betterRound(testPos.x + width), AdditionalMath.betterRound(testPos.x - width));
 
-        int[] yPositions = valuesBetween(betterRound(testPos.y),
-                betterRound(testPos.y + controller.getPlayerHeight()));
+        int[] yPositions = AdditionalMath.valuesBetween(AdditionalMath.betterRound(testPos.y), AdditionalMath.betterRound(testPos.y + controller.getPlayerHeight()));
 
-        int[] zPositions = valuesBetween(betterRound(testPos.z + width),
-                betterRound(testPos.z - width));
+        int[] zPositions = AdditionalMath.valuesBetween(AdditionalMath.betterRound(testPos.z + width), AdditionalMath.betterRound(testPos.z - width));
 
         for (int xPos : xPositions) {
             for (int yPos : yPositions) {

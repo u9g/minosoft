@@ -38,14 +38,12 @@ public class BlockModel implements BlockModelInterface {
         blockConfigurationStates = new HashMap<>();
 
         if (block.has("blockModel")) {
-            blockConfigurationStates.put(new BlockConfigurationTrue(),
-                    BlockModelInterface.load(mod, block.get("blockModel").getAsString()));
+            blockConfigurationStates.put(new BlockConfigurationTrue(), BlockModelInterface.load(mod, block.get("blockModel").getAsString()));
         } else if (block.has("states")) {
             for (JsonElement element : block.get("states").getAsJsonArray()) {
                 JsonObject state = element.getAsJsonObject();
                 BlockConfiguration configuration = new BlockConfiguration(state.get("properties").getAsJsonObject());
-                blockConfigurationStates.put(configuration,
-                        BlockModelInterface.load(mod, state.get("blockModel").getAsString()));
+                blockConfigurationStates.put(configuration, BlockModelInterface.load(mod, state.get("blockModel").getAsString()));
             }
         }
         // TODO
