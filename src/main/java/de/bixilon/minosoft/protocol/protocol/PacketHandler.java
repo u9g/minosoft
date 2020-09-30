@@ -29,7 +29,6 @@ import de.bixilon.minosoft.game.datatypes.scoreboard.ScoreboardScore;
 import de.bixilon.minosoft.game.datatypes.scoreboard.Team;
 import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
 import de.bixilon.minosoft.game.datatypes.world.Chunk;
-import de.bixilon.minosoft.game.datatypes.world.ChunkLocation;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.network.Connection;
 import de.bixilon.minosoft.protocol.packets.clientbound.login.*;
@@ -290,10 +289,8 @@ public class PacketHandler {
     }
 
     public void handle(PacketBlockChange pkg) {
-        ChunkLocation chunkLocation = pkg.getPosition().getChunkLocation();
-        Chunk chunk = connection.getPlayer().getWorld().getChunk(chunkLocation);
-        chunk.setBlock(pkg.getPosition().getInChunkLocation(), pkg.getBlock());
-        GameWindow.getRenderer().queueChunk(chunkLocation, chunk); // ToDo: only recalculate the changed nibbles
+        connection.getPlayer().getWorld().getChunk(pkg.getPosition().getChunkLocation()).setBlock(pkg.getPosition().getInChunkLocation(), pkg.getBlock());
+        GameWindow.getRenderer().queueBlock(pkg.getPosition(), pkg.getBlock());
     }
 
     public void handle(PacketMultiBlockChange pkg) {
@@ -303,7 +300,7 @@ public class PacketHandler {
             return;
         }
         chunk.setBlocks(pkg.getBlocks());
-        GameWindow.getRenderer().queueChunk(pkg.getLocation(), chunk); // ToDo: only recalculate the changed nibbles
+        GameWindow.getRenderer().queueChunk(pkg.getLocation(), chunk);
     }
 
     public void handle(PacketRespawn pkg) {

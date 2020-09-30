@@ -1,6 +1,6 @@
 /*
  * Codename Minosoft
- * Copyright (C) 2020 Lukas Eisenhauer
+ * Copyright (C) 2020 Lukas Eisenhauer, Moritz Zwerger
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -14,11 +14,11 @@
 package de.bixilon.minosoft.render;
 
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
+import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Blocks;
 import de.bixilon.minosoft.game.datatypes.world.*;
 import de.bixilon.minosoft.protocol.network.Connection;
 import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
-import javafx.util.Pair;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,7 +33,7 @@ public class WorldRenderer {
     private final ConcurrentHashMap<ChunkLocation, ConcurrentHashMap<Byte, ConcurrentHashMap<ChunkNibbleLocation, HashSet<Face>>>> faces = new ConcurrentHashMap<>();
     private AssetsLoader assetsLoader;
 
-    private LinkedBlockingQueue<Pair<ChunkLocation, Chunk>> queuedChunks;
+    private LinkedBlockingQueue<Runnable> queuedMapData;
 
     public int getCountOfFaces() {
         AtomicInteger count = new AtomicInteger();
@@ -42,7 +42,7 @@ public class WorldRenderer {
     }
 
     public void init() {
-        queuedChunks = new LinkedBlockingQueue<>();
+        queuedMapData = new LinkedBlockingQueue<>();
         assetsLoader = new AssetsLoader();
     }
 
@@ -50,8 +50,7 @@ public class WorldRenderer {
         Thread chunkLoadThread = new Thread(() -> {
             while (true) {
                 try {
-                    Pair<ChunkLocation, Chunk> current = queuedChunks.take();
-                    prepareChunk(current.getKey(), current.getValue(), true);
+                    queuedMapData.take().run();
                     //Log.verbose(String.format("Count of faces: %d", getCountOfFaces()));
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -67,22 +66,30 @@ public class WorldRenderer {
     }
 
     public void queueChunk(ChunkLocation location, Chunk chunk) {
-        queuedChunks.add(new Pair<>(location, chunk));
+        queuedMapData.add(() -> prepareChunk(location, chunk));
     }
 
-    public void prepareChunk(ChunkLocation location, Chunk chunk, boolean checkEdges) {
+    public void queueChunkNibble(ChunkLocation location, byte sectionHeight, ChunkNibble nibble) {
+        queuedMapData.add(() -> prepareChunkNibble(location, sectionHeight, nibble));
+    }
+
+    public void queueBlock(BlockPosition position, Block block) {
+        queuedMapData.add(() -> prepareBlock(position, block, false));
+    }
+
+    private void prepareChunk(ChunkLocation location, Chunk chunk) {
         // clear or create current chunk
         ConcurrentHashMap<Byte, ConcurrentHashMap<ChunkNibbleLocation, HashSet<Face>>> chunkFaces = new ConcurrentHashMap<>();
         chunk.getNibbles().forEach(((height, chunkNibble) -> chunkFaces.put(height, getFacesForChunkNibble(location, height, chunkNibble))));
         faces.put(location, chunkFaces);
-        if (!checkEdges) {
-            return;
-        }
-        //ToDo
-
     }
 
-    public ConcurrentHashMap<ChunkNibbleLocation, HashSet<Face>> getFacesForChunkNibble(ChunkLocation chunkLocation, byte sectionHeight, ChunkNibble nibble) {
+    private void prepareChunkNibble(ChunkLocation chunkLocation, byte sectionHeight, ChunkNibble nibble) {
+        faces.get(chunkLocation).put(sectionHeight, getFacesForChunkNibble(chunkLocation, sectionHeight, nibble));
+    }
+
+
+    private ConcurrentHashMap<ChunkNibbleLocation, HashSet<Face>> getFacesForChunkNibble(ChunkLocation chunkLocation, byte sectionHeight, ChunkNibble nibble) {
         ConcurrentHashMap<ChunkLocation, Chunk> world = GameWindow.getConnection().getPlayer().getWorld().getAllChunks();
         // clear or create current chunk nibble
         ConcurrentHashMap<ChunkNibbleLocation, HashSet<Face>> nibbleMap = new ConcurrentHashMap<>();
@@ -175,8 +182,88 @@ public class WorldRenderer {
         return nibbleMap;
     }
 
-    public void prepareChunkNibble(ChunkLocation chunkLocation, byte sectionHeight, ChunkNibble nibble) {
-        faces.get(chunkLocation).put(sectionHeight, getFacesForChunkNibble(chunkLocation, sectionHeight, nibble));
+
+    private void prepareBlock(BlockPosition position, Block block, boolean trustEdges) {
+        HashSet<FaceOrientation> facesToDraw = new HashSet<>();
+
+        if (block != null && !block.equals(Blocks.nullBlock)) {
+            for (FaceOrientation orientation : FaceOrientation.values()) {
+                Block dependedBlock = switch (orientation) {
+                    case DOWN -> {
+                        if (position.getY() == 0) {
+                            facesToDraw.add(orientation);
+                            yield null;
+                        }
+                        yield GameWindow.getConnection().getPlayer().getWorld().getBlock(new BlockPosition(position.getX(), position.getY() - 1, position.getZ()));
+                    }
+                    case UP -> {
+                        if (position.getY() == 255) {
+                            facesToDraw.add(orientation);
+                            yield null;
+                        }
+                        yield GameWindow.getConnection().getPlayer().getWorld().getBlock(new BlockPosition(position.getX(), position.getY() + 1, position.getZ()));
+                    }
+                    case NORTH -> {
+                        if (position.getY() == 255) {
+                            facesToDraw.add(orientation);
+                            yield null;
+                        }
+                        yield GameWindow.getConnection().getPlayer().getWorld().getBlock(new BlockPosition(position.getX(), position.getY(), position.getZ() - 1));
+                    }
+                    case SOUTH -> {
+                        if (position.getY() == 255) {
+                            facesToDraw.add(orientation);
+                            yield null;
+                        }
+                        yield GameWindow.getConnection().getPlayer().getWorld().getBlock(new BlockPosition(position.getX(), position.getY(), position.getZ() + 1));
+                    }
+                    case WEST -> {
+                        if (position.getY() == 255) {
+                            facesToDraw.add(orientation);
+                            yield null;
+                        }
+                        yield GameWindow.getConnection().getPlayer().getWorld().getBlock(new BlockPosition(position.getX() - 1, position.getY(), position.getZ()));
+                    }
+                    case EAST -> {
+                        if (position.getY() == 255) {
+                            facesToDraw.add(orientation);
+                            yield null;
+                        }
+                        yield GameWindow.getConnection().getPlayer().getWorld().getBlock(new BlockPosition(position.getX() + 1, position.getY(), position.getZ()));
+                    }
+                };
+                if (dependedBlock == null || !assetsLoader.getBlockModelLoader().isFull(dependedBlock)) {
+                    facesToDraw.add(orientation);
+                }
+            }
+        }
+        ConcurrentHashMap<ChunkNibbleLocation, HashSet<Face>> nibbleMap = faces.get(position.getChunkLocation()).get((byte) (position.getY() / 16));
+        if (facesToDraw.size() == 0) {
+            // remove all faces
+            nibbleMap.remove(position.getInChunkLocation().getChunkNibbleLocation());
+        } else {
+            nibbleMap.put(position.getInChunkLocation().getChunkNibbleLocation(), assetsLoader.getBlockModelLoader().prepare(block, facesToDraw));
+        }
+
+        if (trustEdges) {
+            return;
+        }
+        if (position.getY() != 0) {
+            // bottom
+            prepareBlock(new BlockPosition(position.getX(), position.getY() - 1, position.getZ()), true);
+        }
+        if (position.getY() != 255) {
+            // bottom
+            prepareBlock(new BlockPosition(position.getX(), position.getY() + 1, position.getZ()), true);
+        }
+        prepareBlock(new BlockPosition(position.getX() + 1, position.getY(), position.getZ()), true);
+        prepareBlock(new BlockPosition(position.getX() - 1, position.getY(), position.getZ()), true);
+        prepareBlock(new BlockPosition(position.getX(), position.getY(), position.getZ() + 1), true);
+        prepareBlock(new BlockPosition(position.getX(), position.getY(), position.getZ() - 1), true);
+    }
+
+    private void prepareBlock(BlockPosition position, boolean trustEdges) {
+        prepareBlock(position, GameWindow.getConnection().getPlayer().getWorld().getBlock(position), trustEdges);
     }
 
 
@@ -198,4 +285,5 @@ public class WorldRenderer {
         }
         return null;
     }
+
 }
