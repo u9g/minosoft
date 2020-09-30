@@ -22,6 +22,7 @@ import de.bixilon.minosoft.game.datatypes.world.palette.Palette;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
 import de.bixilon.minosoft.protocol.protocol.ProtocolDefinition;
+import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -34,7 +35,7 @@ public final class ChunkUtil {
             }
             //chunk
             byte sections = BitByte.getBitCount(sectionBitMask);
-            int totalBytes = 4096 * sections; // 16 * 16 * 16 * sections; Section Width * Section Height * Section Width * sections
+            int totalBytes = RenderConstants.SECTION_HEIGHT * RenderConstants.SECTION_WIDTH * RenderConstants.SECTION_WIDTH * sections;
             int halfBytes = totalBytes / 2; // half bytes
 
             byte[] blockTypes = buffer.readBytes(totalBytes);
@@ -44,22 +45,22 @@ public final class ChunkUtil {
             if (containsSkyLight) {
                 skyLight = buffer.readBytes(halfBytes);
             }
-            byte[] addBlockTypes = buffer.readBytes(Integer.bitCount(addBitMask) * 2048); // 16 * 16 * 16 * addBlocks / 2
+            byte[] addBlockTypes = buffer.readBytes(Integer.bitCount(addBitMask) * RenderConstants.SECTION_HEIGHT * RenderConstants.SECTION_WIDTH * RenderConstants.SECTION_WIDTH / 2); // 16 * 16 * 16 * addBlocks / 2
             if (groundUpContinuous) {
-                byte[] biomes = buffer.readBytes(256);
+                byte[] biomes = buffer.readBytes(RenderConstants.SECTION_WIDTH * RenderConstants.SECTION_WIDTH);
             }
 
             //parse data
             int arrayPos = 0;
             ConcurrentHashMap<Byte, ChunkNibble> nibbleMap = new ConcurrentHashMap<>();
-            for (byte c = 0; c < 16; c++) { // max sections per chunks in chunk column
+            for (byte c = 0; c < RenderConstants.SECTIONS_PER_CHUNK; c++) { // max sections per chunks in chunk column
                 if (BitByte.isBitSet(sectionBitMask, c)) {
 
                     ConcurrentHashMap<ChunkNibbleLocation, Block> blockMap = new ConcurrentHashMap<>();
 
-                    for (int nibbleY = 0; nibbleY < 16; nibbleY++) {
-                        for (int nibbleZ = 0; nibbleZ < 16; nibbleZ++) {
-                            for (int nibbleX = 0; nibbleX < 16; nibbleX++) {
+                    for (int nibbleY = 0; nibbleY < RenderConstants.SECTION_HEIGHT; nibbleY++) {
+                        for (int nibbleZ = 0; nibbleZ < RenderConstants.SECTION_WIDTH; nibbleZ++) {
+                            for (int nibbleX = 0; nibbleX < RenderConstants.SECTION_WIDTH; nibbleX++) {
 
                                 short singeBlockId = (short) (blockTypes[arrayPos] & 0xFF);
                                 byte singleMeta;
@@ -99,7 +100,7 @@ public final class ChunkUtil {
                 return null;
             }
             byte sections = BitByte.getBitCount(sectionBitMask);
-            int totalBlocks = 4096 * sections; // 16 * 16 * 16 * sections; Section Width * Section Height * Section Width * sections
+            int totalBlocks = RenderConstants.SECTION_HEIGHT * RenderConstants.SECTION_WIDTH * RenderConstants.SECTION_WIDTH * sections;
             int halfBytes = totalBlocks / 2; // half bytes
 
             short[] blockData = buffer.readLEShorts(totalBlocks); // blocks >>> 4, data & 0xF
@@ -111,20 +112,20 @@ public final class ChunkUtil {
             }
 
             if (groundUpContinuous) {
-                byte[] biomes = buffer.readBytes(256);
+                byte[] biomes = buffer.readBytes(RenderConstants.SECTION_WIDTH * RenderConstants.SECTION_WIDTH);
             }
 
             int arrayPos = 0;
             ConcurrentHashMap<Byte, ChunkNibble> nibbleMap = new ConcurrentHashMap<>();
-            for (byte c = 0; c < 16; c++) { // max sections per chunks in chunk column
+            for (byte c = 0; c < RenderConstants.SECTIONS_PER_CHUNK; c++) { // max sections per chunks in chunk column
                 if (!BitByte.isBitSet(sectionBitMask, c)) {
                     continue;
                 }
                 ConcurrentHashMap<ChunkNibbleLocation, Block> blockMap = new ConcurrentHashMap<>();
 
-                for (int nibbleY = 0; nibbleY < 16; nibbleY++) {
-                    for (int nibbleZ = 0; nibbleZ < 16; nibbleZ++) {
-                        for (int nibbleX = 0; nibbleX < 16; nibbleX++) {
+                for (int nibbleY = 0; nibbleY < RenderConstants.SECTION_HEIGHT; nibbleY++) {
+                    for (int nibbleZ = 0; nibbleZ < RenderConstants.SECTION_WIDTH; nibbleZ++) {
+                        for (int nibbleX = 0; nibbleX < RenderConstants.SECTION_WIDTH; nibbleX++) {
                             int blockId = blockData[arrayPos] & 0xFFFF;
                             Block block = buffer.getConnection().getMapping().getBlockById(blockId);
                             if (block.equals(Blocks.nullBlock)) {
@@ -142,7 +143,7 @@ public final class ChunkUtil {
         }
         // really big thanks to: https://wiki.vg/index.php?title=Chunk_Format&oldid=13712
         ConcurrentHashMap<Byte, ChunkNibble> nibbleMap = new ConcurrentHashMap<>();
-        for (byte c = 0; c < 16; c++) { // max sections per chunks in chunk column
+        for (byte c = 0; c < RenderConstants.SECTIONS_PER_CHUNK; c++) { // max sections per chunks in chunk column
             if (!BitByte.isBitSet(sectionBitMask, c)) {
                 continue;
             }
@@ -156,9 +157,9 @@ public final class ChunkUtil {
             long[] data = buffer.readLongArray(buffer.readVarInt());
 
             ConcurrentHashMap<ChunkNibbleLocation, Block> blockMap = new ConcurrentHashMap<>();
-            for (int nibbleY = 0; nibbleY < 16; nibbleY++) {
-                for (int nibbleZ = 0; nibbleZ < 16; nibbleZ++) {
-                    for (int nibbleX = 0; nibbleX < 16; nibbleX++) {
+            for (int nibbleY = 0; nibbleY < RenderConstants.SECTION_HEIGHT; nibbleY++) {
+                for (int nibbleZ = 0; nibbleZ < RenderConstants.SECTION_WIDTH; nibbleZ++) {
+                    for (int nibbleX = 0; nibbleX < RenderConstants.SECTION_WIDTH; nibbleX++) {
 
                         int blockNumber = (((nibbleY * 16) + nibbleZ) * 16) + nibbleX;
                         int startLong = (blockNumber * palette.getBitsPerBlock()) / 64;
@@ -203,7 +204,7 @@ public final class ChunkUtil {
             nibbleMap.put(c, new ChunkNibble(blockMap));
         }
         if (buffer.getProtocolId() < 552) {
-            byte[] biomes = buffer.readBytes(256);
+            byte[] biomes = buffer.readBytes(RenderConstants.SECTION_WIDTH * RenderConstants.SECTION_WIDTH);
         }
         return new Chunk(nibbleMap);
     }

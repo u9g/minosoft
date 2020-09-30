@@ -14,7 +14,7 @@
 package de.bixilon.minosoft.game.datatypes.world;
 
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
-import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Blocks;
+import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,14 +31,8 @@ public class Chunk {
     }
 
     public Block getBlock(int x, int y, int z) {
-        if (x > 15 || y > 255 || z > 15 || x < 0 || y < 0 || z < 0) {
-            throw new IllegalArgumentException(String.format("Invalid chunk location %s %s %s", x, y, z));
-        }
-        byte section = (byte) (y / 16);
-        if (nibbles.get(section) == null) {
-            return Blocks.nullBlock;
-        }
-        return nibbles.get(section).getBlock(x, y % 16, z);
+        byte section = (byte) (y / RenderConstants.SECTION_HEIGHT);
+        return nibbles.get(section).getBlock(x, y % RenderConstants.SECTION_HEIGHT, z);
     }
 
     public Block getBlock(InChunkLocation location) {
@@ -46,20 +40,19 @@ public class Chunk {
     }
 
     public void setBlock(int x, int y, int z, Block block) {
-        byte section = (byte) (y / 16);
+        byte section = (byte) (y / RenderConstants.SECTION_HEIGHT);
         createSectionIfNotExist(section);
-        nibbles.get(section).setBlock(x, y % 16, z, block);
+        nibbles.get(section).setBlock(x, y % RenderConstants.SECTION_HEIGHT, z, block);
     }
 
     public void setBlock(InChunkLocation location, Block block) {
-        byte section = (byte) (location.getY() / 16);
+        byte section = (byte) (location.getY() / RenderConstants.SECTION_HEIGHT);
         createSectionIfNotExist(section);
         nibbles.get(section).setBlock(location.getChunkNibbleLocation(), block);
     }
 
     void createSectionIfNotExist(byte section) {
         if (nibbles.get(section) == null) {
-            // nibble was empty before, creating it
             nibbles.put(section, new ChunkNibble());
         }
     }

@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import static de.bixilon.minosoft.render.blockModels.Face.RenderConstants.TEXTURE_PACK_RES;
+import static de.bixilon.minosoft.render.blockModels.Face.RenderConstants.TEXTURE_PACK_RESOLUTION;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 
@@ -36,7 +36,7 @@ public class TextureLoader {
     private int textureID;
     private float step;
     private int totalTextures = 0;
-    private HashMap<String, HashMap<String, BufferedImage>> images;
+    private final HashMap<String, HashMap<String, BufferedImage>> images;
 
     public TextureLoader(HashMap<String, HashSet<String>> textures, HashMap<String, HashMap<String, float[]>> tints) {
         textureCoordinates = new HashMap<>();
@@ -99,20 +99,20 @@ public class TextureLoader {
         // greatly improves performance in opengl
         // TEXTURE_PACK_RESxTEXTURE_PACK_RES textures only
         int imageLength = 1;
-        while (totalTextures * TEXTURE_PACK_RES > imageLength) {
+        while (totalTextures * TEXTURE_PACK_RESOLUTION > imageLength) {
             imageLength *= 2; //figure out the right length for the image
         }
-        BufferedImage totalImage = new BufferedImage(imageLength, TEXTURE_PACK_RES,
+        BufferedImage totalImage = new BufferedImage(imageLength, TEXTURE_PACK_RESOLUTION,
                 BufferedImage.TYPE_4BYTE_ABGR);
 
         int currentPos = 0;
         for (Map.Entry<String, HashMap<String, BufferedImage>> mod : images.entrySet()) {
             HashMap<String, Integer> modMap = new HashMap<>();
             for (Map.Entry<String, BufferedImage> texture : mod.getValue().entrySet()) {
-                for (int y = 0; y < TEXTURE_PACK_RES; y++) {
-                    for (int xPixel = 0; xPixel < TEXTURE_PACK_RES; xPixel++) {
+                for (int y = 0; y < TEXTURE_PACK_RESOLUTION; y++) {
+                    for (int xPixel = 0; xPixel < TEXTURE_PACK_RESOLUTION; xPixel++) {
                         int rgb = texture.getValue().getRGB(xPixel, y);
-                        totalImage.setRGB(currentPos * TEXTURE_PACK_RES + xPixel, y, rgb);
+                        totalImage.setRGB(currentPos * TEXTURE_PACK_RESOLUTION + xPixel, y, rgb);
                     }
                 }
                 modMap.put(texture.getKey(), currentPos++);
@@ -126,7 +126,7 @@ public class TextureLoader {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        step = (float) 1 / (float) imageLength * TEXTURE_PACK_RES;
+        step = (float) 1 / (float) imageLength * TEXTURE_PACK_RESOLUTION;
     }
 
     private int bindTexture(ByteBuffer buf, int width, int height) {

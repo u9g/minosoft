@@ -16,7 +16,7 @@ package de.bixilon.minosoft.render.texture;
 import com.google.gson.JsonArray;
 import de.bixilon.minosoft.render.GameWindow;
 
-import static de.bixilon.minosoft.render.blockModels.Face.RenderConstants.texturePackRes;
+import static de.bixilon.minosoft.render.blockModels.Face.RenderConstants.TEXTURE_PACK_RESOLUTION;
 import static org.lwjgl.opengl.GL11.glTexCoord2f;
 
 public class InFaceUV {
@@ -38,11 +38,11 @@ public class InFaceUV {
 
     public void prepare(float texture) {
         realU1 = texture + u1 * GameWindow.getRenderer().getAssetsLoader().getTextureLoader().getStep()
-                / texturePackRes;
+                / TEXTURE_PACK_RESOLUTION;
         realU2 = texture + u2 * GameWindow.getRenderer().getAssetsLoader().getTextureLoader().getStep()
-                / texturePackRes;
-        realV1 = (float) v1 / texturePackRes;
-        realV2 = (float) v2 / texturePackRes;
+                / TEXTURE_PACK_RESOLUTION;
+        realV1 = (float) v1 / TEXTURE_PACK_RESOLUTION;
+        realV2 = (float) v2 / TEXTURE_PACK_RESOLUTION;
     }
 
     public void draw(int i) {

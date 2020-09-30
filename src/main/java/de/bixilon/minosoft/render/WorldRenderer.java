@@ -19,6 +19,7 @@ import de.bixilon.minosoft.game.datatypes.world.*;
 import de.bixilon.minosoft.protocol.network.Connection;
 import de.bixilon.minosoft.render.blockModels.Face.Face;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
+import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -102,9 +103,9 @@ public class WorldRenderer {
             for (FaceOrientation orientation : FaceOrientation.values()) {
                 Block dependedBlock = switch (orientation) {
                     case DOWN -> {
-                        if (location.getY() == 0) {
+                        if (location.getY() == RenderConstants.SECTIONS_MIN_Y) {
                             // need to check upper section (nibble)
-                            if (sectionHeight == 0) {
+                            if (sectionHeight == RenderConstants.SECTIONS_MIN_Y) {
                                 // y = 0, there can't be any blocks below me
                                 yield null;
                             }
@@ -113,14 +114,14 @@ public class WorldRenderer {
                             if (!world.get(chunkLocation).getNibbles().containsKey(bottomSection)) {
                                 yield null;
                             }
-                            yield world.get(chunkLocation).getNibbles().get(bottomSection).getBlock(location.getX(), 15, location.getZ());
+                            yield world.get(chunkLocation).getNibbles().get(bottomSection).getBlock(location.getX(), RenderConstants.SECTIONS_MAX_Y, location.getZ());
                         }
                         yield nibbleBlocks.get(new ChunkNibbleLocation(location.getX(), location.getY() - 1, location.getZ()));
                     }
                     case UP -> {
-                        if (location.getY() == 15) {
+                        if (location.getY() == RenderConstants.SECTIONS_MAX_Y) {
                             // need to check upper section (nibble)
-                            if (sectionHeight == 15) {
+                            if (sectionHeight == RenderConstants.SECTIONS_MAX_Y) {
                                 // y = 255, there can't be any blocks above me
                                 yield null;
                             }
@@ -129,42 +130,42 @@ public class WorldRenderer {
                             if (!world.get(chunkLocation).getNibbles().containsKey(upperSection)) {
                                 yield null;
                             }
-                            yield world.get(chunkLocation).getNibbles().get(upperSection).getBlock(location.getX(), 0, location.getZ());
+                            yield world.get(chunkLocation).getNibbles().get(upperSection).getBlock(location.getX(), RenderConstants.SECTIONS_MIN_Y, location.getZ());
                         }
                         yield nibbleBlocks.get(new ChunkNibbleLocation(location.getX(), location.getY() + 1, location.getZ()));
                     }
                     case WEST -> {
-                        if (location.getX() == 0) {
+                        if (location.getX() == RenderConstants.SECTIONS_MIN_X) {
                             ChunkNibble otherChunkNibble = getChunkNibbleOfWorld(world, new ChunkLocation(chunkLocation.getX() - 1, chunkLocation.getZ()), sectionHeight);
                             if (otherChunkNibble != null) {
-                                yield otherChunkNibble.getBlock(15, location.getY(), location.getZ());
+                                yield otherChunkNibble.getBlock(RenderConstants.SECTIONS_MAX_X, location.getY(), location.getZ());
                             }
                         }
                         yield nibbleBlocks.get(new ChunkNibbleLocation(location.getX() - 1, location.getY(), location.getZ()));
                     }
                     case EAST -> {
-                        if (location.getX() == 15) {
+                        if (location.getX() == RenderConstants.SECTIONS_MIN_X) {
                             ChunkNibble otherChunkNibble = getChunkNibbleOfWorld(world, new ChunkLocation(chunkLocation.getX() + 1, chunkLocation.getZ()), sectionHeight);
                             if (otherChunkNibble != null) {
-                                yield otherChunkNibble.getBlock(0, location.getY(), location.getZ());
+                                yield otherChunkNibble.getBlock(RenderConstants.SECTIONS_MAX_X, location.getY(), location.getZ());
                             }
                         }
                         yield nibbleBlocks.get(new ChunkNibbleLocation(location.getX() + 1, location.getY(), location.getZ()));
                     }
                     case NORTH -> {
-                        if (location.getZ() == 0) {
+                        if (location.getZ() == RenderConstants.SECTIONS_MIN_Z) {
                             ChunkNibble otherChunkNibble = getChunkNibbleOfWorld(world, new ChunkLocation(chunkLocation.getX(), chunkLocation.getZ() - 1), sectionHeight);
                             if (otherChunkNibble != null) {
-                                yield otherChunkNibble.getBlock(location.getX(), location.getY(), 15);
+                                yield otherChunkNibble.getBlock(location.getX(), location.getY(), RenderConstants.SECTIONS_MAX_Z);
                             }
                         }
                         yield nibbleBlocks.get(new ChunkNibbleLocation(location.getX(), location.getY(), location.getZ() - 1));
                     }
                     case SOUTH -> {
-                        if (location.getZ() == 15) {
+                        if (location.getZ() == RenderConstants.SECTIONS_MAX_Z) {
                             ChunkNibble otherChunkNibble = getChunkNibbleOfWorld(world, new ChunkLocation(chunkLocation.getX(), chunkLocation.getZ() + 1), sectionHeight);
                             if (otherChunkNibble != null) {
-                                yield otherChunkNibble.getBlock(location.getX(), location.getY(), 0);
+                                yield otherChunkNibble.getBlock(location.getX(), location.getY(), RenderConstants.SECTIONS_MIN_Z);
                             }
                         }
                         yield nibbleBlocks.get(new ChunkNibbleLocation(location.getX(), location.getY(), location.getZ() + 1));
@@ -174,7 +175,7 @@ public class WorldRenderer {
                     facesToDraw.add(orientation);
                 }
             }
-            if (facesToDraw.size() > 0) {
+            if (!facesToDraw.isEmpty()) {
                 nibbleMap.put(location, assetsLoader.getBlockModelLoader().prepare(block, facesToDraw));
             }
 
@@ -190,54 +191,30 @@ public class WorldRenderer {
             for (FaceOrientation orientation : FaceOrientation.values()) {
                 Block dependedBlock = switch (orientation) {
                     case DOWN -> {
-                        if (position.getY() == 0) {
+                        if (position.getY() == RenderConstants.CHUNK_MIN_Y) {
                             facesToDraw.add(orientation);
                             yield null;
                         }
                         yield GameWindow.getConnection().getPlayer().getWorld().getBlock(new BlockPosition(position.getX(), position.getY() - 1, position.getZ()));
                     }
                     case UP -> {
-                        if (position.getY() == 255) {
+                        if (position.getY() == RenderConstants.CHUNK_MAX_Y) {
                             facesToDraw.add(orientation);
                             yield null;
                         }
                         yield GameWindow.getConnection().getPlayer().getWorld().getBlock(new BlockPosition(position.getX(), position.getY() + 1, position.getZ()));
                     }
-                    case NORTH -> {
-                        if (position.getY() == 255) {
-                            facesToDraw.add(orientation);
-                            yield null;
-                        }
-                        yield GameWindow.getConnection().getPlayer().getWorld().getBlock(new BlockPosition(position.getX(), position.getY(), position.getZ() - 1));
-                    }
-                    case SOUTH -> {
-                        if (position.getY() == 255) {
-                            facesToDraw.add(orientation);
-                            yield null;
-                        }
-                        yield GameWindow.getConnection().getPlayer().getWorld().getBlock(new BlockPosition(position.getX(), position.getY(), position.getZ() + 1));
-                    }
-                    case WEST -> {
-                        if (position.getY() == 255) {
-                            facesToDraw.add(orientation);
-                            yield null;
-                        }
-                        yield GameWindow.getConnection().getPlayer().getWorld().getBlock(new BlockPosition(position.getX() - 1, position.getY(), position.getZ()));
-                    }
-                    case EAST -> {
-                        if (position.getY() == 255) {
-                            facesToDraw.add(orientation);
-                            yield null;
-                        }
-                        yield GameWindow.getConnection().getPlayer().getWorld().getBlock(new BlockPosition(position.getX() + 1, position.getY(), position.getZ()));
-                    }
+                    case NORTH -> GameWindow.getConnection().getPlayer().getWorld().getBlock(new BlockPosition(position.getX(), position.getY(), position.getZ() - 1));
+                    case SOUTH -> GameWindow.getConnection().getPlayer().getWorld().getBlock(new BlockPosition(position.getX(), position.getY(), position.getZ() + 1));
+                    case WEST -> GameWindow.getConnection().getPlayer().getWorld().getBlock(new BlockPosition(position.getX() - 1, position.getY(), position.getZ()));
+                    case EAST -> GameWindow.getConnection().getPlayer().getWorld().getBlock(new BlockPosition(position.getX() + 1, position.getY(), position.getZ()));
                 };
                 if (dependedBlock == null || !assetsLoader.getBlockModelLoader().isFull(dependedBlock)) {
                     facesToDraw.add(orientation);
                 }
             }
         }
-        ConcurrentHashMap<ChunkNibbleLocation, HashSet<Face>> nibbleMap = faces.get(position.getChunkLocation()).get((byte) (position.getY() / 16));
+        ConcurrentHashMap<ChunkNibbleLocation, HashSet<Face>> nibbleMap = faces.get(position.getChunkLocation()).get((byte) (position.getY() / RenderConstants.SECTION_HEIGHT));
         if (facesToDraw.size() == 0) {
             // remove all faces
             nibbleMap.remove(position.getInChunkLocation().getChunkNibbleLocation());
@@ -248,11 +225,11 @@ public class WorldRenderer {
         if (trustEdges) {
             return;
         }
-        if (position.getY() != 0) {
+        if (position.getY() != RenderConstants.CHUNK_MIN_Y) {
             // bottom
             prepareBlock(new BlockPosition(position.getX(), position.getY() - 1, position.getZ()), true);
         }
-        if (position.getY() != 255) {
+        if (position.getY() != RenderConstants.CHUNK_MAX_Y) {
             // bottom
             prepareBlock(new BlockPosition(position.getX(), position.getY() + 1, position.getZ()), true);
         }

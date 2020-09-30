@@ -73,7 +73,7 @@ public class Block {
             out.append("rotation=");
             out.append(getRotation());
         }
-        if (properties.size() > 0) {
+        if (!properties.isEmpty()) {
             if (out.length() > 0) {
                 out.append(", ");
             } else {
@@ -91,7 +91,7 @@ public class Block {
     @Override
     public int hashCode() {
         int ret = mod.hashCode() * identifier.hashCode() * rotation.hashCode();
-        if (properties.size() > 0) {
+        if (!properties.isEmpty()) {
             ret *= properties.hashCode();
         }
         return ret;

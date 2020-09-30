@@ -17,27 +17,23 @@ import com.google.gson.JsonArray;
 import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
 import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
 import de.bixilon.minosoft.render.blockModels.Face.Axis;
+import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
 
-import static de.bixilon.minosoft.render.blockModels.Face.RenderConstants.blockRes;
 import static org.lwjgl.opengl.GL11.glVertex3f;
 
 public class SubBlockPosition {
-    public float x;
-    public float y;
-    public float z;
-
     private static final SubBlockPosition middlePos = new SubBlockPosition(8, 8, 8);
-
     private static final SubBlockRotation westRotator = new SubBlockRotation(middlePos, Axis.Y, 90);
     private static final SubBlockRotation eastRotator = new SubBlockRotation(middlePos, Axis.Y, 270);
     private static final SubBlockRotation southRotator = new SubBlockRotation(middlePos, Axis.Y, 180);
-
     private static final SubBlockRotation xAxisRotator = new SubBlockRotation(middlePos, Axis.Z, 90);
     private static final SubBlockRotation zAxisRotator = new SubBlockRotation(middlePos, Axis.X, 90);
-
     private static final SubBlockRotation downRotator = new SubBlockRotation(middlePos, Axis.X, 90);
     private static final SubBlockRotation downAltRotator = new SubBlockRotation(middlePos, Axis.X, 180);
     private static final SubBlockRotation upRotator = new SubBlockRotation(middlePos, Axis.X, -90);
+    public float x;
+    public float y;
+    public float z;
 
 
     public SubBlockPosition(JsonArray json) {
@@ -67,10 +63,9 @@ public class SubBlockPosition {
     }
 
     public void draw(BlockPosition pos) {
-        glVertex3f(
-                pos.getX() + x / blockRes,
-                pos.getY() + y / blockRes,
-                pos.getZ() + z / blockRes);
+        glVertex3f(pos.getX() + x / RenderConstants.BLOCK_RESOLUTION,
+                pos.getY() + y / RenderConstants.BLOCK_RESOLUTION,
+                pos.getZ() + z / RenderConstants.BLOCK_RESOLUTION);
     }
 
     public SubBlockPosition rotated(Block block) {
