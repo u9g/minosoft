@@ -96,6 +96,7 @@ public class GameWindow {
         GameWindow.connection = connection;
         running = true;
         playerController = new PlayerController(openGLWindow.getWindow());
+        renderer.startChunkPreparation(connection);
     }
 
     public static void pause() {
