@@ -13,23 +13,29 @@
 
 package de.bixilon.minosoft.gui.main;
 
+import com.google.gson.JsonObject;
 import de.bixilon.minosoft.Minosoft;
 import de.bixilon.minosoft.protocol.network.Connection;
 import de.bixilon.minosoft.protocol.protocol.ConnectionReasons;
-import javafx.scene.image.Image;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Base64;
 
 public class Server {
     static int highestServerId;
     final int id;
+    final ArrayList<Connection> connections = new ArrayList<>();
     String name;
     String address;
     int desiredVersion;
-    String favicon;
+    byte[] favicon;
     Connection lastPing;
-    ArrayList<Connection> connections = new ArrayList<>();
+
+    public Server(int id, String name, String address, int desiredVersion, byte[] favicon) {
+        this(id, name, address, desiredVersion);
+        this.favicon = favicon;
+    }
 
     public Server(int id, String name, String address, int desiredVersion) {
         this.id = id;
@@ -41,51 +47,26 @@ public class Server {
         this.desiredVersion = desiredVersion;
     }
 
-    public Server(int id, String name, String address, int desiredVersion, String favicon) {
-        this(id, name, address, desiredVersion);
-        this.favicon = favicon;
-    }
-
     public static int getNextServerId() {
         return ++highestServerId;
     }
 
-    public String getName() {
-        return name;
+    public static Server deserialize(JsonObject json) {
+        Server server = new Server(json.get("id").getAsInt(), json.get("name").getAsString(), json.get("address").getAsString(), json.get("version").getAsInt());
+        if (json.has("favicon")) {
+            server.setFavicon(Base64.getDecoder().decode(json.get("favicon").getAsString()));
+        }
+        return server;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public int getDesiredVersion() {
-        return desiredVersion;
-    }
-
-    public void setDesiredVersion(int desiredVersion) {
-        this.desiredVersion = desiredVersion;
-    }
 
     @Nullable
-    public String getBase64Favicon() {
+    public byte[] getFavicon() {
         return favicon;
     }
 
-    public void setBase64Favicon(String favicon) {
+    public void setFavicon(byte[] favicon) {
         this.favicon = favicon;
-    }
-
-    @Nullable
-    public Image getFavicon() {
-        return GUITools.getImageFromBase64(getBase64Favicon());
     }
 
     public int getId() {
@@ -107,13 +88,29 @@ public class Server {
     }
 
     @Override
+    public int hashCode() {
+        return id;
+    }
+
+    @Override
     public String toString() {
         return getName() + " (" + getAddress() + ")";
     }
 
-    @Override
-    public int hashCode() {
-        return id;
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public void ping() {
@@ -121,6 +118,14 @@ public class Server {
             lastPing = new Connection(Connection.lastConnectionId++, getAddress(), null);
         }
         lastPing.resolve(ConnectionReasons.PING, getDesiredVersion()); // resolve dns address and ping
+    }
+
+    public int getDesiredVersion() {
+        return desiredVersion;
+    }
+
+    public void setDesiredVersion(int desiredVersion) {
+        this.desiredVersion = desiredVersion;
     }
 
     public ArrayList<Connection> getConnections() {
@@ -138,5 +143,25 @@ public class Server {
             }
         }
         return false;
+    }
+
+    public JsonObject serialize() {
+        JsonObject json = new JsonObject();
+        json.addProperty("id", id);
+        json.addProperty("name", name);
+        json.addProperty("address", address);
+        json.addProperty("version", desiredVersion);
+        if (favicon != null) {
+            json.addProperty("favicon", getBase64Favicon());
+        }
+        return json;
+    }
+
+    @Nullable
+    public String getBase64Favicon() {
+        if (favicon == null) {
+            return null;
+        }
+        return Base64.getEncoder().encodeToString(favicon);
     }
 }

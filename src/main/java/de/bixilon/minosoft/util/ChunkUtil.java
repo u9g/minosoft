@@ -13,12 +13,12 @@
 
 package de.bixilon.minosoft.util;
 
-import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
-import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Blocks;
-import de.bixilon.minosoft.game.datatypes.world.Chunk;
-import de.bixilon.minosoft.game.datatypes.world.ChunkNibble;
-import de.bixilon.minosoft.game.datatypes.world.ChunkNibbleLocation;
-import de.bixilon.minosoft.game.datatypes.world.palette.Palette;
+import de.bixilon.minosoft.data.mappings.blocks.Block;
+import de.bixilon.minosoft.data.mappings.blocks.Blocks;
+import de.bixilon.minosoft.data.world.Chunk;
+import de.bixilon.minosoft.data.world.ChunkNibble;
+import de.bixilon.minosoft.data.world.ChunkNibbleLocation;
+import de.bixilon.minosoft.data.world.palette.Palette;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
 import de.bixilon.minosoft.protocol.protocol.ProtocolDefinition;
@@ -160,7 +160,6 @@ public final class ChunkUtil {
             for (int nibbleY = 0; nibbleY < RenderConstants.SECTION_HEIGHT; nibbleY++) {
                 for (int nibbleZ = 0; nibbleZ < RenderConstants.SECTION_WIDTH; nibbleZ++) {
                     for (int nibbleX = 0; nibbleX < RenderConstants.SECTION_WIDTH; nibbleX++) {
-
                         int blockNumber = (((nibbleY * 16) + nibbleZ) * 16) + nibbleX;
                         int startLong = (blockNumber * palette.getBitsPerBlock()) / 64;
                         int startOffset = (blockNumber * palette.getBitsPerBlock()) % 64;

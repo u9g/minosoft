@@ -28,7 +28,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class AccountListCell extends ListCell<MojangAccount> implements Initializable {
-    public static ListView<MojangAccount> listView = new ListView<>();
+    public static final ListView<MojangAccount> listView = new ListView<>();
     @FXML
     public MenuButton optionsMenu;
     @FXML
@@ -62,7 +62,6 @@ public class AccountListCell extends ListCell<MojangAccount> implements Initiali
         return root;
     }
 
-
     @Override
     protected void updateItem(MojangAccount account, boolean empty) {
         super.updateItem(account, empty);
@@ -95,6 +94,12 @@ public class AccountListCell extends ListCell<MojangAccount> implements Initiali
         super.updateSelected(selected);
     }
 
+    private void resetCell() {
+        // clear all cells
+        setStyle(null);
+        optionsSelect.setDisable(false);
+    }
+
     public void delete() {
         account.delete();
         if (Minosoft.getSelectedAccount() == account) {
@@ -109,18 +114,6 @@ public class AccountListCell extends ListCell<MojangAccount> implements Initiali
         listView.getItems().remove(account);
     }
 
-    public void select() {
-        Minosoft.selectAccount(account);
-        listView.refresh();
-        ServerListCell.listView.refresh();
-    }
-
-    private void resetCell() {
-        // clear all cells
-        setStyle(null);
-        optionsSelect.setDisable(false);
-    }
-
     public void clicked(MouseEvent e) {
         switch (e.getButton()) {
             case PRIMARY -> {
@@ -130,5 +123,11 @@ public class AccountListCell extends ListCell<MojangAccount> implements Initiali
             }
             case SECONDARY -> optionsMenu.fire();
         }
+    }
+
+    public void select() {
+        Minosoft.selectAccount(account);
+        listView.refresh();
+        ServerListCell.listView.refresh();
     }
 }

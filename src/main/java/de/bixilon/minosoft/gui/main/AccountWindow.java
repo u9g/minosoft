@@ -62,7 +62,6 @@ public class AccountWindow implements Initializable {
         PasswordField password = new PasswordField();
         password.setPromptText("Password");
 
-
         grid.add(new Label("Email:"), 0, 0);
         grid.add(email, 1, 0);
         grid.add(new Label("Password:"), 0, 1);
@@ -76,30 +75,28 @@ public class AccountWindow implements Initializable {
 
         Platform.runLater(email::requestFocus);
         loginButton.addEventFilter(ActionEvent.ACTION, event -> {
-                    MojangAccountAuthenticationAttempt attempt = MojangAuthentication.login(email.getText(), password.getText());
-                    if (attempt.succeeded()) {
-                        // login okay
-                        MojangAccount account = attempt.getAccount();
-                        Minosoft.accountList.put(account.getUserId(), account);
-                        account.saveToConfig();
-                        AccountListCell.listView.getItems().add(account);
-                        Log.info(String.format("Added and saved account (playerName=%s, email=%s, uuid=%s)", account.getPlayerName(), account.getMojangUserName(), account.getUUID()));
-                        return;
-                    }
-                    event.consume();
-                    Label error = new Label();
-                    error.setStyle("-fx-text-fill: red");
-                    error.setText(attempt.getError());
+            MojangAccountAuthenticationAttempt attempt = MojangAuthentication.login(email.getText(), password.getText());
+            if (attempt.succeeded()) {
+                // login okay
+                MojangAccount account = attempt.getAccount();
+                Minosoft.accountList.put(account.getUserId(), account);
+                account.saveToConfig();
+                AccountListCell.listView.getItems().add(account);
+                Log.info(String.format("Added and saved account (playerName=%s, email=%s, uuid=%s)", account.getPlayerName(), account.getMojangUserName(), account.getUUID()));
+                return;
+            }
+            event.consume();
+            Label error = new Label();
+            error.setStyle("-fx-text-fill: red");
+            error.setText(attempt.getError());
 
-                    grid.add(new Label("Error:"), 0, 2);
-                    grid.add(error, 1, 2);
-                    // ToDo resize window
-                }
-        );
+            grid.add(new Label("Error:"), 0, 2);
+            grid.add(error, 1, 2);
+            // ToDo resize window
+        });
 
         Window window = dialog.getDialogPane().getScene().getWindow();
         window.setOnCloseRequest(windowEvent -> window.hide());
-
 
         dialog.showAndWait();
     }

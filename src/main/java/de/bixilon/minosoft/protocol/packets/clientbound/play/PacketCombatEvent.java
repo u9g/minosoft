@@ -13,7 +13,7 @@
 
 package de.bixilon.minosoft.protocol.packets.clientbound.play;
 
-import de.bixilon.minosoft.game.datatypes.TextComponent;
+import de.bixilon.minosoft.data.text.ChatComponent;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.packets.ClientboundPacket;
 import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
@@ -25,7 +25,7 @@ public class PacketCombatEvent implements ClientboundPacket {
     int duration;
     int playerId;
     int entityId;
-    TextComponent message;
+    ChatComponent message;
 
     @Override
     public boolean read(InByteBuffer buffer) {
@@ -45,6 +45,11 @@ public class PacketCombatEvent implements ClientboundPacket {
     }
 
     @Override
+    public void handle(PacketHandler h) {
+        h.handle(this);
+    }
+
+    @Override
     public void log() {
         switch (action) {
             case ENTER_COMBAT -> Log.protocol(String.format("Received combat packet (action=%s)", action));
@@ -53,23 +58,13 @@ public class PacketCombatEvent implements ClientboundPacket {
         }
     }
 
-    @Override
-    public void handle(PacketHandler h) {
-        h.handle(this);
-    }
-
     public enum CombatEvents {
         ENTER_COMBAT,
         END_COMBAT,
         ENTITY_DEAD;
 
-
         public static CombatEvents byId(int id) {
             return values()[id];
-        }
-
-        public int getId() {
-            return ordinal();
         }
     }
 }
