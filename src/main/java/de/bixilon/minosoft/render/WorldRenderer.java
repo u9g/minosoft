@@ -1,6 +1,6 @@
 /*
  * Codename Minosoft
- * Copyright (C) 2020 Lukas Eisenhauer
+ * Copyright (C) 2020 Moritz Zwerger
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -13,14 +13,13 @@
 
 package de.bixilon.minosoft.render;
 
-import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
-import de.bixilon.minosoft.game.datatypes.world.*;
+import de.bixilon.minosoft.data.mappings.blocks.Block;
+import de.bixilon.minosoft.data.world.*;
 import de.bixilon.minosoft.protocol.network.Connection;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
-import org.apache.commons.collections.primitives.ArrayFloatList;
 import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
+import org.apache.commons.collections.primitives.ArrayFloatList;
 
-import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,7 +28,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import static org.lwjgl.opengl.GL11.*;
 
 public class WorldRenderer {
-    private ConcurrentHashMap<ChunkLocation, ConcurrentHashMap<Byte, ArrayFloatList>> faces;
+    private final ConcurrentHashMap<ChunkLocation, ConcurrentHashMap<Byte, ArrayFloatList>> faces;
     private AssetsLoader assetsLoader;
 
     private LinkedBlockingQueue<Runnable> queuedMapData;

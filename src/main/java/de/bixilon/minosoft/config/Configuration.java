@@ -47,29 +47,7 @@ public class Configuration {
             Files.copy(input, Paths.get(file.getAbsolutePath()));
             file = new File(Config.homeDir + "config/" + filename);
         }
-        Yaml yml = new Yaml();
-        config = yml.load(new FileInputStream(file));
-    }
-
-    public boolean getBoolean(String path) {
-        return (boolean) get(path);
-    }
-
-    public boolean getBoolean(ConfigEnum config) {
-        return getBoolean(config.getPath());
-    }
-
-    public int getInt(String path) {
-        return (int) get(path);
-    }
-
-    public int getInt(ConfigEnum config) {
-        return getInt(config.getPath());
-    }
-
-    public String getString(String path) {
-        return (String) get(path);
-    }
+        config = Util.readJsonFromFile(file.getAbsolutePath());
 
         final File finalFile = file;
         thread = new Thread(() -> {

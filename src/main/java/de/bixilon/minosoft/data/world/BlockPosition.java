@@ -13,10 +13,10 @@
 
 package de.bixilon.minosoft.data.world;
 
-import java.util.Objects;
-
 import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
 import de.bixilon.minosoft.render.utility.Vec3;
+
+import java.util.Objects;
 
 public class BlockPosition {
     final int x;
@@ -39,10 +39,6 @@ public class BlockPosition {
         this.x = chunkLocation.getX() * RenderConstants.SECTION_WIDTH + nibbleLocation.getX();
         this.y = height * RenderConstants.SECTION_HEIGHT + nibbleLocation.getY();
         this.z = chunkLocation.getZ() * RenderConstants.SECTION_WIDTH + nibbleLocation.getZ();
-    }
-
-    public ChunkLocation getChunkLocation() {
-        return new ChunkLocation(getX() / 16, getZ() / 16);
     }
 
     public int getX() {

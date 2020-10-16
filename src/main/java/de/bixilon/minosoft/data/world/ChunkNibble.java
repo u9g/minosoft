@@ -33,13 +33,6 @@ public class ChunkNibble {
         this.blocks = new ConcurrentHashMap<>();
     }
 
-    public Block getBlock(ChunkNibbleLocation loc) {
-        if (!blocks.containsKey(loc)) {
-            return null;
-        }
-        return blocks.get(loc);
-    }
-
     public Block getBlock(int x, int y, int z) {
         return getBlock(new ChunkNibbleLocation(x, y, z));
     }

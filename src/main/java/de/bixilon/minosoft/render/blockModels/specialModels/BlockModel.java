@@ -15,8 +15,8 @@ package de.bixilon.minosoft.render.blockModels.specialModels;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import de.bixilon.minosoft.game.datatypes.objectLoader.blocks.Block;
-import de.bixilon.minosoft.game.datatypes.world.BlockPosition;
+import de.bixilon.minosoft.data.mappings.blocks.Block;
+import de.bixilon.minosoft.data.world.BlockPosition;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.render.blockModels.BlockConfiguration;
 import de.bixilon.minosoft.render.blockModels.BlockConfigurationTrue;

@@ -115,15 +115,10 @@ public class MojangAccount {
     public String toString() {
         return getUserId();
     }
+
     public String getUserId() {
         return userId;
-
-    public enum RefreshStates {
-        SUCCESSFUL,
-        ERROR, // account not valid anymore
-        FAILED // error occurred while checking -> Unknown state
     }
-
 
     @Override
     public int hashCode() {
@@ -143,5 +138,11 @@ public class MojangAccount {
         }
         MojangAccount account = (MojangAccount) obj;
         return account.getUserId().equals(getUserId());
+    }
+
+    public enum RefreshStates {
+        SUCCESSFUL,
+        ERROR, // account not valid anymore
+        FAILED // error occurred while checking -> Unknown state
     }
 }

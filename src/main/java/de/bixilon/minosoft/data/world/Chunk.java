@@ -18,7 +18,6 @@ import de.bixilon.minosoft.data.mappings.blocks.Blocks;
 import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -45,17 +44,17 @@ public class Chunk {
 
     public void setBlock(int x, int y, int z, Block block) {
         byte section = (byte) (y / RenderConstants.SECTION_HEIGHT);
-        createSectionIfNotExist(section);
+        createSectionIfNotExists(section);
         nibbles.get(section).setBlock(x, y % RenderConstants.SECTION_HEIGHT, z, block);
     }
 
     public void setBlock(InChunkLocation location, Block block) {
         byte section = (byte) (location.getY() / RenderConstants.SECTION_HEIGHT);
-        createSectionIfNotExist(section);
+        createSectionIfNotExists(section);
         nibbles.get(section).setBlock(location.getChunkNibbleLocation(), block);
     }
 
-    void createSection(byte section) {
+    void createSectionIfNotExists(byte section) {
         if (nibbles.get(section) == null) {
             nibbles.put(section, new ChunkNibble());
         }
@@ -64,13 +63,6 @@ public class Chunk {
     public void setBlocks(HashMap<InChunkLocation, Block> blocks) {
         blocks.forEach(this::setBlock);
     }
-
-    public void setBlock(InChunkLocation location, Block block) {
-        byte section = (byte) (location.getY() / 16);
-        createSection(section);
-        nibbles.get(section).setBlock(location.getChunkNibbleLocation(), block);
-    }
-
     public ConcurrentHashMap<Byte, ChunkNibble> getNibbles() {
         return nibbles;
     }

@@ -20,7 +20,6 @@ import de.bixilon.minosoft.data.mappings.blocks.Block;
 import de.bixilon.minosoft.data.mappings.blocks.Blocks;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -62,9 +61,6 @@ public class World {
         return Blocks.nullBlock;
     }
 
-    public Chunk getChunk(ChunkLocation loc) {
-        return chunks.get(loc);
-    }
 
     public void setBlock(BlockPosition pos, Block block) {
         if (getChunk(pos.getChunkLocation()) != null) {

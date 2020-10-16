@@ -40,7 +40,6 @@ import de.bixilon.minosoft.protocol.packets.clientbound.status.PacketStatusPong;
 import de.bixilon.minosoft.protocol.packets.clientbound.status.PacketStatusResponse;
 import de.bixilon.minosoft.protocol.packets.serverbound.login.PacketEncryptionResponse;
 import de.bixilon.minosoft.protocol.packets.serverbound.play.PacketKeepAliveResponse;
-import de.bixilon.minosoft.protocol.packets.serverbound.play.PacketResourcePackStatus;
 import de.bixilon.minosoft.render.GameWindow;
 import de.bixilon.minosoft.render.utility.Vec3;
 import de.bixilon.minosoft.util.nbt.tag.CompoundTag;
@@ -181,7 +180,7 @@ public class PacketHandler {
     }
 
     public void handle(PacketChunkBulk pkg) {
-        pkg.getChunks().forEach(((location, chunk) -> connection.fireEvent(new ChunkDataChangeEvent(connection, location, chunk))));
+        pkg.getChunkMap().forEach(((location, chunk) -> connection.fireEvent(new ChunkDataChangeEvent(connection, location, chunk))));
 
         connection.getPlayer().getWorld().setChunks(pkg.getChunkMap());
         GameWindow.getRenderer().queueChunkBulk(pkg.getChunkMap());
