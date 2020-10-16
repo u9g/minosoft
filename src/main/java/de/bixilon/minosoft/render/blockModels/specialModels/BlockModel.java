@@ -62,8 +62,7 @@ public class BlockModel implements BlockModelInterface {
         return isFull;
     }
 
-    public ArrayFloatList prepare(Block block, HashSet<FaceOrientation> facesToDraw,
-                                 BlockPosition position) {
+    public ArrayFloatList prepare(Block block, HashSet<FaceOrientation> facesToDraw, BlockPosition position) {
         for (Map.Entry<BlockConfiguration, HashSet<SubBlock>> entry : blockConfigurationStates.entrySet()) {
             if (entry.getKey().contains(block)) {
                 return prepareBlockState(entry.getValue(), facesToDraw, block, position);

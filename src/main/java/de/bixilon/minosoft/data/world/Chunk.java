@@ -36,7 +36,7 @@ public class Chunk {
 
     public Block getBlock(int x, int y, int z) {
         byte section = (byte) (y / RenderConstants.SECTION_HEIGHT);
-        if (! nibbles.containsKey(section)) {
+        if (!nibbles.containsKey(section)) {
             return Blocks.nullBlock;
         }
         return nibbles.get(section).getBlock(x, y % RenderConstants.SECTION_HEIGHT, z);
@@ -63,6 +63,7 @@ public class Chunk {
     public void setBlocks(HashMap<InChunkLocation, Block> blocks) {
         blocks.forEach(this::setBlock);
     }
+
     public ConcurrentHashMap<Byte, ChunkNibble> getNibbles() {
         return nibbles;
     }

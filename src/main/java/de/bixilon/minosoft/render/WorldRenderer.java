@@ -167,7 +167,7 @@ public class WorldRenderer {
                         yield nibbleBlocks.get(new ChunkNibbleLocation(location.getX(), location.getY(), location.getZ() + 1));
                     }
                 };
-                if (dependedBlock == null ||!assetsLoader.getBlockModelLoader().isFull(dependedBlock)) {
+                if (dependedBlock == null || !assetsLoader.getBlockModelLoader().isFull(dependedBlock)) {
                     facesToDraw.add(orientation);
                 }
             }
@@ -186,9 +186,9 @@ public class WorldRenderer {
         for (ConcurrentHashMap<Byte, ArrayFloatList> chunk : faces.values()) {
             for (ArrayFloatList nibble : chunk.values()) {
                 float[] array = nibble.toArray();
-                for (int i = 0; i < array.length; i+=5) {
-                    glTexCoord2f(array[i], array[i+1]);
-                    glVertex3f(array[i+2], array[i+3], array[i+4]);
+                for (int i = 0; i < array.length; i += 5) {
+                    glTexCoord2f(array[i], array[i + 1]);
+                    glVertex3f(array[i + 2], array[i + 3], array[i + 4]);
                 }
             }
         }

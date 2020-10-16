@@ -52,8 +52,7 @@ public class SubBlock {
         JsonObject faces = json.getAsJsonObject("faces");
         for (FaceOrientation orientation : FaceOrientation.values()) {
             if (faces.has(orientation.name().toLowerCase())) {
-                putTexture(faces.getAsJsonObject(orientation.name().toLowerCase()),
-                        orientation, variables);
+                putTexture(faces.getAsJsonObject(orientation.name().toLowerCase()), orientation, variables);
             }
         }
         isFull = (from.x == 0 && from.y == 0 && from.z == 0) && (to.x == 16 && to.y == 16 && to.z == 16) && rotation == null;

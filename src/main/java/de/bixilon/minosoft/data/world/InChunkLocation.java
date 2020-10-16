@@ -13,9 +13,9 @@
 
 package de.bixilon.minosoft.data.world;
 
-import java.util.Objects;
-
 import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
+
+import java.util.Objects;
 
 public class InChunkLocation {
     final int x;

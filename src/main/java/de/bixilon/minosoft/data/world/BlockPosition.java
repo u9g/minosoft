@@ -98,10 +98,6 @@ public class BlockPosition {
     }
 
     public BlockPosition add(int[] ints) {
-        return new BlockPosition(
-                x + ints[0],
-                (short) (y + ints[1]),
-                z + ints[2]
-        );
+        return new BlockPosition(x + ints[0], (short) (y + ints[1]), z + ints[2]);
     }
 }

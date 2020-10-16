@@ -54,9 +54,9 @@ public class DoorModel implements BlockModelInterface {
 
     private static ArrayFloatList prepareHalf(HashSet<SubBlock> bottom, HashSet<SubBlock> top, BlockRotations rotation, Block block, HashSet<FaceOrientation> facesToDraw, BlockPosition position) {
         if (block.getProperties().contains(BlockProperties.HALF_LOWER)) {
-            return prepareBlockState(bottom, facesToDraw, new Block("", "",rotation), position);
+            return prepareBlockState(bottom, facesToDraw, new Block("", "", rotation), position);
         } else if (block.getProperties().contains(BlockProperties.HALF_UPPER)) {
-            return prepareBlockState(top, facesToDraw, new Block("", "",rotation), position);
+            return prepareBlockState(top, facesToDraw, new Block("", "", rotation), position);
         }
         Log.warn("now");
         return null;

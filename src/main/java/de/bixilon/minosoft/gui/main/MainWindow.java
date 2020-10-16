@@ -37,12 +37,42 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class MainWindow implements Initializable {
+    public static Menu accountMenu2;
     @FXML
     public BorderPane serversPane;
     @FXML
     public Menu accountMenu;
 
-    public static Menu accountMenu2;
+    public static void manageAccounts() {
+        try {
+            Parent parent = new FXMLLoader(MainWindow.class.getResource("/layout/accounts.fxml")).load();
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setTitle("Manage accounts - Minosoft");
+            stage.setScene(new Scene(parent));
+            Platform.setImplicitExit(false);
+            stage.setOnCloseRequest(event -> {
+                if (Minosoft.getSelectedAccount() == null) {
+                    event.consume();
+                    Alert alert = new Alert(Alert.AlertType.WARNING, "Error", ButtonType.CANCEL, ButtonType.OK);
+                    alert.setHeaderText("Are you sure?");
+                    alert.setContentText("No account selected, Minosoft will exit.");
+                    alert.showAndWait().ifPresent((type) -> {
+                        if (type == ButtonType.OK) {
+                            System.exit(0);
+                            return;
+                        }
+                        alert.close();
+                    });
+                } else {
+                    stage.close();
+                }
+            });
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -123,37 +153,6 @@ public class MainWindow implements Initializable {
 
     public void manageAccounts(ActionEvent actionEvent) {
         manageAccounts();
-    }
-
-    public static void manageAccounts() {
-        try {
-            Parent parent = new FXMLLoader(MainWindow.class.getResource("/layout/accounts.fxml")).load();
-            Stage stage = new Stage();
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setTitle("Manage accounts - Minosoft");
-            stage.setScene(new Scene(parent));
-            Platform.setImplicitExit(false);
-            stage.setOnCloseRequest(event -> {
-                if (Minosoft.getSelectedAccount() == null) {
-                    event.consume();
-                    Alert alert = new Alert(Alert.AlertType.WARNING, "Error", ButtonType.CANCEL, ButtonType.OK);
-                    alert.setHeaderText("Are you sure?");
-                    alert.setContentText("No account selected, Minosoft will exit.");
-                    alert.showAndWait().ifPresent((type) -> {
-                        if (type == ButtonType.OK) {
-                            System.exit(0);
-                            return;
-                        }
-                        alert.close();
-                    });
-                } else {
-                    stage.close();
-                }
-            });
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     public void openSettings() {

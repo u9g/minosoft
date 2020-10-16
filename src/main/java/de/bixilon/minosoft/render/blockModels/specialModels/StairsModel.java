@@ -37,6 +37,13 @@ public class StairsModel implements BlockModelInterface {
         outer = BlockModelInterface.load(mod, block.get("outer").getAsString());
     }
 
+    public static ArrayFloatList prepareCorner(HashSet<SubBlock> subBlocks, BlockProperties property, BlockRotations rotation, HashSet<FaceOrientation> facesToDraw, BlockPosition position) {
+        if (property.name().contains("LEFT")) {
+            return BlockModelInterface.prepareState(subBlocks, rotation, facesToDraw, position);
+        }
+        return BlockModelInterface.prepareState(subBlocks, rotationAdjust.get(rotation), facesToDraw, position);
+    }
+
     public ArrayFloatList prepare(Block block, HashSet<FaceOrientation> facesToDraw, BlockPosition position) {
         HashSet<BlockProperties> properties = block.getProperties();
 
@@ -48,14 +55,6 @@ public class StairsModel implements BlockModelInterface {
             }
         }
         return BlockModelInterface.prepareState(straight, rotationAdjust.get(block.getRotation()), facesToDraw, position);
-    }
-
-    public static ArrayFloatList prepareCorner(HashSet<SubBlock> subBlocks, BlockProperties property,
-                                               BlockRotations rotation, HashSet<FaceOrientation> facesToDraw, BlockPosition position) {
-        if (property.name().contains("LEFT")) {
-            return BlockModelInterface.prepareState(subBlocks, rotation, facesToDraw, position);
-        }
-        return BlockModelInterface.prepareState(subBlocks, rotationAdjust.get(rotation), facesToDraw, position);
     }
 
     @Override

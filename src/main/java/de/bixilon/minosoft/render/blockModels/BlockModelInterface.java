@@ -33,17 +33,7 @@ import java.util.HashSet;
 import java.util.Map;
 
 public interface BlockModelInterface {
-    ArrayFloatList prepare(Block block, HashSet<FaceOrientation> facesToDraw, BlockPosition position);
-    boolean isFull();
-    HashSet<String> getAllTextures();
-    void applyTextures(String mod, TextureLoader loader);
-
-    HashBiMap<BlockRotations, BlockRotations> rotationAdjust = HashBiMap.create(Map.of(
-            BlockRotations.EAST, BlockRotations.SOUTH,
-            BlockRotations.SOUTH, BlockRotations.WEST,
-            BlockRotations.WEST, BlockRotations.NORTH,
-            BlockRotations.NORTH, BlockRotations.EAST
-    ));
+    HashBiMap<BlockRotations, BlockRotations> rotationAdjust = HashBiMap.create(Map.of(BlockRotations.EAST, BlockRotations.SOUTH, BlockRotations.SOUTH, BlockRotations.WEST, BlockRotations.WEST, BlockRotations.NORTH, BlockRotations.NORTH, BlockRotations.EAST));
 
     static void applyConfigurationTextures(HashSet<SubBlock> subBlocks, String mod, TextureLoader loader) {
         for (SubBlock subBlock : subBlocks) {
@@ -104,4 +94,12 @@ public interface BlockModelInterface {
     static HashSet<SubBlock> load(String mod, String identifier) {
         return load(mod, identifier, new HashMap<>());
     }
+
+    ArrayFloatList prepare(Block block, HashSet<FaceOrientation> facesToDraw, BlockPosition position);
+
+    boolean isFull();
+
+    HashSet<String> getAllTextures();
+
+    void applyTextures(String mod, TextureLoader loader);
 }
