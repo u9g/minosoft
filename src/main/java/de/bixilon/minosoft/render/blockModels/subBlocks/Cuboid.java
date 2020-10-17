@@ -1,6 +1,6 @@
 /*
  * Codename Minosoft
- * Copyright (C) 2020 Moritz Zwerger
+ * Copyright (C) 2020 Lukas Eisenhauer
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -15,12 +15,13 @@ package de.bixilon.minosoft.render.blockModels.subBlocks;
 
 // some 3d object with 8 corners, 6 faces and 12 edges (example: cube, but can be deformed)
 
-import de.bixilon.minosoft.data.mappings.blocks.Block;
-import de.bixilon.minosoft.data.mappings.blocks.BlockRotations;
+import de.bixilon.minosoft.render.blockModels.Face.Axis;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static de.bixilon.minosoft.render.blockModels.Face.RenderConstants.BLOCK_RESOLUTION;
 
 public class Cuboid {
     public static final Map<FaceOrientation, int[]> facePositionMapTemplate = Map.of(FaceOrientation.EAST, new int[]{7, 5, 1, 3}, FaceOrientation.WEST, new int[]{4, 6, 2, 0}, FaceOrientation.UP, new int[]{4, 5, 7, 6}, FaceOrientation.DOWN, new int[]{2, 3, 1, 0}, FaceOrientation.SOUTH, new int[]{6, 7, 3, 2}, FaceOrientation.NORTH, new int[]{5, 4, 0, 1});
@@ -54,15 +55,27 @@ public class Cuboid {
         }
     }
 
-    public SubBlockPosition[] getFacePositions(FaceOrientation orientation, Block block) {
-        SubBlockPosition[] positions = facePositionMap.get(orientation);
-        if (block.getRotation() == BlockRotations.NONE || block.getRotation() == BlockRotations.NORTH) {
-            return positions;
+    public SubBlockPosition[] getFacePositions(FaceOrientation orientation) {
+        return facePositionMap.get(orientation);
+    }
+
+    public boolean isFull(FaceOrientation orientation) {
+        SubBlockPosition[] positions = getFacePositions(orientation);
+        return switch (orientation) {
+            case EAST -> (positions[0].x == 0 && positions[1].x == 0 && positions[2].x == 0 && positions[3].x == 0);
+            case WEST -> (positions[0].x == BLOCK_RESOLUTION && positions[1].x == BLOCK_RESOLUTION && positions[2].x == BLOCK_RESOLUTION && positions[3].x == BLOCK_RESOLUTION);
+            case UP -> (positions[0].y == 0 && positions[1].y == 0 && positions[2].y == 0 && positions[3].y == 0);
+            case DOWN -> (positions[0].y == BLOCK_RESOLUTION && positions[1].y == BLOCK_RESOLUTION && positions[2].y == BLOCK_RESOLUTION && positions[3].y == BLOCK_RESOLUTION);
+            case SOUTH -> (positions[0].z == 0 && positions[1].z == 0 && positions[2].z == 0 && positions[3].z == 0);
+            case NORTH -> (positions[0].z == BLOCK_RESOLUTION && positions[1].z == BLOCK_RESOLUTION && positions[2].z == BLOCK_RESOLUTION && positions[3].z == BLOCK_RESOLUTION);
+        };
+    }
+
+    public void rotate(Axis axis, int rotation) {
+        for (SubBlockPosition[] positions : facePositionMap.values()) {
+            for (SubBlockPosition position : positions) {
+                position = position.rotated(axis, rotation);
+            }
         }
-        SubBlockPosition[] result = new SubBlockPosition[positions.length];
-        for (int i = 0; i < positions.length; i++) {
-            result[i] = positions[i].rotated(block);
-        }
-        return result;
     }
 }

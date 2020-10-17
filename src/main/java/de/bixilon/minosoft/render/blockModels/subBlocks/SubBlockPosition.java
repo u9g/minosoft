@@ -14,7 +14,6 @@
 package de.bixilon.minosoft.render.blockModels.subBlocks;
 
 import com.google.gson.JsonArray;
-import de.bixilon.minosoft.data.mappings.blocks.Block;
 import de.bixilon.minosoft.data.world.BlockPosition;
 import de.bixilon.minosoft.render.blockModels.Face.Axis;
 import org.apache.commons.collections.primitives.ArrayFloatList;
@@ -23,14 +22,6 @@ import static de.bixilon.minosoft.render.blockModels.Face.RenderConstants.BLOCK_
 
 public class SubBlockPosition {
     private static final SubBlockPosition middlePos = new SubBlockPosition(8, 8, 8);
-    private static final SubBlockRotation westRotator = new SubBlockRotation(middlePos, Axis.Y, 90);
-    private static final SubBlockRotation eastRotator = new SubBlockRotation(middlePos, Axis.Y, 270);
-    private static final SubBlockRotation southRotator = new SubBlockRotation(middlePos, Axis.Y, 180);
-    private static final SubBlockRotation xAxisRotator = new SubBlockRotation(middlePos, Axis.Z, 90);
-    private static final SubBlockRotation zAxisRotator = new SubBlockRotation(middlePos, Axis.X, 90);
-    private static final SubBlockRotation downRotator = new SubBlockRotation(middlePos, Axis.X, 90);
-    private static final SubBlockRotation downAltRotator = new SubBlockRotation(middlePos, Axis.X, 180);
-    private static final SubBlockRotation upRotator = new SubBlockRotation(middlePos, Axis.X, -90);
     public float x;
     public float y;
     public float z;
@@ -56,40 +47,15 @@ public class SubBlockPosition {
         return new SubBlockPosition(pos1.x - pos2.x, pos1.y - pos2.y, pos1.z - pos2.z);
     }
 
-    public SubBlockPosition rotated(Block block) {
-        if (block.getRotation() == null) {
-            return this;
-        }
-        switch (block.getRotation()) {
-            case EAST:
-                return eastRotator.apply(this);
-            case WEST:
-                return westRotator.apply(this);
-            case SOUTH:
-                return southRotator.apply(this);
-            case UP:
-                if (block.getIdentifier().equals("dispenser") || block.getIdentifier().equals("dropper")) {
-                    return this;
-                }
-                return upRotator.apply(this);
-            case DOWN:
-                if (block.getIdentifier().equals("dispenser") || block.getIdentifier().equals("dropper")) {
-                    return downAltRotator.apply(this);
-                }
-                return downRotator.apply(this);
-            case AXIS_X:
-                return xAxisRotator.apply(this);
-            case AXIS_Z:
-                return zAxisRotator.apply(this);
-        }
-        return this;
-    }
-
     public ArrayFloatList getFloats(BlockPosition position) {
         ArrayFloatList result = new ArrayFloatList();
         result.add(x / BLOCK_RESOLUTION + position.getX());
         result.add(y / BLOCK_RESOLUTION + position.getY());
         result.add(z / BLOCK_RESOLUTION + position.getZ());
         return result;
+    }
+
+    public SubBlockPosition rotated(Axis axis, int rotation) {
+        return new SubBlockRotation(middlePos, axis, rotation).apply(this);
     }
 }

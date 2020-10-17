@@ -16,6 +16,7 @@ package de.bixilon.minosoft.render;
 import de.bixilon.minosoft.data.mappings.blocks.Block;
 import de.bixilon.minosoft.data.world.*;
 import de.bixilon.minosoft.protocol.network.Connection;
+import de.bixilon.minosoft.render.blockModels.BlockModelLoader;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
 import org.apache.commons.collections.primitives.ArrayFloatList;
@@ -29,7 +30,7 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class WorldRenderer {
     private final ConcurrentHashMap<ChunkLocation, ConcurrentHashMap<Byte, ArrayFloatList>> faces;
-    private AssetsLoader assetsLoader;
+    private BlockModelLoader modelLoader;
 
     private LinkedBlockingQueue<Runnable> queuedMapData;
 
@@ -39,7 +40,7 @@ public class WorldRenderer {
 
     public void init() {
         queuedMapData = new LinkedBlockingQueue<>();
-        assetsLoader = new AssetsLoader();
+        modelLoader = new BlockModelLoader();
     }
 
     public void startChunkPreparation(Connection connection) {
@@ -167,12 +168,12 @@ public class WorldRenderer {
                         yield nibbleBlocks.get(new ChunkNibbleLocation(location.getX(), location.getY(), location.getZ() + 1));
                     }
                 };
-                if (dependedBlock == null || !assetsLoader.getBlockModelLoader().isFull(dependedBlock)) {
+                if (dependedBlock == null || modelLoader.isFull(dependedBlock, FaceOrientation.inverse(orientation))) {
                     facesToDraw.add(orientation);
                 }
             }
             if (!facesToDraw.isEmpty()) {
-                nibbleMap.addAll(assetsLoader.getBlockModelLoader().prepare(block, facesToDraw, new BlockPosition(chunkLocation, sectionHeight, location)));
+                nibbleMap.addAll(modelLoader.prepare(block, facesToDraw, new BlockPosition(chunkLocation, sectionHeight, location)));
             }
         });
         return nibbleMap;
@@ -181,7 +182,7 @@ public class WorldRenderer {
 
     public void draw() {
         glPushMatrix();
-        glBindTexture(GL_TEXTURE_2D, assetsLoader.getTextureLoader().getTextureID());
+        glBindTexture(GL_TEXTURE_2D, modelLoader.getTextureLoader().getTextureID());
         glBegin(GL_QUADS);
         for (ConcurrentHashMap<Byte, ArrayFloatList> chunk : faces.values()) {
             for (ArrayFloatList nibble : chunk.values()) {
@@ -195,10 +196,6 @@ public class WorldRenderer {
         glEnd();
     }
 
-    public AssetsLoader getAssetsLoader() {
-        return assetsLoader;
-    }
-
     private ChunkNibble getChunkNibbleOfWorld(ConcurrentHashMap<ChunkLocation, Chunk> world, ChunkLocation location, byte sectionHeight) {
         if (world.containsKey(location) && world.get(location).getNibbles().containsKey(sectionHeight)) {
             return world.get(location).getNibbles().get(sectionHeight);
@@ -206,4 +203,7 @@ public class WorldRenderer {
         return null;
     }
 
+    public BlockModelLoader getBlockModelLoader() {
+        return modelLoader;
+    }
 }

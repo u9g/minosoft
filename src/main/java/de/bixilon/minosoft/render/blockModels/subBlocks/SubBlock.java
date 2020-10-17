@@ -14,8 +14,8 @@
 package de.bixilon.minosoft.render.blockModels.subBlocks;
 
 import com.google.gson.JsonObject;
-import de.bixilon.minosoft.data.mappings.blocks.Block;
 import de.bixilon.minosoft.data.world.BlockPosition;
+import de.bixilon.minosoft.render.blockModels.Face.Axis;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.texture.InFaceUV;
 import de.bixilon.minosoft.render.texture.TextureLoader;
@@ -29,10 +29,9 @@ public class SubBlock {
     private final HashMap<FaceOrientation, Float> textureCoordinates;
     private final HashMap<FaceOrientation, String> textures;
     private final HashMap<FaceOrientation, Integer> textureRotations;
-    private final HashSet<FaceOrientation> cullFaceTextures;
+    private final boolean[] full;
     private final HashMap<FaceOrientation, InFaceUV> uv;
     private final Cuboid cuboid;
-    private final boolean isFull;
     private SubBlockRotation rotation;
 
     public SubBlock(JsonObject json, HashMap<String, String> variables) {
@@ -40,7 +39,6 @@ public class SubBlock {
         textures = new HashMap<>();
         textureRotations = new HashMap<>();
         textureCoordinates = new HashMap<>();
-        cullFaceTextures = new HashSet<>();
 
         SubBlockPosition from = new SubBlockPosition(json.getAsJsonArray("from"));
         SubBlockPosition to = new SubBlockPosition(json.getAsJsonArray("to"));
@@ -55,7 +53,7 @@ public class SubBlock {
                 putTexture(faces.getAsJsonObject(orientation.name().toLowerCase()), orientation, variables);
             }
         }
-        isFull = (from.x == 0 && from.y == 0 && from.z == 0) && (to.x == 16 && to.y == 16 && to.z == 16) && rotation == null;
+        full = createFull();
     }
 
     private static String getRealTextureName(String textureName, HashMap<String, String> variables) {
@@ -71,11 +69,15 @@ public class SubBlock {
                 }
                 return newName;
             } else {
-                throw new IllegalArgumentException("could not resolve variable " + textureName);
+                return "";
             }
         } else {
             return textureName;
         }
+    }
+
+    private boolean[] createFull() {
+        return new boolean[]{cuboid.isFull(FaceOrientation.EAST), cuboid.isFull(FaceOrientation.WEST), cuboid.isFull(FaceOrientation.UP), cuboid.isFull(FaceOrientation.DOWN), cuboid.isFull(FaceOrientation.NORTH), cuboid.isFull(FaceOrientation.SOUTH)};
     }
 
     public void applyTextures(String mod, TextureLoader loader) {
@@ -106,10 +108,10 @@ public class SubBlock {
         textures.put(orientation, textureName);
     }
 
-    public ArrayFloatList getFaces(Block block, HashSet<FaceOrientation> facesToDraw, BlockPosition position) {
+    public ArrayFloatList getFaces(HashSet<FaceOrientation> facesToDraw, BlockPosition position) {
         ArrayFloatList result = new ArrayFloatList();
         facesToDraw.forEach((faceOrientation -> {
-            ArrayFloatList face = prepareFace(faceOrientation, block, position);
+            ArrayFloatList face = prepareFace(faceOrientation, position);
             if (face != null) {
                 result.addAll(face);
             }
@@ -117,12 +119,12 @@ public class SubBlock {
         return result;
     }
 
-    private ArrayFloatList prepareFace(FaceOrientation faceDirection, Block block, BlockPosition position) {
-        if (cullFaceTextures.contains(faceDirection) || !textureCoordinates.containsKey(faceDirection)) {
+    private ArrayFloatList prepareFace(FaceOrientation faceDirection, BlockPosition position) {
+        if (full[faceDirection.getId()] || !textureCoordinates.containsKey(faceDirection)) {
             return null;
         }
         ArrayFloatList result = new ArrayFloatList();
-        SubBlockPosition[] positions = cuboid.getFacePositions(faceDirection, block);
+        SubBlockPosition[] positions = cuboid.getFacePositions(faceDirection);
         InFaceUV inFaceUV = uv.get(faceDirection);
         inFaceUV.prepare(textureCoordinates.get(faceDirection));
         int rotation = textureRotations.get(faceDirection);
@@ -133,15 +135,19 @@ public class SubBlock {
         return result;
     }
 
-    public boolean isFull() {
-        return isFull;
-    }
-
     public HashSet<String> getTextures() {
         HashSet<String> result = new HashSet<>();
         for (Map.Entry<FaceOrientation, String> texture : textures.entrySet()) {
             result.add(texture.getValue());
         }
         return result;
+    }
+
+    public void rotate(Axis axis, int rotation) {
+        cuboid.rotate(axis, rotation);
+    }
+
+    public boolean[] getFull() {
+        return full;
     }
 }

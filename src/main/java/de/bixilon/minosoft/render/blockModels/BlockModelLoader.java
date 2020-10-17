@@ -19,47 +19,89 @@ import de.bixilon.minosoft.data.mappings.blocks.Block;
 import de.bixilon.minosoft.data.mappings.blocks.Blocks;
 import de.bixilon.minosoft.data.world.BlockPosition;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
-import de.bixilon.minosoft.render.blockModels.specialModels.*;
 import de.bixilon.minosoft.render.texture.TextureLoader;
 import de.bixilon.minosoft.util.Util;
 import org.apache.commons.collections.primitives.ArrayFloatList;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
 
 public class BlockModelLoader {
-    private final HashMap<String, HashMap<String, BlockModelInterface>> blockDescriptionMap;
-    private final HashMap<String, HashSet<String>> textures;
-    HashMap<String, HashMap<String, float[]>> tints;
+    HashMap<BlockModelBlockWrapper, BlockModel> blockMap;
+    TextureLoader loader;
 
     public BlockModelLoader() {
-        blockDescriptionMap = new HashMap<>();
-        tints = new HashMap<>();
-        textures = new HashMap<>();
+        blockMap = new HashMap<>();
+        HashMap<String, JsonObject> mods = new HashMap<>();
+        HashMap<String, HashMap<String, float[]>> tints = new HashMap<>();
         try {
-            JsonObject json = Util.readJsonAsset("mapping/blockModels.json");
-            String mod = "minecraft";
-            tints.put(mod, readTints(json));
-            textures.put(mod, loadModels(json.get("blocks").getAsJsonObject(), mod));
+            //TODO: modding
+            mods.put("minecraft", Util.readJsonAsset("mapping/blockModels.json"));
         } catch (IOException e) {
             e.printStackTrace();
         }
+        HashMap<String, HashMap<String, BlockModel>> blockModels = new HashMap<>();
+        for (Map.Entry<String, JsonObject> mod : mods.entrySet()) {
+            blockModels.put(mod.getKey(), loadModels(mod));
+            tints.put(mod.getKey(), readTints(mod.getValue()));
+        }
+        loader = new TextureLoader(getTextures(blockModels), tints);
+        applyTextures(blockModels);
+        for (Map.Entry<String, JsonObject> mod : mods.entrySet()) {
+            loadBlocks(mod, blockModels.get(mod.getKey()));
+        }
     }
 
-    public HashMap<String, HashMap<String, float[]>> getTints() {
-        return tints;
+    private void loadBlocks(Map.Entry<String, JsonObject> mod, HashMap<String, BlockModel> blockModels) {
+        for (Map.Entry<String, JsonElement> blockEntry : mod.getValue().get("blockStates").getAsJsonObject().entrySet()) {
+            JsonObject block = blockEntry.getValue().getAsJsonObject();
+            if (block.has("variants")) {
+                JsonObject variants = block.get("variants").getAsJsonObject();
+                for (Map.Entry<String, JsonElement> variant : variants.entrySet()) {
+                    if (variant.getValue().isJsonArray()) {
+                        ArrayList<BlockModel> models = new ArrayList<>();
+                        for (JsonElement model : variant.getValue().getAsJsonArray()) {
+                            models.add(new BlockModel(blockModels.get(blockEntry.getKey()), model.getAsJsonObject()));
+                        }
+                        blockMap.put(new BlockModelBlockWrapper(new Block(mod.getKey(), blockEntry.getKey(), variant.getKey())), new BlockModel(models));
+                    } else {
+                        String fullModel = variant.getValue().getAsJsonObject().get("model").getAsString();
+                        String modelName = fullModel.substring(fullModel.indexOf("/") + 1);
+                        BlockModel model = blockModels.get(modelName);
+                        blockMap.put(new BlockModelBlockWrapper(new Block(mod.getKey(), blockEntry.getKey(), variant.getKey())), new BlockModel(model, variant.getValue().getAsJsonObject()));
+                    }
+                }
+            }
+        }
     }
 
-    public HashMap<String, HashSet<String>> getTextures() {
+    private HashMap<String, BlockModel> loadModels(Map.Entry<String, JsonObject> mod) {
+        HashMap<String, BlockModel> modMap = new HashMap<>();
+        for (Map.Entry<String, JsonElement> block : mod.getValue().get("blockModels").getAsJsonObject().entrySet()) {
+            modMap.put(block.getKey(), new BlockModel(block.getValue().getAsJsonObject(), mod.getValue().get("blockModels").getAsJsonObject()));
+        }
+        return modMap;
+    }
+
+    public HashMap<String, HashSet<String>> getTextures(HashMap<String, HashMap<String, BlockModel>> blockModels) {
+        HashMap<String, HashSet<String>> textures = new HashMap<>();
+        for (Map.Entry<String, HashMap<String, BlockModel>> mod : blockModels.entrySet()) {
+            HashSet<String> modTextures = new HashSet<>();
+            for (BlockModel blockModel : mod.getValue().values()) {
+                modTextures.addAll(blockModel.getAllTextures());
+            }
+            textures.put(mod.getKey(), modTextures);
+        }
         return textures;
     }
 
-    public void applyTextures(TextureLoader loader) {
-        for (Map.Entry<String, HashMap<String, BlockModelInterface>> mod : blockDescriptionMap.entrySet()) {
-            for (Map.Entry<String, BlockModelInterface> block : mod.getValue().entrySet()) {
+    public void applyTextures(HashMap<String, HashMap<String, BlockModel>> blockModels) {
+        for (Map.Entry<String, HashMap<String, BlockModel>> mod : blockModels.entrySet()) {
+            for (Map.Entry<String, BlockModel> block : mod.getValue().entrySet()) {
                 block.getValue().applyTextures(mod.getKey(), loader);
             }
         }
@@ -81,57 +123,30 @@ public class BlockModelLoader {
         return result;
     }
 
-    private HashSet<String> loadModels(JsonObject blockList, String mod) {
-        HashSet<String> result = new HashSet<>();
-        blockDescriptionMap.put(mod, new HashMap<>());
-        for (String identifier : blockList.keySet()) {
-            JsonObject block = blockList.get(identifier).getAsJsonObject();
-            result.addAll(loadModel(mod, identifier, block));
+    public BlockModel getBlockModel(Block block) {
+        BlockModel model = blockMap.get(new BlockModelBlockWrapper(block));
+        if (model == null) {
+            throw new RuntimeException("block " + block + " could not be found");
         }
-        return result;
+        return blockMap.get(new BlockModelBlockWrapper(block));
     }
 
-    private HashSet<String> loadModel(String mod, String identifier, JsonObject block) {
-        HashSet<String> result = new HashSet<>();
-        try {
-            String type = "";
-            if (block.has("type")) {
-                type = block.get("type").getAsString();
-            }
-            BlockModelInterface model = switch (type) {
-                case "fire" -> new FireModel(block, mod);
-                case "stairs" -> new StairsModel(block, mod);
-                case "wire" -> new WireModel(block, mod);
-                case "crop" -> new CropModel(block, mod);
-                case "door" -> new DoorModel(block, mod);
-                case "fence" -> new FenceModel(block, mod);
-                case "mushroom" -> new MushroomModel(block, mod);
-                default -> new BlockModel(block, mod);
-            };
-            result.addAll(model.getAllTextures());
-            HashMap<String, BlockModelInterface> modMap = blockDescriptionMap.get(mod);
-            modMap.put(identifier, model);
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println(mod + ":" + identifier);
-            System.exit(-1);
-        }
-        return result;
-    }
-
-    public BlockModelInterface getBlockDescription(Block block) {
-        HashMap<String, BlockModelInterface> modList = blockDescriptionMap.get(block.getMod());
-        return modList.get(block.getIdentifier());
-    }
-
-    public boolean isFull(Block block) {
+    public boolean isFull(Block block, FaceOrientation orientation) {
         if (block == null || block.equals(Blocks.nullBlock)) {
             return false;
         }
-        return getBlockDescription(block).isFull();
+        return getBlockModel(block).isFull(orientation);
+    }
+
+    public boolean isFull(Block block) {
+        return block != null && !block.equals(Blocks.nullBlock);
     }
 
     public ArrayFloatList prepare(Block block, HashSet<FaceOrientation> facesToDraw, BlockPosition position) {
-        return getBlockDescription(block).prepare(block, facesToDraw, position);
+        return getBlockModel(block).prepare(facesToDraw, position);
+    }
+
+    public TextureLoader getTextureLoader() {
+        return loader;
     }
 }

@@ -19,7 +19,7 @@ import de.bixilon.minosoft.render.utility.Vec3;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class PlayerMovement {
-    private static final float FLY_SPEED = 0.1f;
+    private static final float FLY_SPEED = 0.2f;
     private static final Vec3 CAMERA_UP = new Vec3(0f, 1f, 0f);
 
     private final long window;

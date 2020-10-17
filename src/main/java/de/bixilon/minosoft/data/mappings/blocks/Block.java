@@ -49,6 +49,30 @@ public class Block {
         this.rotation = BlockRotations.NONE;
     }
 
+    public Block(String mod, String identifier, String properties) {
+        this.mod = mod;
+        this.identifier = identifier;
+        this.properties = new HashSet<>();
+        BlockRotations rot = BlockRotations.NONE;
+        for (String part : properties.split(",")) {
+            if (part.equals("")) {
+                continue;
+            }
+            String[] subParts = part.split("=");
+            if (!(subParts.length == 2)) {
+                throw new IllegalArgumentException("too many or few = in " + part);
+            }
+            String key = subParts[0];
+            String value = subParts[1];
+            if (Blocks.getPropertiesMapping().containsKey(key)) {
+                this.properties.add(Blocks.getPropertiesMapping().get(key).get(value));
+            } else if (Blocks.getRotationMapping().containsKey(key)) {
+                rot = Blocks.getRotationMapping().get(value);
+            }
+        }
+        rotation = rot;
+    }
+
     public String getMod() {
         return mod;
     }

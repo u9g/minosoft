@@ -72,13 +72,13 @@ public class TextureLoader {
     private void loadTextures(String mod, HashSet<String> textureNames, HashMap<String, float[]> tint) {
         HashMap<String, BufferedImage> modTextureMap = new HashMap<>();
         for (String textureName : textureNames) {
-            if (textureName.contains("overlay")) {
+            if (textureName.contains("overlay") || textureName.equals("")) {
                 continue;
             }
             String path = Config.homeDir + "assets/" + mod + "/textures/" + textureName + ".png";
             try {
                 BufferedImage image = ImageIO.read(new File(path));
-                if (tint.containsKey(textureName)) {
+                if (tint != null && tint.containsKey(textureName)) {
                     tintImage(image, tint.get(textureName));
                 }
                 modTextureMap.put(textureName, image);
@@ -141,7 +141,7 @@ public class TextureLoader {
     }
 
     public float getTexture(String mod, String textureName) {
-        if (textureName.contains("overlay")) {
+        if (textureName.contains("overlay") || textureName.equals("")) {
             return -1;
         }
 
@@ -152,11 +152,6 @@ public class TextureLoader {
             System.exit(9);
         }
         Integer pos = modMap.get(textureName);
-
-        if (pos == null) {
-            System.out.println("failed to find texture " + textureName);
-            System.exit(10);
-        }
 
         return pos * step;
     }

@@ -27,7 +27,7 @@ public class CollisionHandler {
 
     public CollisionHandler(PlayerController controller) {
         world = GameWindow.getConnection().getPlayer().getWorld();
-        modelLoader = GameWindow.getRenderer().getAssetsLoader().getBlockModelLoader();
+        modelLoader = GameWindow.getRenderer().getBlockModelLoader();
         this.controller = controller;
     }
 
@@ -88,14 +88,14 @@ public class CollisionHandler {
         controller.playerVelocity.z = 0;
     }
 
-    private boolean isPositionValid(Vec3 testPos) {
+    private boolean isPositionValid(Vec3 testPosition) {
         float width = controller.getPlayerWidth();
 
-        int[] xPositions = AdditionalMath.valuesBetween(AdditionalMath.betterRound(testPos.x + width), AdditionalMath.betterRound(testPos.x - width));
+        int[] xPositions = AdditionalMath.valuesBetween(AdditionalMath.betterRound(testPosition.x + width), AdditionalMath.betterRound(testPosition.x - width));
 
-        int[] yPositions = AdditionalMath.valuesBetween(AdditionalMath.betterRound(testPos.y), AdditionalMath.betterRound(testPos.y + controller.getPlayerHeight()));
+        int[] yPositions = AdditionalMath.valuesBetween(AdditionalMath.betterRound(testPosition.y), AdditionalMath.betterRound(testPosition.y + controller.getPlayerHeight()));
 
-        int[] zPositions = AdditionalMath.valuesBetween(AdditionalMath.betterRound(testPos.z + width), AdditionalMath.betterRound(testPos.z - width));
+        int[] zPositions = AdditionalMath.valuesBetween(AdditionalMath.betterRound(testPosition.z + width), AdditionalMath.betterRound(testPosition.z - width));
 
         for (int xPos : xPositions) {
             for (int yPos : yPositions) {
