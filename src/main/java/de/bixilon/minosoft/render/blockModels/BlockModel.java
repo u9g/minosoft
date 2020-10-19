@@ -15,6 +15,7 @@ package de.bixilon.minosoft.render.blockModels;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import de.bixilon.minosoft.data.mappings.blocks.Block;
 import de.bixilon.minosoft.data.world.BlockPosition;
 import de.bixilon.minosoft.render.blockModels.Face.Axis;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
@@ -27,12 +28,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class BlockModel {
-    private final ArrayList<SubBlock> subBlocks;
-    private final boolean[] full; // minor memory improvement over a Map
+    private ArrayList<SubBlock> subBlocks;
+    private boolean[] full; // minor memory improvement over a Map
 
     public BlockModel(JsonObject block, JsonObject allModels) {
         subBlocks = load(block, allModels);
-        full = new boolean[]{true, true, true, true, true, true};
     }
 
     public BlockModel(BlockModel blockModel, JsonObject json) {
@@ -59,12 +59,7 @@ public class BlockModel {
         full = createFullValues();
     }
 
-    public BlockModel(ArrayList<BlockModel> models) {
-        subBlocks = new ArrayList<>();
-        for (BlockModel model : models) {
-            subBlocks.addAll(model.getSubBlocks());
-        }
-        full = createFullValues();
+    public BlockModel() {
     }
 
     static ArrayList<SubBlock> load(JsonObject json, JsonObject allModels, HashMap<String, String> variables) {
@@ -117,7 +112,7 @@ public class BlockModel {
         return full[orientation.getId()];
     }
 
-    public ArrayFloatList prepare(HashSet<FaceOrientation> facesToDraw, BlockPosition position) {
+    public ArrayFloatList prepare(HashSet<FaceOrientation> facesToDraw, BlockPosition position, Block block) {
         ArrayFloatList result = new ArrayFloatList();
         for (SubBlock subBlock : subBlocks) {
             result.addAll(subBlock.getFaces(facesToDraw, position));

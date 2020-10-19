@@ -13,7 +13,11 @@
 
 package de.bixilon.minosoft.data.mappings.blocks;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
 import java.util.HashSet;
+import java.util.Map;
 
 public class Block {
     final String mod;
@@ -49,21 +53,14 @@ public class Block {
         this.rotation = BlockRotations.NONE;
     }
 
-    public Block(String mod, String identifier, String properties) {
+    public Block(String mod, String identifier, JsonObject properties) {
         this.mod = mod;
         this.identifier = identifier;
         this.properties = new HashSet<>();
         BlockRotations rot = BlockRotations.NONE;
-        for (String part : properties.split(",")) {
-            if (part.equals("")) {
-                continue;
-            }
-            String[] subParts = part.split("=");
-            if (!(subParts.length == 2)) {
-                throw new IllegalArgumentException("too many or few = in " + part);
-            }
-            String key = subParts[0];
-            String value = subParts[1];
+        for (Map.Entry<String, JsonElement> property : properties.entrySet()) {
+            String key = property.getKey();
+            String value = property.getValue().getAsString();
             if (Blocks.getPropertiesMapping().containsKey(key)) {
                 this.properties.add(Blocks.getPropertiesMapping().get(key).get(value));
             } else if (Blocks.getRotationMapping().containsKey(key)) {
