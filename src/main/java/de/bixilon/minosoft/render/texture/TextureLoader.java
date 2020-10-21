@@ -14,6 +14,7 @@
 package de.bixilon.minosoft.render.texture;
 
 import de.bixilon.minosoft.Config;
+import de.bixilon.minosoft.data.assets.AssetsManager;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
 import de.matthiasmann.twl.utils.PNGDecoder;
@@ -73,12 +74,11 @@ public class TextureLoader {
     private void loadTextures(String mod, HashSet<String> textureNames, HashMap<String, float[]> tint) {
         HashMap<String, BufferedImage> modTextureMap = new HashMap<>();
         for (String textureName : textureNames) {
-            if (textureName.contains("overlay") || textureName.equals("")) {
+            if (textureName.contains("overlay") || textureName.isBlank()) {
                 continue;
             }
-            String path = Config.homeDir + "assets/" + mod + "/textures/" + textureName + ".png";
             try {
-                BufferedImage image = ImageIO.read(new File(path));
+                BufferedImage image = ImageIO.read(AssetsManager.readAssetAsStream(String.format("%s/textures/%s.png", mod, textureName)));
                 if (tint != null && tint.containsKey(textureName)) {
                     tintImage(image, tint.get(textureName));
                 }
@@ -94,8 +94,7 @@ public class TextureLoader {
     }
 
     private void combineTextures() {
-        // CONVERT ALL THE IMAGES INTO A SINGLE, VERY LONG IMAGE
-        // greatly improves performance in opengl
+        // converts all single textures into a very wide image. Improves performance in opengl
         // TEXTURE_PACK_RESxTEXTURE_PACK_RES textures only
         int imageLength = 1;
         while (totalTextures * RenderConstants.TEXTURE_PACK_RESOLUTION > imageLength) {
@@ -141,7 +140,7 @@ public class TextureLoader {
     }
 
     public float getTexture(String mod, String textureName) {
-        if (textureName.contains("overlay") || textureName.equals("")) {
+        if (textureName.contains("overlay") || textureName.isBlank()) {
             return -1;
         }
 
