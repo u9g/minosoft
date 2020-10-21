@@ -20,6 +20,8 @@ import de.bixilon.minosoft.Config;
 import de.bixilon.minosoft.Minosoft;
 import de.bixilon.minosoft.config.ConfigurationPaths;
 import de.bixilon.minosoft.data.Mappings;
+import de.bixilon.minosoft.data.locale.LocaleManager;
+import de.bixilon.minosoft.data.locale.Strings;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.protocol.ConnectionStates;
 import de.bixilon.minosoft.protocol.protocol.Packets;
@@ -51,17 +53,22 @@ public class Versions {
     }
 
     public static void load(JsonObject json) {
+        int currentSortingId = 0;
         for (String protocolId : json.keySet()) {
-            loadVersion(json, protocolId);
+            loadVersion(json, protocolId, currentSortingId++);
         }
     }
 
-    public static void loadVersion(JsonObject json, String protocolIdString) {
+    public static void loadVersion(JsonObject json, String protocolIdString, int sortingId) {
         JsonObject versionJson = json.getAsJsonObject(protocolIdString);
         String versionName = versionJson.get("name").getAsString();
         int protocolId = Integer.parseInt(protocolIdString);
         if (versionMap.containsKey(protocolId)) {
             // already loaded, skip
+            Version loadedVersion = versionMap.get(protocolId);
+            if (loadedVersion.getSortingId() == -1) {
+                loadedVersion.setSortingId(sortingId);
+            }
             return;
         }
 
@@ -70,7 +77,7 @@ public class Versions {
         if (versionJson.get("mapping").isJsonPrimitive()) {
             // inherits or copies mapping from an other version
             if (!versionMap.containsKey(protocolId)) {
-                loadVersion(json, versionJson.get("mapping").getAsString());
+                loadVersion(json, versionJson.get("mapping").getAsString(), -1);
             }
             Version parent = versionMap.get(versionJson.get("mapping").getAsInt());
             serverboundPacketMapping = parent.getServerboundPacketMapping();
@@ -97,7 +104,7 @@ public class Versions {
                 clientboundPacketMapping.get(packet.getState()).put(packet, clientboundPacketMapping.get(packet.getState()).size());
             }
         }
-        Version version = new Version(versionName, protocolId, serverboundPacketMapping, clientboundPacketMapping);
+        Version version = new Version(versionName, protocolId, sortingId, serverboundPacketMapping, clientboundPacketMapping);
         versionMap.put(version.getProtocolVersion(), version);
     }
 
@@ -191,7 +198,7 @@ public class Versions {
     }
 
     public static Version getLowestVersionSupported() {
-        return new Version("Automatic", -1, null, null);
+        return new Version(LocaleManager.translate(Strings.VERSION_AUTOMATIC), -1, -1, null, null);
     }
 
     public static HashBiMap<Integer, Version> getVersionMap() {

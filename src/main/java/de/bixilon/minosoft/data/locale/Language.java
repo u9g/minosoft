@@ -11,21 +11,31 @@
  *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
-package de.bixilon.minosoft.data;
+package de.bixilon.minosoft.data.locale;
 
-public enum SoundCategories {
-    MASTER,
-    MUSIC,
-    RECORD,
-    WEATHER,
-    BLOCK,
-    HOSTILE,
-    NEUTRAL,
-    PLAYER,
-    AMBIENT,
-    VOICE;
+import com.google.gson.JsonObject;
 
-    public static SoundCategories byId(int id) {
-        return values()[id];
+import java.text.MessageFormat;
+import java.util.HashMap;
+
+public class Language {
+    private final String language;
+    private final HashMap<Strings, String> data = new HashMap<>();
+
+    protected Language(String language, JsonObject json) {
+        this.language = language;
+        json.keySet().forEach((key) -> data.put(Strings.valueOf(key.toUpperCase()), json.get(key).getAsString()));
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public boolean canTranslate(Strings key) {
+        return data.containsKey(key);
+    }
+
+    public String translate(Strings key, Object... data) {
+        return MessageFormat.format(this.data.get(key), data);
     }
 }

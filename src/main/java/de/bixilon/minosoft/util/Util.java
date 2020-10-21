@@ -29,10 +29,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.*;
 import java.util.regex.Pattern;
 import java.util.zip.*;
 
@@ -104,16 +101,28 @@ public final class Util {
         return ret;
     }
 
-    public static String sha1(String string) {
+    public static String sha1(byte[] data) {
         try {
             MessageDigest crypt = MessageDigest.getInstance("SHA-1");
             crypt.reset();
-            crypt.update(string.getBytes(StandardCharsets.UTF_8));
-            return new String(crypt.digest());
+            crypt.update(data);
+            return byteArrayToHexString(crypt.digest());
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static String byteArrayToHexString(byte[] b) {
+        StringBuilder result = new StringBuilder();
+        for (byte value : b) {
+            result.append(Integer.toString((value & 0xff) + 0x100, 16).substring(1));
+        }
+        return result.toString();
+    }
+
+    public static String sha1(String string) {
+        return sha1(string.getBytes(StandardCharsets.UTF_8));
     }
 
     public static HashMap<String, String> readTarGzFile(String fileName) throws IOException {
@@ -191,23 +200,45 @@ public final class Util {
     }
 
     public static void downloadFile(String url, String destination) throws IOException {
+        createParentFolderIfNotExist(destination);
+        downloadFile(url, new FileOutputStream(destination));
+    }
+
+    public static void downloadFileAsGz(String url, String destination) throws IOException {
+        createParentFolderIfNotExist(destination);
+        downloadFile(url, new GZIPOutputStream(new FileOutputStream(destination)));
+    }
+
+
+    public static void downloadFile(String url, OutputStream output) throws IOException {
         BufferedInputStream inputStream = new BufferedInputStream(new URL(url).openStream());
-        FileOutputStream fileOutputStream = new FileOutputStream(destination);
         byte[] buffer = new byte[1024];
         int length;
         while ((length = inputStream.read(buffer, 0, 1024)) != -1) {
-            fileOutputStream.write(buffer, 0, length);
+            output.write(buffer, 0, length);
         }
         inputStream.close();
-        fileOutputStream.close();
+        output.close();
     }
 
     public static <T> void executeInThreadPool(String name, Collection<Callable<T>> callables) throws InterruptedException {
         ExecutorService phaseLoader = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), getThreadFactory(name));
-        phaseLoader.invokeAll(callables);
+        phaseLoader.invokeAll(callables).forEach((tFuture -> {
+            try {
+                tFuture.get();
+            } catch (ExecutionException | InterruptedException ex) {
+                ex.getCause().printStackTrace();
+            }
+        }));
     }
 
     public static ThreadFactory getThreadFactory(String threadName) {
         return new ThreadFactoryBuilder().setNameFormat(threadName + "#%d").build();
     }
+
+    public static void createParentFolderIfNotExist(String destination) {
+        File file = new File(destination);
+        file.getParentFile().mkdirs();
+    }
+
 }

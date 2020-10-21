@@ -20,5 +20,6 @@ public enum ConfigurationPaths {
     GENERAL_LOG_LEVEL,
     CLIENT_TOKEN,
     MAPPINGS_URL,
-    ACCOUNT_SELECTED
+    ACCOUNT_SELECTED,
+    LANGUAGE,
 }
