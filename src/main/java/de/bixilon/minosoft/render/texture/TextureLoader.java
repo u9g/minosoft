@@ -1,6 +1,6 @@
 /*
  * Codename Minosoft
- * Copyright (C) 2020 Lukas Eisenhauer
+ * Copyright (C) 2020 Moritz Zwerger
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -14,6 +14,7 @@
 package de.bixilon.minosoft.render.texture;
 
 import de.bixilon.minosoft.Config;
+import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
 import de.matthiasmann.twl.utils.PNGDecoder;
 
@@ -83,8 +84,7 @@ public class TextureLoader {
                 }
                 modTextureMap.put(textureName, image);
             } catch (IOException e) {
-                System.out.println(textureName);
-                System.out.println(path);
+                Log.fatal(String.format("An error occurred while loading texture %s: %s", textureName, e.getLocalizedMessage()));
                 e.printStackTrace();
                 System.exit(6);
             }
@@ -148,7 +148,7 @@ public class TextureLoader {
         // returns the start and end u-coordinate of a specific texture to access it
         HashMap<String, Integer> modMap = textureCoordinates.get(mod);
         if (modMap == null) {
-            System.out.println("no mod " + mod + " loaded");
+            Log.fatal(String.format("Could not load texture for mod %s", mod));
             System.exit(9);
         }
         Integer pos = modMap.get(textureName);

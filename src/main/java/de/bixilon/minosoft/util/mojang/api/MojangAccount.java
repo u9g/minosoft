@@ -74,7 +74,7 @@ public class MojangAccount {
             lastRefreshStatus = RefreshStates.FAILED;
             return lastRefreshStatus;
         }
-        if (accessToken.equals("")) {
+        if (accessToken.isBlank()) {
             lastRefreshStatus = RefreshStates.ERROR;
             return lastRefreshStatus;
         }

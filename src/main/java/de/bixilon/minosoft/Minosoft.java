@@ -100,6 +100,9 @@ public final class Minosoft {
             return true;
         });
         startCallables.add(() -> {
+            // wait for assets to be loaded
+            assetsLatch.waitUntilZero();
+
             GameWindow.prepare();
             countDownStartLatch();
             return true;
