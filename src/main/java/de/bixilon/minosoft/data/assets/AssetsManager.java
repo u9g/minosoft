@@ -19,7 +19,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
 import de.bixilon.minosoft.Config;
+import de.bixilon.minosoft.Minosoft;
+import de.bixilon.minosoft.config.ConfigurationPaths;
 import de.bixilon.minosoft.logging.Log;
+import de.bixilon.minosoft.logging.LogLevels;
 import de.bixilon.minosoft.util.CountUpAndDownLatch;
 import de.bixilon.minosoft.util.HTTP;
 import de.bixilon.minosoft.util.Util;
@@ -72,13 +75,23 @@ public class AssetsManager {
         if (assets.size() > 0) {
             return;
         }
-        downloadAssetsIndex();
+        try {
+            downloadAssetsIndex();
+        } catch (IOException e) {
+            if (Log.getLevel().ordinal() >= LogLevels.DEBUG.ordinal()) {
+                e.printStackTrace();
+            }
+            Log.warn("Could not download assets index. Please check your internet connection");
+        }
         assets.putAll(parseAssetsIndex(ASSETS_INDEX_HASH));
         latch.setCount(assets.size() + 1); // set size of mappings + 1 (for client jar assets)
         // download assets
         assets.keySet().parallelStream().forEach((filename) -> {
             try {
-                AssetsManager.downloadAsset(assets.get(filename));
+                String hash = assets.get(filename);
+                if (!verifyAssetHash(hash)) {
+                    AssetsManager.downloadAsset(hash);
+                }
                 latch.countDown();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -125,15 +138,37 @@ public class AssetsManager {
         return JsonParser.parseReader(readAssetByHash(hash));
     }
 
+    private static long getAssetSize(String hash) {
+        File file = new File(getAssetDiskPath(hash));
+        if (!file.exists()) {
+            return -1;
+        }
+        return file.length();
+    }
+
+    private static boolean verifyAssetHash(String hash) {
+        // file does not exist
+        if (getAssetSize(hash) == -1) {
+            return false;
+        }
+        if (!Minosoft.config.getBoolean(ConfigurationPaths.DEBUG_VERIFY_ASSETS)) {
+            return true;
+        }
+        try {
+            return hash.equals(Util.sha1Gzip(new File(getAssetDiskPath(hash))));
+        } catch (IOException ignored) {
+        }
+        return false;
+    }
+
     public static void generateJarAssets() throws IOException {
         long startTime = System.currentTimeMillis();
         Log.verbose("Generating client.jar assets...");
-        try {
-            // ToDo: Verify assets
+        if (verifyAssetHash(ASSETS_CLIENT_JAR_HASH)) {
+            // ToDo: Verify all jar assets
             readAssetAsStreamByHash(ASSETS_CLIENT_JAR_HASH);
-            Log.verbose("client.jar assets probably already loaded, skipping");
+            Log.verbose("client.jar assets probably already generated, skipping");
             return;
-        } catch (Exception ignored) {
         }
         JsonObject manifest = HTTP.getJson("https://launchermeta.mojang.com/mc/game/version_manifest.json").getAsJsonObject();
         String assetsVersionJsonUrl = null;
@@ -173,7 +208,7 @@ public class AssetsManager {
             // ToDo: use input steam twice ?
             ByteArrayOutputStream outputBuffer = new ByteArrayOutputStream();
             int len;
-            byte[] buffer = new byte[2048];
+            byte[] buffer = new byte[4096];
             while ((len = versionJar.read(buffer)) > 0) {
                 outputBuffer.write(buffer, 0, len);
             }
@@ -203,13 +238,8 @@ public class AssetsManager {
     }
 
     private static void downloadAsset(String url, String hash) throws IOException {
-        String destination = getAssetDiskPath(hash);
-        File file = new File(destination);
-        if (file.exists() && file.length() > 0) {
-            return; // ToDo: check sha1
-        }
         Log.verbose(String.format("Downloading %s -> %s", url, hash));
-        Util.downloadFileAsGz(url, destination);
+        Util.downloadFileAsGz(url, getAssetDiskPath(hash));
     }
 
     private static String getAssetDiskPath(String hash) {
