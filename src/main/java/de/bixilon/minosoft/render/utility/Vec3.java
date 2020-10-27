@@ -17,13 +17,13 @@ import de.bixilon.minosoft.data.entities.Location;
 
 
 public class Vec3 {
-    public float x, y, z;
+    public double x, y, z;
 
     public Vec3() {
         x = y = z = 0;
     }
 
-    public Vec3(float x, float y, float z) {
+    public Vec3(double x, double y, double z) {
         this.x = x;
         this.y = y;
         this.z = z;
@@ -35,16 +35,28 @@ public class Vec3 {
         z = (float) location.getZ();
     }
 
-    public static Vec3 add(Vec3 v1, Vec3 v2) {
-        return new Vec3(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
+    public static Vec3 add(Vec3... vectors) {
+        Vec3 result = new Vec3(0, 0, 0);
+        for (Vec3 vector : vectors) {
+            result.x += vector.x;
+            result.y += vector.y;
+            result.z += vector.z;
+        }
+        return result;
     }
 
-    public static Vec3 mul(Vec3 v, float n) {
+    public static Vec3 mul(Vec3 v, double n) {
         return new Vec3(v.x * n, v.y * n, v.z * n);
     }
 
-    public static Vec3 mul(Vec3 v1, Vec3 v2) {
-        return new Vec3(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z);
+    public static Vec3 mul(Vec3... vectors) {
+        Vec3 result = new Vec3(0, 0, 0);
+        for (Vec3 vector : vectors) {
+            result.x *= vector.x;
+            result.y *= vector.y;
+            result.z *= vector.z;
+        }
+        return result;
     }
 
     public static Vec3 normalize(Vec3 v) {
@@ -65,7 +77,7 @@ public class Vec3 {
         z += v.z;
     }
 
-    public Vec3 add(float x, float y, float z) {
+    public Vec3 add(double x, double y, double z) {
         this.x += x;
         this.y += y;
         this.z += z;

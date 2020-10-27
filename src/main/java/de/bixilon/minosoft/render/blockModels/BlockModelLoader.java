@@ -1,6 +1,6 @@
 /*
  * Codename Minosoft
- * Copyright (C) 2020 Moritz Zwerger
+ * Copyright (C) 2020 Lukas Eisenhauer
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -32,7 +32,7 @@ import java.util.Map;
 
 public class BlockModelLoader {
     HashMap<BlockModelBlockWrapper, BlockModel> blockMap;
-    TextureLoader loader;
+    TextureLoader textureLoader;
 
     public BlockModelLoader() {
         blockMap = new HashMap<>();
@@ -49,7 +49,7 @@ public class BlockModelLoader {
             blockModels.put(mod.get("mod").getAsString(), loadModels(mod));
             tints.put(mod.get("mod").getAsString(), readTints(mod));
         }
-        loader = new TextureLoader(getTextures(blockModels), tints);
+        textureLoader = new TextureLoader(getTextures(blockModels), tints);
         applyTextures(blockModels);
         for (JsonObject mod : mods) {
             loadBlocks(mod, blockModels.get(mod.get("mod").getAsString()));
@@ -96,7 +96,7 @@ public class BlockModelLoader {
     public void applyTextures(HashMap<String, HashMap<String, BlockModel>> blockModels) {
         for (Map.Entry<String, HashMap<String, BlockModel>> mod : blockModels.entrySet()) {
             for (Map.Entry<String, BlockModel> block : mod.getValue().entrySet()) {
-                block.getValue().applyTextures(mod.getKey(), loader);
+                block.getValue().applyTextures(mod.getKey(), textureLoader);
             }
         }
     }
@@ -141,6 +141,6 @@ public class BlockModelLoader {
     }
 
     public TextureLoader getTextureLoader() {
-        return loader;
+        return textureLoader;
     }
 }

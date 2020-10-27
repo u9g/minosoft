@@ -18,7 +18,7 @@ import de.bixilon.minosoft.data.world.World;
 import de.bixilon.minosoft.render.GameWindow;
 import de.bixilon.minosoft.render.utility.Vec3;
 
-import static org.lwjgl.opengl.GL11.glTranslatef;
+import static org.lwjgl.opengl.GL11.glTranslated;
 
 public class PlayerController {
     private static final float playerHeight = 1.8f;
@@ -47,7 +47,7 @@ public class PlayerController {
         }
         if (GameWindow.paused) {
             cameraMovement.loop();
-            glTranslatef(-playerPos.x, -(playerPos.y + playerHeight - 0.2f), -playerPos.z);
+            glTranslated(-playerPos.x, -(playerPos.y + playerHeight - 0.2f), -playerPos.z);
             return;
         }
         oldPos = playerPos.copy();
@@ -64,7 +64,7 @@ public class PlayerController {
         }
         handleCollisions(GameWindow.getConnection().getPlayer().getWorld());
 
-        glTranslatef(-playerPos.x, -(playerPos.y + playerHeight - 0.2f), -playerPos.z);
+        glTranslated(-playerPos.x, -(playerPos.y + playerHeight - 0.2f), -playerPos.z);
     }
 
     private void handleCollisions(World world) {

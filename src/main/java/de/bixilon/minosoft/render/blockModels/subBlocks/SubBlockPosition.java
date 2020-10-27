@@ -16,46 +16,61 @@ package de.bixilon.minosoft.render.blockModels.subBlocks;
 import com.google.gson.JsonArray;
 import de.bixilon.minosoft.data.world.BlockPosition;
 import de.bixilon.minosoft.render.blockModels.Face.Axis;
+import de.bixilon.minosoft.render.utility.Vec3;
 import org.apache.commons.collections.primitives.ArrayFloatList;
 
 import static de.bixilon.minosoft.render.blockModels.Face.RenderConstants.BLOCK_RESOLUTION;
 
 public class SubBlockPosition {
-    private static final SubBlockPosition middlePos = new SubBlockPosition(8, 8, 8);
-    public float x;
-    public float y;
-    public float z;
-
+    public static final float e = 0.01f;
+    private static final SubBlockPosition middlePos = new SubBlockPosition(BLOCK_RESOLUTION / 2f, BLOCK_RESOLUTION / 2f, BLOCK_RESOLUTION / 2f);
+    private final Vec3 vector;
 
     public SubBlockPosition(JsonArray json) {
-        x = json.get(0).getAsFloat();
-        y = json.get(1).getAsFloat();
-        z = json.get(2).getAsFloat();
+        float x = json.get(0).getAsFloat();
+        float y = json.get(1).getAsFloat();
+        float z = json.get(2).getAsFloat();
+        vector = new Vec3(x, y, z);
     }
 
-    public SubBlockPosition(float x, float y, float z) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
+    public SubBlockPosition(double x, double y, double z) {
+        vector = new Vec3(x, y, z);
     }
 
-    public static SubBlockPosition add(SubBlockPosition pos1, SubBlockPosition pos2) {
-        return new SubBlockPosition(pos1.x + pos2.x, pos1.y + pos2.y, pos1.z + pos2.z);
-    }
-
-    public static SubBlockPosition subtract(SubBlockPosition pos1, SubBlockPosition pos2) {
-        return new SubBlockPosition(pos1.x - pos2.x, pos1.y - pos2.y, pos1.z - pos2.z);
-    }
-
-    public ArrayFloatList getFloats(BlockPosition position) {
-        ArrayFloatList result = new ArrayFloatList();
-        result.add(x / BLOCK_RESOLUTION + position.getX());
-        result.add(y / BLOCK_RESOLUTION + position.getY());
-        result.add(z / BLOCK_RESOLUTION + position.getZ());
-        return result;
+    public SubBlockPosition(Vec3 vector) {
+        this.vector = vector;
     }
 
     public SubBlockPosition rotated(Axis axis, int rotation) {
         return new SubBlockRotation(middlePos, axis, rotation).apply(this);
+    }
+
+    public ArrayFloatList getFloats(BlockPosition position) {
+        ArrayFloatList result = new ArrayFloatList();
+        result.add((float) (vector.x / BLOCK_RESOLUTION + position.getX()));
+        result.add((float) (vector.y / BLOCK_RESOLUTION + position.getY()));
+        result.add((float) (vector.z / BLOCK_RESOLUTION + position.getZ()));
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        SubBlockPosition position = (SubBlockPosition) o;
+        return Math.abs(position.getVector().x - vector.x) < e && Math.abs(position.getVector().y - vector.y) < e && Math.abs(position.getVector().z - vector.z) < e;
+    }
+
+    public Vec3 getVector() {
+        return vector;
+    }
+
+    @Override
+    public int hashCode() {
+        return 0;
     }
 }

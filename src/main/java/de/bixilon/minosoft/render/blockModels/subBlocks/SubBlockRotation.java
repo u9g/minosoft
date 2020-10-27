@@ -15,35 +15,50 @@ package de.bixilon.minosoft.render.blockModels.subBlocks;
 
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.render.blockModels.Face.Axis;
-import javafx.util.Pair;
+import de.bixilon.minosoft.render.utility.Vec3;
 
 
 public class SubBlockRotation {
-    private final SubBlockPosition origin;
-    private final float angle;
-    private Axis direction;
+    private final Vec3 origin;
+    private final double angle;
+    private final Vec3 direction;
 
     public SubBlockRotation(SubBlockPosition origin, Axis direction, float angle) {
-        this.origin = origin;
-        this.direction = direction;
+        this.origin = origin.getVector();
+        this.direction = switch (direction) {
+            case X -> new Vec3(1, 0, 0);
+            case Y -> new Vec3(0, 1, 0);
+            case Z -> new Vec3(0, 0, 1);
+        };
         this.angle = angle;
     }
 
     public SubBlockRotation(JsonObject rotation) {
-        origin = new SubBlockPosition(rotation.get("origin").getAsJsonArray());
+        origin = new SubBlockPosition(rotation.get("origin").getAsJsonArray()).getVector();
         String axis = rotation.get("axis").getAsString();
-        switch (axis) {
-            case "x" -> direction = Axis.X;
-            case "y" -> direction = Axis.Y;
-            case "z" -> direction = Axis.Z;
-        }
-        angle = rotation.get("angle").getAsFloat();
+        direction = switch (axis) {
+            case "x" -> new Vec3(1, 0, 0);
+            case "y" -> new Vec3(0, 1, 0);
+            case "z" -> new Vec3(0, 0, 1);
+            default -> throw new IllegalStateException("Unexpected value: " + axis);
+        };
+        angle = Math.toRadians(rotation.get("angle").getAsFloat());
     }
 
+    public SubBlockPosition apply(SubBlockPosition position) {
+        Vec3 transformed = Vec3.add(position.getVector(), Vec3.mul(origin, -1));
+
+        Vec3 result = Vec3.mul(transformed, Math.cos(angle));
+        result.add(Vec3.mul(Vec3.cross(direction, transformed), Math.sin(angle)));
+        //result.add(Vec3.mul(direction, direction, transformed, ));
+        return new SubBlockPosition(Vec3.add(transformed, origin));
+    }
+
+    /*
     public static Pair<Float, Float> rotate(float x, float y, float angle) {
         float angleRad = (float) Math.toRadians(angle);
         float newX = x * (float) StrictMath.cos(angleRad) + y * (float) StrictMath.sin(angleRad);
-        float newY = -x * (float) StrictMath.sin(angleRad) + y * (float) StrictMath.cos(angleRad);
+        float newY = - x * (float) StrictMath.sin(angleRad) + y * (float) StrictMath.cos(angleRad);
         return new Pair<>(newX, newY);
     }
 
@@ -69,4 +84,5 @@ public class SubBlockRotation {
         }
         return SubBlockPosition.add(transformed, origin);
     }
+     */
 }

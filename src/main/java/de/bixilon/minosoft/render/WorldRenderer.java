@@ -168,7 +168,7 @@ public class WorldRenderer {
                         yield nibbleBlocks.get(new ChunkNibbleLocation(location.getX(), location.getY(), location.getZ() + 1));
                     }
                 };
-                if (dependedBlock == null || modelLoader.isFull(dependedBlock, FaceOrientation.inverse(orientation))) {
+                if (dependedBlock == null || !modelLoader.isFull(dependedBlock, FaceOrientation.inverse(orientation))) {
                     facesToDraw.add(orientation);
                 }
             }

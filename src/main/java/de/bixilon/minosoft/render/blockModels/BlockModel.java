@@ -42,21 +42,21 @@ public class BlockModel {
             subBlocks = new ArrayList<>();
         }
         if (json.has("x")) {
-            for (SubBlock subBlock : subBlocks) {
-                subBlock.rotate(Axis.X, json.get("x").getAsInt());
-            }
+            rotate(Axis.X, json.get("x").getAsInt());
         }
         if (json.has("y")) {
-            for (SubBlock subBlock : subBlocks) {
-                subBlock.rotate(Axis.X, json.get("y").getAsInt());
-            }
+            rotate(Axis.Y, json.get("y").getAsInt());
         }
         if (json.has("z")) {
-            for (SubBlock subBlock : subBlocks) {
-                subBlock.rotate(Axis.X, json.get("z").getAsInt());
-            }
+            rotate(Axis.Z, json.get("z").getAsInt());
         }
         full = createFullValues();
+    }
+
+    private void rotate(Axis axis, int rotation) {
+        for (SubBlock subBlock : subBlocks) {
+            subBlock.rotate(axis, rotation);
+        }
     }
 
     public BlockModel() {

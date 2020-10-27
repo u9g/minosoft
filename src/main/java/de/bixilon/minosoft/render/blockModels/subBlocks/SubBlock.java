@@ -1,6 +1,6 @@
 /*
  * Codename Minosoft
- * Copyright (C) 2020 Moritz Zwerger
+ * Copyright (C) 2020 Lukas Eisenhauer
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -110,17 +110,21 @@ public class SubBlock {
 
     public ArrayFloatList getFaces(HashSet<FaceOrientation> facesToDraw, BlockPosition position) {
         ArrayFloatList result = new ArrayFloatList();
-        facesToDraw.forEach((faceOrientation -> {
-            ArrayFloatList face = prepareFace(faceOrientation, position);
-            if (face != null) {
-                result.addAll(face);
+        for (FaceOrientation orientation : FaceOrientation.values()) {
+            if (full[orientation.getId()] && !facesToDraw.contains(orientation)) {
+                continue;
             }
-        }));
+            ArrayFloatList face = prepareFace(orientation, position);
+            if (face == null) {
+                continue;
+            }
+            result.addAll(face);
+        }
         return result;
     }
 
     private ArrayFloatList prepareFace(FaceOrientation faceDirection, BlockPosition position) {
-        if (full[faceDirection.getId()] || !textureCoordinates.containsKey(faceDirection)) {
+        if (!textureCoordinates.containsKey(faceDirection)) {
             return null;
         }
         ArrayFloatList result = new ArrayFloatList();

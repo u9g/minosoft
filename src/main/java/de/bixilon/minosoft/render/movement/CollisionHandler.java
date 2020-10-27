@@ -46,7 +46,7 @@ public class CollisionHandler {
     }
 
     private void xAxisCollision() {
-        float deltaX = controller.playerPos.x - controller.oldPos.x;
+        double deltaX = controller.playerPos.x - controller.oldPos.x;
         if (deltaX == 0) {
             return;
         }
@@ -59,7 +59,7 @@ public class CollisionHandler {
     }
 
     private void yAxisCollision() {
-        float deltaY = controller.playerPos.y - controller.oldPos.y;
+        double deltaY = controller.playerPos.y - controller.oldPos.y;
         if (deltaY == 0) {
             return;
         }
@@ -76,7 +76,7 @@ public class CollisionHandler {
     }
 
     private void zAxisCollision() {
-        float deltaZ = controller.playerPos.z - controller.oldPos.z;
+        double deltaZ = controller.playerPos.z - controller.oldPos.z;
         if (deltaZ == 0) {
             return;
         }
