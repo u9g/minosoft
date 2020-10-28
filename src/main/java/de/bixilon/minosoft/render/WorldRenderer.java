@@ -29,22 +29,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 import static org.lwjgl.opengl.GL11.*;
 
 public class WorldRenderer {
-    private final ConcurrentHashMap<ChunkLocation, ConcurrentHashMap<Byte, ArrayFloatList>> faces;
-    private BlockModelLoader modelLoader;
+    private final ConcurrentHashMap<ChunkLocation, ConcurrentHashMap<Byte, ArrayFloatList>> faces = new ConcurrentHashMap<>();
+    private final BlockModelLoader modelLoader = new BlockModelLoader();
 
-    private LinkedBlockingQueue<Runnable> queuedMapData;
-
-    public WorldRenderer() {
-        faces = new ConcurrentHashMap<>();
-    }
-
-    public void init() {
-        queuedMapData = new LinkedBlockingQueue<>();
-        modelLoader = new BlockModelLoader();
-    }
+    private final LinkedBlockingQueue<Runnable> queuedMapData = new LinkedBlockingQueue<>();
 
     public void startChunkPreparation(Connection connection) {
-        Thread chunkLoadThread = new Thread(() -> {
+        new Thread(() -> {
             while (true) {
                 try {
                     queuedMapData.take().run();
@@ -53,9 +44,7 @@ public class WorldRenderer {
                     e.printStackTrace();
                 }
             }
-        });
-        chunkLoadThread.setName(String.format("%d/ChunkLoading", connection.getConnectionId()));
-        chunkLoadThread.start();
+        }, String.format("%d/ChunkLoading", connection.getConnectionId())).start();
     }
 
     public void queueChunkBulk(HashMap<ChunkLocation, Chunk> chunks) {

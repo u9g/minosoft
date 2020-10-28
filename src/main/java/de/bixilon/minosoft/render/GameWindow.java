@@ -21,7 +21,7 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
 public class GameWindow {
-    private static final float FOVY = 45f;
+    private static final float FOV_Y = 45f;
     private static final int WIDTH = 800;
     private static final int HEIGHT = 800;
     private static final boolean FULLSCREEN = false;
@@ -30,21 +30,21 @@ public class GameWindow {
     private static WorldRenderer renderer;
     private static Connection connection;
     private static PlayerController playerController;
-    private static boolean running = false;
 
     public static void prepare() {
         new Thread(() -> {
+            Log.debug("Starting render preparations...");
             openGLWindow = new OpenGLWindow(WIDTH, HEIGHT, FULLSCREEN);
-            playerController = new PlayerController(openGLWindow.getWindow());
+            playerController = new PlayerController(openGLWindow.getWindowId());
             openGLWindow.init();
             renderer = new WorldRenderer();
-            renderer.init();
-            Log.info("Finished loading game Assets");
+            Log.debug("Render preparations done.");
             try {
-                while (!running) {
+                while (connection == null) {
                     Thread.sleep(100);
                 }
                 openGLWindow.start();
+                Log.debug("Render window preparations done.");
                 mainLoop();
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -53,7 +53,7 @@ public class GameWindow {
     }
 
     private static void mainLoop() {
-        while (!glfwWindowShouldClose(openGLWindow.getWindow())) {
+        while (!glfwWindowShouldClose(openGLWindow.getWindowId())) {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glLoadIdentity();
             glfwPollEvents();
@@ -65,13 +65,11 @@ public class GameWindow {
                 glColor4f(1f, 1f, 1f, 1f);
             }
 
-            OpenGLWindow.gluPerspective(FOVY, (float) WIDTH / (float) HEIGHT, 0.1f, 500f);
+            OpenGLWindow.gluPerspective(FOV_Y, WIDTH / (float) HEIGHT, 0.1f, 500f);
             playerController.loop(deltaTime);
-            if (connection != null && connection.getPlayer().isSpawnConfirmed()) {
-                renderer.draw();
-            }
+            renderer.draw();
             glPopMatrix();
-            glfwSwapBuffers(openGLWindow.getWindow());
+            glfwSwapBuffers(openGLWindow.getWindowId());
         }
     }
 
@@ -88,12 +86,11 @@ public class GameWindow {
     }
 
     public static void start(Connection connection) {
-        if (running) {
+        if (GameWindow.connection != null) {
             return;
         }
         GameWindow.connection = connection;
-        running = true;
-        playerController = new PlayerController(openGLWindow.getWindow());
+        playerController = new PlayerController(openGLWindow.getWindowId());
         renderer.startChunkPreparation(connection);
     }
 

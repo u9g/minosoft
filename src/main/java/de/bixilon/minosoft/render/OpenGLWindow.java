@@ -1,6 +1,6 @@
 /*
  * Codename Minosoft
- * Copyright (C) 2020 Lukas Eisenhauer
+ * Copyright (C) 2020 Moritz Zwerger
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -29,7 +29,7 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 public class OpenGLWindow {
     private final boolean fullscreen;
     boolean escDown = false;
-    private long window;
+    private long windowId;
     private int width, height;
     private double mouseX;
     private double mouseY;
@@ -41,8 +41,8 @@ public class OpenGLWindow {
         this.fullscreen = fullscreen;
     }
 
-    public static void gluPerspective(float fovy, float aspect, float near, float far) {
-        float bottom = -near * (float) Math.tan(fovy / 2);
+    public static void gluPerspective(float fovY, float aspect, float near, float far) {
+        float bottom = -near * (float) Math.tan(fovY / 2);
         float top = -bottom;
         float left = aspect * bottom;
         float right = -left;
@@ -67,8 +67,8 @@ public class OpenGLWindow {
             height = mode.height();
         }
 
-        window = glfwCreateWindow(width, height, "RENDER", NULL, NULL);
-        if (window == NULL) {
+        windowId = glfwCreateWindow(width, height, "RENDER", NULL, NULL);
+        if (windowId == NULL) {
             throw new RuntimeException("Failed to create the GLFW window");
         }
 
@@ -76,19 +76,19 @@ public class OpenGLWindow {
             IntBuffer pWidth = stack.mallocInt(1); // int*
             IntBuffer pHeight = stack.mallocInt(1); // int*
 
-            glfwGetWindowSize(window, pWidth, pHeight);
+            glfwGetWindowSize(windowId, pWidth, pHeight);
 
             GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 
-            glfwSetWindowPos(window, (vidmode.width() - pWidth.get(0)) / 2, (vidmode.height() - pHeight.get(0)) / 2);
+            glfwSetWindowPos(windowId, (vidmode.width() - pWidth.get(0)) / 2, (vidmode.height() - pHeight.get(0)) / 2);
         }
-        glfwMakeContextCurrent(window);
+        glfwMakeContextCurrent(windowId);
 
-        glfwSetCursorPosCallback(window, new GLFWCursorPosCallback() {
+        glfwSetCursorPosCallback(windowId, new GLFWCursorPosCallback() {
             @Override
-            public void invoke(long window, double xpos, double ypos) {
-                mouseX = xpos;
-                mouseY = ypos;
+            public void invoke(long windowId, double xPos, double yPos) {
+                mouseX = xPos;
+                mouseY = yPos;
             }
         });
 
@@ -117,8 +117,8 @@ public class OpenGLWindow {
         glEnable(GL_TEXTURE_2D);
     }
 
-    public long getWindow() {
-        return window;
+    public long getWindowId() {
+        return windowId;
     }
 
     public int getWidth() {
@@ -138,7 +138,7 @@ public class OpenGLWindow {
     }
 
     public float loop() {
-        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+        if (glfwGetKey(windowId, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             if (!escDown) {
                 GameWindow.pause();
                 escDown = true;
@@ -154,15 +154,15 @@ public class OpenGLWindow {
     }
 
     public void start() {
-        glfwSetCursorPosCallback(window, GameWindow.getPlayerController().getCameraMovement()::mouseCallback);
-        glfwShowWindow(window);
+        glfwSetCursorPosCallback(windowId, GameWindow.getPlayerController().getCameraMovement()::mouseCallback);
+        glfwShowWindow(windowId);
     }
 
     public void mouseEnable(boolean mouse) {
         if (mouse) {
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        } else {
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            glfwSetInputMode(windowId, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            return;
         }
+        glfwSetInputMode(windowId, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
 }
