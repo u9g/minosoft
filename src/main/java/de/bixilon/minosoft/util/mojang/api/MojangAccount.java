@@ -102,7 +102,6 @@ public class MojangAccount {
     public void saveToConfig() {
         Minosoft.getConfig().putMojangAccount(this);
         Minosoft.getConfig().saveToFile();
-        Minosoft.getConfig().saveToFile();
     }
 
     public void delete() {

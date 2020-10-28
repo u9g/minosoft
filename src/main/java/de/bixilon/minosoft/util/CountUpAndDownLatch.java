@@ -78,6 +78,14 @@ public class CountUpAndDownLatch {
         }
     }
 
+    public void addCount(int count) {
+        synchronized (lock) {
+            total += count;
+            latch = new CountDownLatch((int) latch.getCount() + count);
+            lock.notifyAll();
+        }
+    }
+
     public long getTotal() {
         return total;
     }
@@ -90,5 +98,10 @@ public class CountUpAndDownLatch {
                 lock.wait();
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%d / %d", latch.getCount(), total);
     }
 }

@@ -62,7 +62,6 @@ public class VillagerData {
         return level;
     }
 
-
     public enum VillagerProfessions {
         NONE(new MapSet[]{new MapSet<>(451, 0)}),
         ARMORER(new MapSet[]{new MapSet<>(451, 1)}),
@@ -130,5 +129,4 @@ public class VillagerData {
             return values()[id];
         }
     }
-
 }
