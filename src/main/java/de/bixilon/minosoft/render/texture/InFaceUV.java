@@ -14,7 +14,7 @@
 package de.bixilon.minosoft.render.texture;
 
 import com.google.gson.JsonArray;
-import de.bixilon.minosoft.render.GameWindow;
+import de.bixilon.minosoft.render.blockModels.BlockModelLoader;
 import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
 import org.apache.commons.collections.primitives.ArrayFloatList;
 
@@ -36,8 +36,8 @@ public class InFaceUV {
     }
 
     public void prepare(float texture) {
-        realU1 = texture + u1 * GameWindow.getRenderer().getBlockModelLoader().getTextureLoader().getStep() / RenderConstants.TEXTURE_PACK_RESOLUTION;
-        realU2 = texture + u2 * GameWindow.getRenderer().getBlockModelLoader().getTextureLoader().getStep() / RenderConstants.TEXTURE_PACK_RESOLUTION;
+        realU1 = texture + u1 * BlockModelLoader.getInstance().getTextureLoader().getStep() / RenderConstants.TEXTURE_PACK_RESOLUTION;
+        realU2 = texture + u2 * BlockModelLoader.getInstance().getTextureLoader().getStep() / RenderConstants.TEXTURE_PACK_RESOLUTION;
         realV1 = (float) v1 / RenderConstants.TEXTURE_PACK_RESOLUTION;
         realV2 = (float) v2 / RenderConstants.TEXTURE_PACK_RESOLUTION;
     }

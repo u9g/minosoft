@@ -15,7 +15,7 @@ package de.bixilon.minosoft.render.movement;
 
 import de.bixilon.minosoft.data.world.BlockPosition;
 import de.bixilon.minosoft.data.world.World;
-import de.bixilon.minosoft.render.GameWindow;
+import de.bixilon.minosoft.protocol.network.Connection;
 import de.bixilon.minosoft.render.blockModels.BlockModelLoader;
 import de.bixilon.minosoft.render.utility.AdditionalMath;
 import de.bixilon.minosoft.render.utility.Vec3;
@@ -23,12 +23,10 @@ import de.bixilon.minosoft.render.utility.Vec3;
 public class CollisionHandler {
     private final World world;
     private final PlayerController controller;
-    private final BlockModelLoader modelLoader;
 
-    public CollisionHandler(PlayerController controller) {
-        world = GameWindow.getConnection().getPlayer().getWorld();
-        modelLoader = GameWindow.getRenderer().getBlockModelLoader();
-        this.controller = controller;
+    public CollisionHandler(Connection connection) {
+        world = connection.getPlayer().getWorld();
+        this.controller = connection.getRenderProperties().getController();
     }
 
     public void handleCollisions() {
@@ -101,7 +99,7 @@ public class CollisionHandler {
             for (int yPos : yPositions) {
                 for (int zPos : zPositions) {
                     BlockPosition pos = new BlockPosition(xPos, (short) yPos, zPos);
-                    if (modelLoader.isFull(world.getBlock(pos))) {
+                    if (BlockModelLoader.getInstance().isFull(world.getBlock(pos))) {
                         return false;
                     }
                 }

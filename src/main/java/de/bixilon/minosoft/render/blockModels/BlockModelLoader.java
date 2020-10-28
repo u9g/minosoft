@@ -33,6 +33,7 @@ import java.util.Map;
 public class BlockModelLoader {
     HashMap<BlockModelBlockWrapper, BlockModel> blockMap;
     TextureLoader textureLoader;
+    public static BlockModelLoader blockModelLoader;
 
     public BlockModelLoader() {
         blockMap = new HashMap<>();
@@ -142,5 +143,9 @@ public class BlockModelLoader {
 
     public TextureLoader getTextureLoader() {
         return textureLoader;
+    }
+
+    public static BlockModelLoader getInstance() {
+        return blockModelLoader;
     }
 }

@@ -1,6 +1,6 @@
 /*
  * Codename Minosoft
- * Copyright (C) 2020 Moritz Zwerger
+ * Copyright (C) 2020 Moritz Zwerger, Lukas Eisenhauer
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -38,6 +38,8 @@ import de.bixilon.minosoft.protocol.packets.serverbound.status.PacketStatusReque
 import de.bixilon.minosoft.protocol.ping.PingCallback;
 import de.bixilon.minosoft.protocol.ping.ServerListPing;
 import de.bixilon.minosoft.protocol.protocol.*;
+import de.bixilon.minosoft.render.GameWindow;
+import de.bixilon.minosoft.render.RenderProperties;
 import de.bixilon.minosoft.util.DNSUtil;
 import de.bixilon.minosoft.util.ServerAddress;
 import org.xbill.DNS.TextParseException;
@@ -51,18 +53,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Connection {
     public static int lastConnectionId;
-    final Network network = Network.getNetworkInstance(this);
-    final PacketHandler handler = new PacketHandler(this);
-    final PacketSender sender = new PacketSender(this);
-    final LinkedBlockingQueue<ClientboundPacket> handlingQueue = new LinkedBlockingQueue<>();
-    final VelocityHandler velocityHandler = new VelocityHandler(this);
-    final HashSet<PingCallback> pingCallbacks = new HashSet<>();
-    final HashSet<ConnectionChangeCallback> connectionChangeCallbacks = new HashSet<>();
-    final HashSet<EventManager> eventManagers = new HashSet<>();
-    final LinkedList<EventMethod> eventListeners = new LinkedList<>();
-    final int connectionId;
-    final Player player;
-    final String hostname;
+    private final Network network = Network.getNetworkInstance(this);
+    private final PacketHandler handler = new PacketHandler(this);
+    private final PacketSender sender = new PacketSender(this);
+    private final LinkedBlockingQueue<ClientboundPacket> handlingQueue = new LinkedBlockingQueue<>();
+    private final VelocityHandler velocityHandler = new VelocityHandler(this);
+    private final HashSet<PingCallback> pingCallbacks = new HashSet<>();
+    private final HashSet<ConnectionChangeCallback> connectionChangeCallbacks = new HashSet<>();
+    private final HashSet<EventManager> eventManagers = new HashSet<>();
+    private final LinkedList<EventMethod> eventListeners = new LinkedList<>();
+    private final int connectionId;
+    private final Player player;
+    private final String hostname;
+    private RenderProperties renderProperties;
     LinkedList<ServerAddress> addresses;
     int desiredVersionNumber = -1;
     ServerAddress address;
@@ -374,6 +377,10 @@ public class Connection {
                 }
             }
             case FAILED_NO_RETRY -> handlePingCallbacks(null);
+            case PLAY -> {
+                renderProperties = new RenderProperties(this);
+                GameWindow.setCurrentConnection(this);
+            }
         }
         // handle callbacks
         connectionChangeCallbacks.forEach((callback -> callback.handle(this)));
@@ -410,5 +417,9 @@ public class Connection {
 
     public ServerListPing getLastPing() {
         return lastPing;
+    }
+
+    public RenderProperties getRenderProperties() {
+        return renderProperties;
     }
 }

@@ -15,6 +15,7 @@ package de.bixilon.minosoft.render.movement;
 
 import de.bixilon.minosoft.data.GameModes;
 import de.bixilon.minosoft.data.world.World;
+import de.bixilon.minosoft.protocol.network.Connection;
 import de.bixilon.minosoft.render.GameWindow;
 import de.bixilon.minosoft.render.utility.Vec3;
 
@@ -24,6 +25,8 @@ public class PlayerController {
     private static final float playerHeight = 1.8f;
     private static final float playerWidth = 0.25f;
     private static final float gravity = 13;
+
+    private final Connection connection;
     public Vec3 oldPos;
     CameraMovement cameraMovement;
     PlayerMovement playerMovement;
@@ -33,17 +36,18 @@ public class PlayerController {
     private boolean enableGravity;
     private CollisionHandler collisionHandler;
 
-    public PlayerController(long window) {
-        cameraMovement = new CameraMovement();
-        playerMovement = new PlayerMovement(window);
+    public PlayerController(Connection connection) {
+        this.connection = connection;
+        cameraMovement = new CameraMovement(connection);
+        playerMovement = new PlayerMovement(connection);
     }
 
     public void loop(float deltaTime) {
-        if (!GameWindow.getConnection().getPlayer().isSpawnConfirmed()) {
+        if (!connection.getPlayer().isSpawnConfirmed()) {
             return;
         }
         if (collisionHandler == null) {
-            collisionHandler = new CollisionHandler(this);
+            collisionHandler = new CollisionHandler(connection);
         }
         if (GameWindow.paused) {
             cameraMovement.loop();
@@ -52,7 +56,7 @@ public class PlayerController {
         }
         oldPos = playerPos.copy();
 
-        GameModes gameMode = GameWindow.getConnection().getPlayer().getGameMode();
+        GameModes gameMode = connection.getPlayer().getGameMode();
         enableGravity = gameMode != GameModes.CREATIVE && gameMode != GameModes.SPECTATOR;
         handleGravity(deltaTime);
         cameraMovement.loop();
@@ -62,7 +66,7 @@ public class PlayerController {
         if (gameMode == GameModes.SPECTATOR) {
             return;
         }
-        handleCollisions(GameWindow.getConnection().getPlayer().getWorld());
+        handleCollisions(connection.getPlayer().getWorld());
 
         glTranslated(-playerPos.x, -(playerPos.y + playerHeight - 0.2f), -playerPos.z);
     }

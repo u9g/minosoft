@@ -13,6 +13,7 @@
 
 package de.bixilon.minosoft.render.movement;
 
+import de.bixilon.minosoft.protocol.network.Connection;
 import de.bixilon.minosoft.render.GameWindow;
 import de.bixilon.minosoft.render.utility.Vec3;
 
@@ -20,6 +21,7 @@ import static org.lwjgl.opengl.GL11.glRotatef;
 
 public class CameraMovement {
     private static final float sensitivity = 0.1f;
+    private final Connection connection;
     private Vec3 cameraFront = new Vec3(0.0f, 0.0f, -1.0f);
 
     private boolean firstMouse = false;
@@ -27,6 +29,10 @@ public class CameraMovement {
     private float lastY;
     private float yaw;
     private float pitch;
+
+    public CameraMovement(Connection connection) {
+        this.connection = connection;
+    }
 
     public void mouseCallback(long l, double xPos, double yPos) {
         // variable l is unused but always given by openGL so it is needed in the method signature

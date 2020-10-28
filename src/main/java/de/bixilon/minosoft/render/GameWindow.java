@@ -15,87 +15,82 @@ package de.bixilon.minosoft.render;
 
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.network.Connection;
-import de.bixilon.minosoft.render.movement.PlayerController;
+import de.bixilon.minosoft.render.blockModels.BlockModelLoader;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
 public class GameWindow {
-    private static final float FOV_Y = 45f;
-    private static final int WIDTH = 800;
-    private static final int HEIGHT = 800;
-    private static final boolean FULLSCREEN = false;
     public static boolean paused = false;
     private static OpenGLWindow openGLWindow;
-    private static WorldRenderer renderer;
-    private static Connection connection;
-    private static PlayerController playerController;
+    private static final Object waiter = new Object();
+    private static final LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
+    private static Connection currentConnection;
 
     public static void prepare() {
+        CountDownLatch latch = new CountDownLatch(1);
         new Thread(() -> {
-            Log.debug("Starting render preparations...");
-            openGLWindow = new OpenGLWindow(WIDTH, HEIGHT, FULLSCREEN);
-            playerController = new PlayerController(openGLWindow.getWindowId());
+            openGLWindow = new OpenGLWindow();
             openGLWindow.init();
-            renderer = new WorldRenderer();
-            Log.debug("Render preparations done.");
-            try {
-                while (connection == null) {
-                    Thread.sleep(100);
-                }
-                openGLWindow.start();
-                Log.debug("Render window preparations done.");
-                mainLoop();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            BlockModelLoader.blockModelLoader = new BlockModelLoader();
+            Log.info("Finished loading block models");
+            latch.countDown();
+            mainLoop();
         }, "GameWindow").start();
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private static void mainLoop() {
+        try {
+            queue.take().run();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         while (!glfwWindowShouldClose(openGLWindow.getWindowId())) {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glLoadIdentity();
             glfwPollEvents();
-            float deltaTime = openGLWindow.loop();
-
             if (paused) {
                 glColor4f(0.5f, 0.5f, 0.5f, 1f);
             } else {
                 glColor4f(1f, 1f, 1f, 1f);
             }
-
-            OpenGLWindow.gluPerspective(FOV_Y, WIDTH / (float) HEIGHT, 0.1f, 500f);
-            playerController.loop(deltaTime);
-            renderer.draw();
+            float deltaTime = openGLWindow.loop();
+            currentConnection.getRenderProperties().getController().loop(deltaTime);
+            currentConnection.getRenderProperties().getRenderer().draw();
             glPopMatrix();
             glfwSwapBuffers(openGLWindow.getWindowId());
         }
     }
 
-    public static WorldRenderer getRenderer() {
-        return renderer;
-    }
-
-    public static Connection getConnection() {
-        return connection;
-    }
-
-    public static PlayerController getPlayerController() {
-        return playerController;
-    }
-
-    public static void start(Connection connection) {
-        if (GameWindow.connection != null) {
-            return;
-        }
-        GameWindow.connection = connection;
-        playerController = new PlayerController(openGLWindow.getWindowId());
-        renderer.startChunkPreparation(connection);
-    }
-
     public static void pause() {
         paused = !paused;
         openGLWindow.mouseEnable(paused);
+    }
+
+    public static OpenGLWindow getOpenGLWindow() {
+        return openGLWindow;
+    }
+
+    public static Connection getCurrentConnection() {
+        return currentConnection;
+    }
+
+    public static void setCurrentConnection(Connection currentConnection) {
+        if (GameWindow.currentConnection == null) {
+            queue.add(openGLWindow::start);
+        }
+        openGLWindow.setCurrentConnection(currentConnection);
+        GameWindow.currentConnection = currentConnection;
+        synchronized (waiter) {
+            waiter.notifyAll();
+        }
     }
 }

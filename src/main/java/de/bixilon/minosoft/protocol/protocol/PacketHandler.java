@@ -40,7 +40,6 @@ import de.bixilon.minosoft.protocol.packets.clientbound.status.PacketStatusPong;
 import de.bixilon.minosoft.protocol.packets.clientbound.status.PacketStatusResponse;
 import de.bixilon.minosoft.protocol.packets.serverbound.login.PacketEncryptionResponse;
 import de.bixilon.minosoft.protocol.packets.serverbound.play.PacketKeepAliveResponse;
-import de.bixilon.minosoft.render.GameWindow;
 import de.bixilon.minosoft.render.utility.Vec3;
 import de.bixilon.minosoft.util.nbt.tag.CompoundTag;
 import de.bixilon.minosoft.util.nbt.tag.StringTag;
@@ -183,7 +182,7 @@ public class PacketHandler {
         pkg.getChunkMap().forEach(((location, chunk) -> connection.fireEvent(new ChunkDataChangeEvent(connection, location, chunk))));
 
         connection.getPlayer().getWorld().setChunks(pkg.getChunkMap());
-        GameWindow.getRenderer().queueChunkBulk(pkg.getChunkMap());
+        connection.getRenderProperties().getRenderer().queueChunkBulk(pkg.getChunkMap());
     }
 
     public void handle(PacketUpdateHealth pkg) {
@@ -359,7 +358,7 @@ public class PacketHandler {
         connection.fireEvent(new BlockChangeEvent(connection, pkg));
 
         connection.getPlayer().getWorld().getChunk(pkg.getPosition().getChunkLocation()).setBlock(pkg.getPosition().getInChunkLocation(), pkg.getBlock());
-        GameWindow.getRenderer().queueBlock(pkg.getPosition(), pkg.getBlock());
+        connection.getRenderProperties().getRenderer().queueBlock(pkg.getPosition(), pkg.getBlock());
     }
 
     public void handle(PacketMultiBlockChange pkg) {
@@ -370,7 +369,7 @@ public class PacketHandler {
         }
         connection.fireEvent(new MultiBlockChangeEvent(connection, pkg));
         chunk.setBlocks(pkg.getBlocks());
-        GameWindow.getRenderer().queueChunk(pkg.getLocation(), chunk);
+        connection.getRenderProperties().getRenderer().queueChunk(pkg.getLocation(), chunk);
     }
 
     public void handle(PacketRespawn pkg) {
@@ -416,7 +415,7 @@ public class PacketHandler {
 
         connection.getPlayer().getWorld().setChunk(pkg.getLocation(), pkg.getChunk());
         connection.getPlayer().getWorld().setBlockEntityData(pkg.getBlockEntities());
-        GameWindow.getRenderer().queueChunk(pkg.getLocation(), pkg.getChunk());
+        connection.getRenderProperties().getRenderer().queueChunk(pkg.getLocation(), pkg.getChunk());
     }
 
     public void handle(PacketEntityEffect pkg) {
@@ -463,10 +462,9 @@ public class PacketHandler {
     }
 
     public void handle(PacketPlayerPositionAndRotation pkg) {
-        GameWindow.start(connection);
         connection.getPlayer().setSpawnConfirmed(true);
-        GameWindow.getPlayerController().getCameraMovement().setRotation(pkg.getPitch(), pkg.getYaw());
-        GameWindow.getPlayerController().setPlayerPos(new Vec3(pkg.getLocation()));
+        connection.getRenderProperties().getController().getCameraMovement().setRotation(pkg.getPitch(), pkg.getYaw());
+        connection.getRenderProperties().getController().setPlayerPos(new Vec3(pkg.getLocation()));
     }
 
     public void handle(PacketAttachEntity pkg) {

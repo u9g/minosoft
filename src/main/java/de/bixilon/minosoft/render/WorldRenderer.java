@@ -30,16 +30,16 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class WorldRenderer {
     private final ConcurrentHashMap<ChunkLocation, ConcurrentHashMap<Byte, ArrayFloatList>> faces = new ConcurrentHashMap<>();
-    private final BlockModelLoader modelLoader = new BlockModelLoader();
 
     private final LinkedBlockingQueue<Runnable> queuedMapData = new LinkedBlockingQueue<>();
+    private final Connection connection;
 
-    public void startChunkPreparation(Connection connection) {
+    public WorldRenderer(Connection connection) {
+        this.connection = connection;
         new Thread(() -> {
             while (true) {
                 try {
                     queuedMapData.take().run();
-                    //Log.verbose(String.format("Count of faces: %d", getCountOfFaces()));
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -78,7 +78,7 @@ public class WorldRenderer {
     }
 
     private ArrayFloatList getFacesForChunkNibble(ChunkLocation chunkLocation, byte sectionHeight, ChunkNibble nibble) {
-        ConcurrentHashMap<ChunkLocation, Chunk> world = GameWindow.getConnection().getPlayer().getWorld().getAllChunks();
+        ConcurrentHashMap<ChunkLocation, Chunk> world = connection.getPlayer().getWorld().getAllChunks();
         // clear or create current chunk nibble
         ArrayFloatList nibbleMap = new ArrayFloatList();
         //faces.get(chunkLocation).put(sectionHeight, nibbleMap);
@@ -157,12 +157,12 @@ public class WorldRenderer {
                         yield nibbleBlocks.get(new ChunkNibbleLocation(location.getX(), location.getY(), location.getZ() + 1));
                     }
                 };
-                if (dependedBlock == null || !modelLoader.isFull(dependedBlock, FaceOrientation.inverse(orientation))) {
+                if (dependedBlock == null || !BlockModelLoader.getInstance().isFull(dependedBlock, FaceOrientation.inverse(orientation))) {
                     facesToDraw.add(orientation);
                 }
             }
             if (!facesToDraw.isEmpty()) {
-                nibbleMap.addAll(modelLoader.prepare(block, facesToDraw, new BlockPosition(chunkLocation, sectionHeight, location)));
+                nibbleMap.addAll(BlockModelLoader.getInstance().prepare(block, facesToDraw, new BlockPosition(chunkLocation, sectionHeight, location)));
             }
         });
         return nibbleMap;
@@ -171,7 +171,7 @@ public class WorldRenderer {
 
     public void draw() {
         glPushMatrix();
-        glBindTexture(GL_TEXTURE_2D, modelLoader.getTextureLoader().getTextureID());
+        glBindTexture(GL_TEXTURE_2D, BlockModelLoader.getInstance().getTextureLoader().getTextureID());
         glBegin(GL_QUADS);
         for (ConcurrentHashMap<Byte, ArrayFloatList> chunk : faces.values()) {
             for (ArrayFloatList nibble : chunk.values()) {
@@ -190,9 +190,5 @@ public class WorldRenderer {
             return world.get(location).getNibbles().get(sectionHeight);
         }
         return null;
-    }
-
-    public BlockModelLoader getBlockModelLoader() {
-        return modelLoader;
     }
 }

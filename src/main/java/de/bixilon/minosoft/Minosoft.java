@@ -157,7 +157,6 @@ public final class Minosoft {
 
         }, "Mojang language", "", Priorities.HIGH, TaskImportance.REQUIRED, "Assets"));
 
-
         taskWorker.addTask(new Task(progress -> {
             progress.countUp();
             GameWindow.prepare();

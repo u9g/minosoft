@@ -13,6 +13,7 @@
 
 package de.bixilon.minosoft.render.movement;
 
+import de.bixilon.minosoft.protocol.network.Connection;
 import de.bixilon.minosoft.render.GameWindow;
 import de.bixilon.minosoft.render.utility.Vec3;
 
@@ -21,49 +22,49 @@ import static org.lwjgl.glfw.GLFW.*;
 public class PlayerMovement {
     private static final float FLY_SPEED = 0.2f;
     private static final Vec3 CAMERA_UP = new Vec3(0f, 1f, 0f);
+    private final Connection connection;
 
-    private final long window;
     private Vec3 cameraFront;
     private Vec3 playerPos;
 
-    public PlayerMovement(long window) {
-        this.window = window;
+    public PlayerMovement(Connection connection) {
+        this.connection = connection;
     }
 
     private void processInput(float deltaTime) {
         float cameraSpeed = FLY_SPEED / deltaTime;
 
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+        if (glfwGetKey(GameWindow.getOpenGLWindow().getWindowId(), GLFW_KEY_W) == GLFW_PRESS) {
             playerPos.add(Vec3.mul(cameraFront, -cameraSpeed * deltaTime));
         }
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+        if (glfwGetKey(GameWindow.getOpenGLWindow().getWindowId(), GLFW_KEY_S) == GLFW_PRESS) {
             playerPos.add(Vec3.mul(cameraFront, cameraSpeed * deltaTime));
         }
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+        if (glfwGetKey(GameWindow.getOpenGLWindow().getWindowId(), GLFW_KEY_A) == GLFW_PRESS) {
             playerPos.add(Vec3.mul(Vec3.cross(CAMERA_UP, cameraFront), -cameraSpeed * deltaTime));
         }
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+        if (glfwGetKey(GameWindow.getOpenGLWindow().getWindowId(), GLFW_KEY_D) == GLFW_PRESS) {
             playerPos.add(Vec3.mul(Vec3.cross(CAMERA_UP, cameraFront), cameraSpeed * deltaTime));
         }
 
-        if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-            if (!GameWindow.getPlayerController().isGravityEnabled()) {
+        if (glfwGetKey(GameWindow.getOpenGLWindow().getWindowId(), GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+            if (!connection.getRenderProperties().getController().isGravityEnabled()) {
                 playerPos.add(0, -cameraSpeed * deltaTime, 0);
             }
         }
-        if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-            if (!GameWindow.getPlayerController().isGravityEnabled()) {
+        if (glfwGetKey(GameWindow.getOpenGLWindow().getWindowId(), GLFW_KEY_SPACE) == GLFW_PRESS) {
+            if (!connection.getRenderProperties().getController().isGravityEnabled()) {
                 playerPos.add(0, cameraSpeed * deltaTime, 0);
             }
-            if (GameWindow.getPlayerController().isOnGround()) {
-                GameWindow.getPlayerController().jump();
+            if (connection.getRenderProperties().getController().isOnGround()) {
+                connection.getRenderProperties().getController().jump();
             }
         }
     }
 
     public void loop(float deltaTime) {
-        cameraFront = GameWindow.getPlayerController().getCameraMovement().getCameraFront();
-        playerPos = GameWindow.getPlayerController().getPlayerPos();
+        cameraFront = connection.getRenderProperties().getController().getCameraMovement().getCameraFront();
+        playerPos = connection.getRenderProperties().getController().getPlayerPos();
         processInput(deltaTime);
     }
 }

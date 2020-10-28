@@ -13,6 +13,7 @@
 
 package de.bixilon.minosoft.render;
 
+import de.bixilon.minosoft.protocol.network.Connection;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
@@ -27,19 +28,15 @@ import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class OpenGLWindow {
-    private final boolean fullscreen;
-    boolean escDown = false;
+    private static final float fovY = 45f;
+    private static final boolean fullscreenEnabled = false;
+    private static int width = 800;
+    private static int height = 800;
+    private boolean escDown = false;
     private long windowId;
-    private int width, height;
     private double mouseX;
     private double mouseY;
     private float lastFrame;
-
-    public OpenGLWindow(int width, int height, boolean fullscreen) {
-        this.width = width;
-        this.height = height;
-        this.fullscreen = fullscreen;
-    }
 
     public static void gluPerspective(float fovY, float aspect, float near, float far) {
         float bottom = -near * (float) Math.tan(fovY / 2);
@@ -47,6 +44,10 @@ public class OpenGLWindow {
         float left = aspect * bottom;
         float right = -left;
         glFrustum(left, right, bottom, top, near, far);
+    }
+
+    public static void setupPerspective() {
+        gluPerspective(fovY, width / (float) height, 0.1f, 500f);
     }
 
     public void init() {
@@ -60,14 +61,14 @@ public class OpenGLWindow {
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
-        if (fullscreen) {
+        if (fullscreenEnabled) {
             long monitor = glfwGetPrimaryMonitor();
             GLFWVidMode mode = glfwGetVideoMode(monitor);
             width = mode.width();
             height = mode.height();
         }
 
-        windowId = glfwCreateWindow(width, height, "RENDER", NULL, NULL);
+        windowId = glfwCreateWindow(width, height, "Minosoft Game Window", NULL, NULL);
         if (windowId == NULL) {
             throw new RuntimeException("Failed to create the GLFW window");
         }
@@ -150,12 +151,16 @@ public class OpenGLWindow {
         float currentFrame = (float) glfwGetTime();
         float deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+        setupPerspective();
         return deltaTime;
     }
 
     public void start() {
-        glfwSetCursorPosCallback(windowId, GameWindow.getPlayerController().getCameraMovement()::mouseCallback);
         glfwShowWindow(windowId);
+    }
+
+    public void setCurrentConnection(Connection connection) {
+        glfwSetCursorPosCallback(windowId, connection.getRenderProperties().getController().getCameraMovement()::mouseCallback);
     }
 
     public void mouseEnable(boolean mouse) {
