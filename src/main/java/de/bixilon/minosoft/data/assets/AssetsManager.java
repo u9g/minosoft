@@ -97,6 +97,14 @@ public class AssetsManager {
                 e.printStackTrace();
             }
         });
+        // ToDo: This is strange. You will get a jvm crash without it on linux. Weired.
+        /*
+        try {
+            Thread.sleep(500L);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+         */
         generateJarAssets();
         assets.putAll(parseAssetsIndex(ASSETS_CLIENT_JAR_HASH));
         latch.countDown();
