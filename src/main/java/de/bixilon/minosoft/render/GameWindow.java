@@ -1,6 +1,6 @@
 /*
  * Codename Minosoft
- * Copyright (C) 2020 Lukas Eisenhauer
+ * Copyright (C) 2020 Moritz Zwerger
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -33,7 +33,7 @@ public class GameWindow {
     private static boolean running = false;
 
     public static void prepare() {
-        Thread guiLoaderThread = new Thread(() -> {
+        new Thread(() -> {
             openGLWindow = new OpenGLWindow(WIDTH, HEIGHT, FULLSCREEN);
             playerController = new PlayerController(openGLWindow.getWindow());
             openGLWindow.init();
@@ -49,9 +49,7 @@ public class GameWindow {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        });
-        guiLoaderThread.setName("GameWindow");
-        guiLoaderThread.start();
+        }, "GameWindow").start();
     }
 
     private static void mainLoop() {

@@ -1,7 +1,8 @@
 {
   "general": {
     "version": 1,
-    "log-level": "WARNING"
+    "log-level": "WARNING",
+    "language": "en_US"
   },
   "game": {
     "render-distance": 12
@@ -22,5 +23,8 @@
     "urls": {
       "mappings": "https://gitlab.com/Bixilon/minosoft/-/raw/master/data/mcdata/%s.tar.gz?inline=false"
     }
+  },
+  "debug": {
+    "verify-assets": true
   }
 }

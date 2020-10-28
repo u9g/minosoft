@@ -16,6 +16,15 @@ Minosoft is an open source minecraft client, written from scratch in java. It ai
  - Async loading
  - Debugging on protocol layer
 
+## System requirements
+ - CPU: Minosoft benefits from multiple cores (at least for most stuff). CPU is kind of important,
+  but for the rendering clock speed is more important. 4 cores recommended with at least 2 Ghz.
+ - RAM: Out goal was it to run without compromises on an 8 Gib computer and at least limited on an 4 Gib one.
+ - Disk space: Minosoft itself is pretty small (2-3 Mib), the libraries are a bit bigger (up to 100 Mib).
+  You also need to have the "normal" minecraft assets (~ 300 Mib). So a total of 500 Mib is recommended.
+ - GPU: Currently only needed for rendering, no clue yet.
+
+
 ## Rendering
 Rendering is developed and maintained by Lukas Eisenhauer. It is very WIP, but it works. See !8 for more details.
 
@@ -38,7 +47,7 @@ Almost all versions are supported, starting with 13w41b (pre 1.7 snapshot) and e
 
 ### Unsupported versions
 Sadly, we cannot support all versions. We will add support for all major versions (like 1.8.9, 1.9.4, 1.14.4, etc), but it is simply not possible to support all snapshots.
- - `1.13-pre6`, `1.13-pre5`, `17w50a`, `17w49b`, `17w49a`, `17w48a`, `17w47b`, `17w47a`: Missing blocks.json (Mappings)
+ - `1.13-pre6`, `1.13-pre5`, `17w50a`, `17w49b`, `17w49a`, `17w48a`, `17w47b`, `17w47a` Missing blocks.json (Mappings)
  - April fools: I will not add any support for them, there are only a few things known. They might work, untested.
  
 ## Modding

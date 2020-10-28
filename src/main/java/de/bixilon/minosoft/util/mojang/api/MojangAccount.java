@@ -74,7 +74,7 @@ public class MojangAccount {
             lastRefreshStatus = RefreshStates.FAILED;
             return lastRefreshStatus;
         }
-        if (accessToken.equals("")) {
+        if (accessToken.isBlank()) {
             lastRefreshStatus = RefreshStates.ERROR;
             return lastRefreshStatus;
         }
@@ -101,7 +101,6 @@ public class MojangAccount {
 
     public void saveToConfig() {
         Minosoft.getConfig().putMojangAccount(this);
-        Minosoft.getConfig().saveToFile();
         Minosoft.getConfig().saveToFile();
     }
 

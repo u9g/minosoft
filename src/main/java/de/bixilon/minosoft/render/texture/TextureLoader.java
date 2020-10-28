@@ -1,6 +1,6 @@
 /*
  * Codename Minosoft
- * Copyright (C) 2020 Lukas Eisenhauer
+ * Copyright (C) 2020 Moritz Zwerger
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -14,6 +14,8 @@
 package de.bixilon.minosoft.render.texture;
 
 import de.bixilon.minosoft.Config;
+import de.bixilon.minosoft.data.assets.AssetsManager;
+import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
 import de.matthiasmann.twl.utils.PNGDecoder;
 
@@ -72,19 +74,17 @@ public class TextureLoader {
     private void loadTextures(String mod, HashSet<String> textureNames, HashMap<String, float[]> tint) {
         HashMap<String, BufferedImage> modTextureMap = new HashMap<>();
         for (String textureName : textureNames) {
-            if (textureName.contains("overlay") || textureName.equals("")) {
+            if (textureName.contains("overlay") || textureName.isBlank()) {
                 continue;
             }
-            String path = Config.homeDir + "assets/" + mod + "/textures/" + textureName + ".png";
             try {
-                BufferedImage image = ImageIO.read(new File(path));
+                BufferedImage image = ImageIO.read(AssetsManager.readAssetAsStream(String.format("%s/textures/%s.png", mod, textureName)));
                 if (tint != null && tint.containsKey(textureName)) {
                     tintImage(image, tint.get(textureName));
                 }
                 modTextureMap.put(textureName, image);
             } catch (IOException e) {
-                System.out.println(textureName);
-                System.out.println(path);
+                Log.fatal(String.format("An error occurred while loading texture %s: %s", textureName, e.getLocalizedMessage()));
                 e.printStackTrace();
                 System.exit(6);
             }
@@ -94,8 +94,7 @@ public class TextureLoader {
     }
 
     private void combineTextures() {
-        // CONVERT ALL THE IMAGES INTO A SINGLE, VERY LONG IMAGE
-        // greatly improves performance in opengl
+        // converts all single textures into a very wide image. Improves performance in opengl
         // TEXTURE_PACK_RESxTEXTURE_PACK_RES textures only
         int imageLength = 1;
         while (totalTextures * RenderConstants.TEXTURE_PACK_RESOLUTION > imageLength) {
@@ -141,14 +140,14 @@ public class TextureLoader {
     }
 
     public float getTexture(String mod, String textureName) {
-        if (textureName.contains("overlay") || textureName.equals("")) {
+        if (textureName.contains("overlay") || textureName.isBlank()) {
             return -1;
         }
 
         // returns the start and end u-coordinate of a specific texture to access it
         HashMap<String, Integer> modMap = textureCoordinates.get(mod);
         if (modMap == null) {
-            System.out.println("no mod " + mod + " loaded");
+            Log.fatal(String.format("Could not load texture for mod %s", mod));
             System.exit(9);
         }
         Integer pos = modMap.get(textureName);
