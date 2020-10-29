@@ -1,5 +1,5 @@
 /*
- * Codename Minosoft
+ * Minosoft
  * Copyright (C) 2020 Moritz Zwerger
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
@@ -55,13 +55,14 @@ public class StartProgressWindow extends Application {
                 grid.add(progressLabel.get(), 1, 0);
                 progressDialog.getDialogPane().setContent(grid);
                 Stage stage = (Stage) progressDialog.getDialogPane().getScene().getWindow();
+                stage.getIcons().add(GUITools.logo);
                 stage.initModality(Modality.APPLICATION_MODAL);
+                stage.setOnCloseRequest((request) -> System.exit(0));
                 if (exit) {
                     return;
                 }
                 progressDialog.show();
                 stage.toFront();
-
             });
             while (progress.getCount() > 0) {
                 try {

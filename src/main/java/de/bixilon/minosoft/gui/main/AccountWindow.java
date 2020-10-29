@@ -1,5 +1,5 @@
 /*
- * Codename Minosoft
+ * Minosoft
  * Copyright (C) 2020 Moritz Zwerger
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
@@ -30,6 +30,7 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.stage.Stage;
 import javafx.stage.Window;
 
 import java.net.URL;
@@ -57,6 +58,7 @@ public class AccountWindow implements Initializable {
         Dialog<?> dialog = new Dialog<>();
         dialog.setTitle(LocaleManager.translate(Strings.LOGIN_DIALOG_TITLE));
         dialog.setHeaderText(LocaleManager.translate(Strings.LOGIN_DIALOG_HEADER));
+        ((Stage) dialog.getDialogPane().getScene().getWindow()).getIcons().add(GUITools.logo);
 
         ButtonType loginButtonType = new ButtonType(LocaleManager.translate(Strings.BUTTON_LOGIN), ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
