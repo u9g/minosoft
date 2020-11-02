@@ -13,7 +13,7 @@
 
 package de.bixilon.minosoft.render.texture;
 
-import de.bixilon.minosoft.Config;
+import de.bixilon.minosoft.config.StaticConfiguration;
 import de.bixilon.minosoft.data.assets.AssetsManager;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
@@ -48,7 +48,7 @@ public class TextureLoader {
         }
         combineTextures();
         try {
-            PNGDecoder decoder = new PNGDecoder(new FileInputStream(Config.homeDir + "assets/allTextures.png"));
+            PNGDecoder decoder = new PNGDecoder(new FileInputStream(StaticConfiguration.homeDir + "assets/allTextures.png"));
             ByteBuffer buf = ByteBuffer.allocateDirect(decoder.getWidth() * decoder.getHeight() * 4);
             decoder.decode(buf, decoder.getWidth() * 4, PNGDecoder.Format.RGBA);
             textureID = bindTexture(buf, decoder.getWidth(), decoder.getHeight());
@@ -118,7 +118,7 @@ public class TextureLoader {
         }
 
         try {
-            File outputFile = new File(Config.homeDir + "assets/allTextures.png");
+            File outputFile = new File(StaticConfiguration.homeDir + "assets/allTextures.png");
             ImageIO.write(totalImage, "png", outputFile);
         } catch (IOException e) {
             e.printStackTrace();

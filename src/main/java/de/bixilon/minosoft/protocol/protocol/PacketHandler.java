@@ -389,6 +389,7 @@ public class PacketHandler {
         connection.getPlayer().getWorld().setDimension(pkg.getDimension());
         connection.getPlayer().setSpawnConfirmed(false);
         connection.getPlayer().setGameMode(pkg.getGameMode());
+        connection.getRenderProperties().getRenderer().clearFaces();
     }
 
     public void handle(PacketOpenSignEditor pkg) {

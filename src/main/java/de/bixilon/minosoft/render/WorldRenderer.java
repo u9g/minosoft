@@ -191,4 +191,8 @@ public class WorldRenderer {
         }
         return null;
     }
+
+    public void clearFaces() {
+        faces.clear();
+    }
 }
