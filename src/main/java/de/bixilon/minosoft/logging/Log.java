@@ -13,7 +13,7 @@
 
 package de.bixilon.minosoft.logging;
 
-import de.bixilon.minosoft.Config;
+import de.bixilon.minosoft.config.StaticConfiguration;
 import de.bixilon.minosoft.data.text.ChatColors;
 import de.bixilon.minosoft.data.text.ChatFormattingCodes;
 import de.bixilon.minosoft.data.text.RGBColor;
@@ -59,13 +59,16 @@ public class Log {
     }
 
     public static void log(LogLevels level, String prefix, String message, RGBColor color) {
+        if (message.isBlank()) {
+            return;
+        }
         if (level.ordinal() > Log.level.ordinal()) {
             // log level too low
             return;
         }
         StringBuilder builder = new StringBuilder();
         builder.append("[");
-        if (Config.logRelativeTime) {
+        if (StaticConfiguration.LOG_RELATIVE_TIME) {
             builder.append(System.currentTimeMillis() - startTime);
         } else {
             builder.append(timeFormat.format(System.currentTimeMillis()));
@@ -76,7 +79,7 @@ public class Log {
         builder.append(level.name());
         builder.append("] ");
         builder.append(prefix);
-        if (color != null && Config.colorLog) {
+        if (color != null && StaticConfiguration.COLORED_LOG) {
             builder.append(ChatColors.getANSIColorByRGBColor(color));
             builder.append(message);
             builder.append(ChatFormattingCodes.RESET.getANSI());
@@ -160,5 +163,18 @@ public class Log {
      */
     public static void info(String message) {
         log(LogLevels.INFO, message, ChatColors.getColorByName("white"));
+    }
+
+    public static boolean printException(Exception exception, LogLevels minimumLogLevel) {
+        // ToDo: log to file, print also exceptions that are not printed with this method
+        if (Log.getLevel().ordinal() >= minimumLogLevel.ordinal()) {
+            exception.printStackTrace();
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean printException(Exception exception) {
+        return printException(exception, LogLevels.FATAL); // always print
     }
 }

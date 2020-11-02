@@ -195,7 +195,7 @@ public class SocketNetwork implements Network {
                         if (packet == null) {
                             Log.fatal(String.format("Packet mapping does not contain a packet with id 0x%x. The server sends bullshit or your versions.json broken!", inPacketBuffer.getCommand()));
                             disconnect();
-                            lastException = new RuntimeException("Invalid packet 0x" + inPacketBuffer.getCommand());
+                            lastException = new RuntimeException(String.format("Invalid packet 0x%x", inPacketBuffer.getCommand()));
                             throw lastException;
                         }
                         Class<? extends ClientboundPacket> clazz = packet.getClazz();
@@ -233,18 +233,14 @@ public class SocketNetwork implements Network {
                             e.printStackTrace();
                         }
                     } catch (Exception e) {
+                        Log.printException(e, LogLevels.DEBUG);
                         Log.protocol(String.format("An error occurred while parsing an packet (%s): %s", packet, e));
-                        if (Log.getLevel().ordinal() >= LogLevels.DEBUG.ordinal()) {
-                            e.printStackTrace();
-                        }
                     }
                 }
                 disconnect();
             } catch (IOException e) {
                 // Could not connect
-                if (Log.getLevel().ordinal() >= LogLevels.DEBUG.ordinal()) {
-                    e.printStackTrace();
-                }
+                Log.printException(e, LogLevels.DEBUG);
                 if (socketSThread != null) {
                     socketSThread.interrupt();
                 }

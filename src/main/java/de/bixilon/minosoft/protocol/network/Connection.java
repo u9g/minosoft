@@ -23,10 +23,9 @@ import de.bixilon.minosoft.data.mappings.versions.Versions;
 import de.bixilon.minosoft.gui.main.ConnectionChangeCallback;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.logging.LogLevels;
-import de.bixilon.minosoft.modding.event.EventManager;
 import de.bixilon.minosoft.modding.event.EventMethod;
 import de.bixilon.minosoft.modding.event.events.CancelableEvent;
-import de.bixilon.minosoft.modding.event.events.Event;
+import de.bixilon.minosoft.modding.event.events.ConnectionEvent;
 import de.bixilon.minosoft.modding.event.events.PacketReceiveEvent;
 import de.bixilon.minosoft.modding.event.events.PacketSendEvent;
 import de.bixilon.minosoft.protocol.packets.ClientboundPacket;
@@ -60,7 +59,6 @@ public class Connection {
     private final VelocityHandler velocityHandler = new VelocityHandler(this);
     private final HashSet<PingCallback> pingCallbacks = new HashSet<>();
     private final HashSet<ConnectionChangeCallback> connectionChangeCallbacks = new HashSet<>();
-    private final HashSet<EventManager> eventManagers = new HashSet<>();
     private final LinkedList<EventMethod> eventListeners = new LinkedList<>();
     private final int connectionId;
     private final Player player;
@@ -163,9 +161,7 @@ public class Connection {
         try {
             Versions.loadVersionMappings(version.getVersionId());
         } catch (IOException e) {
-            if (Log.getLevel().ordinal() >= LogLevels.DEBUG.ordinal()) {
-                e.printStackTrace();
-            }
+            Log.printException(e, LogLevels.DEBUG);
             Log.fatal(String.format("Could not load mapping for %s. This version seems to be unsupported!", version));
             lastException = new RuntimeException(String.format("Mappings could not be loaded: %s", e.getLocalizedMessage()));
             setConnectionState(ConnectionStates.FAILED_NO_RETRY);
@@ -199,14 +195,14 @@ public class Connection {
     }
 
     /**
-     * @param event The event to fire
+     * @param connectionEvent The event to fire
      * @return if the event has been cancelled or not
      */
-    public boolean fireEvent(Event event) {
-        Minosoft.eventManagers.forEach((eventManager -> eventManager.getGlobalEventListeners().forEach((method) -> method.invoke(event))));
-        eventListeners.forEach((method -> method.invoke(event)));
-        if (event instanceof CancelableEvent) {
-            return ((CancelableEvent) event).isCancelled();
+    public boolean fireEvent(ConnectionEvent connectionEvent) {
+        Minosoft.eventManagers.forEach((eventManager -> eventManager.getGlobalEventListeners().forEach((method) -> method.invoke(connectionEvent))));
+        eventListeners.forEach((method -> method.invoke(connectionEvent)));
+        if (connectionEvent instanceof CancelableEvent) {
+            return ((CancelableEvent) connectionEvent).isCancelled();
         }
         return false;
     }
@@ -228,9 +224,7 @@ public class Connection {
                     }
                     packet.handle(getHandler());
                 } catch (Exception e) {
-                    if (Log.getLevel().ordinal() >= LogLevels.DEBUG.ordinal()) {
-                        e.printStackTrace();
-                    }
+                    Log.printException(e, LogLevels.PROTOCOL);
                 }
             }
         }, String.format("%d/Handling", connectionId));

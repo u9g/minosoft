@@ -134,7 +134,7 @@ There are several validators, choose one or write your own:
 
 Your event methods need to be annotated by `EventHandler`. `EventHandler` **can** take these arguments:
  - `priority` Pretty much self explaining. `HIGH` means, that it gets executed at "the beginning", `LOW` means the opposite. Defaults to `NORMAL`.
- - `ignoreCancelled` If it is a cancellable event, your method only gets executed, when all prior listeners (potentially with a higher priority) did not cancel the event. Defaults to `false`.
+ - `ignoreCancelled` If it is a cancellable event, your method only gets executed, when all prior listeners (potentially with a higher priority) did not cancel the connectionEvent. Defaults to `false`.
 
 Your XYEventListener class needs to extend `de.bixilon.minosoft.modding.event.EventListener`;
 ```java
@@ -163,4 +163,4 @@ public class ChatEvent extends EventListener {
 }
 ```
 The following code would suppress messages containing the word "Bixilon" and if you write "jeb_ is stupid" into the chat, the message's text will be "jeb_ is awesome".
-To see a list of all events look into `de.bixilon.minosoft.modding.event.events`. There is also a javadoc.
+To see a list of all events look into `de.bixilon.minosoft.modding.connectionEvent.events`. There is also a javadoc.
