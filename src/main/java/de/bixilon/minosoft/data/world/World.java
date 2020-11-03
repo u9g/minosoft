@@ -23,35 +23,22 @@ import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Collection of ChunkColumns
+ * Collection of chunks
  */
 public class World {
     final ConcurrentHashMap<ChunkLocation, Chunk> chunks = new ConcurrentHashMap<>();
     final ConcurrentHashMap<Integer, Entity> entities = new ConcurrentHashMap<>();
-    final String name;
     final HashMap<BlockPosition, BlockEntityMetaData> blockEntityMeta = new HashMap<>();
     boolean hardcore;
     boolean raining;
     Dimension dimension; // used for sky color, etc
-
-    public World(String name) {
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Chunk getChunk(ChunkLocation loc) {
-        return chunks.get(loc);
-    }
 
     public ConcurrentHashMap<ChunkLocation, Chunk> getAllChunks() {
         return chunks;
     }
 
     public Block getBlock(BlockPosition pos) {
-        if (pos.y < 1) {
+        if (pos.getY() < 1) {
             return Blocks.nullBlock;
         }
         ChunkLocation loc = pos.getChunkLocation();
@@ -132,5 +119,9 @@ public class World {
 
     public void setBlockEntityData(HashMap<BlockPosition, BlockEntityMetaData> blockEntities) {
         blockEntities.forEach(blockEntityMeta::put);
+    }
+
+    public Chunk getChunk(ChunkLocation chunkLocation) {
+        return chunks.get(chunkLocation);
     }
 }

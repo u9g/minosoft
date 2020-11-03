@@ -21,13 +21,13 @@ import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Collection of 16 chunks nibbles
+ * Collection of 16 chunks sections
  */
 public class Chunk {
-    final ConcurrentHashMap<Byte, ChunkNibble> nibbles;
+    final ConcurrentHashMap<Byte, ChunkSection> sections;
 
-    public Chunk(ConcurrentHashMap<Byte, ChunkNibble> chunks) {
-        this.nibbles = chunks;
+    public Chunk(ConcurrentHashMap<Byte, ChunkSection> sections) {
+        this.sections = sections;
     }
 
     public Block getBlock(InChunkLocation location) {
@@ -36,27 +36,27 @@ public class Chunk {
 
     public Block getBlock(int x, int y, int z) {
         byte section = (byte) (y / RenderConstants.SECTION_HEIGHT);
-        if (!nibbles.containsKey(section)) {
+        if (!sections.containsKey(section)) {
             return Blocks.nullBlock;
         }
-        return nibbles.get(section).getBlock(x, y % RenderConstants.SECTION_HEIGHT, z);
+        return sections.get(section).getBlock(x, y % RenderConstants.SECTION_HEIGHT, z);
     }
 
     public void setBlock(int x, int y, int z, Block block) {
         byte section = (byte) (y / RenderConstants.SECTION_HEIGHT);
         createSectionIfNotExists(section);
-        nibbles.get(section).setBlock(x, y % RenderConstants.SECTION_HEIGHT, z, block);
+        sections.get(section).setBlock(x, y % RenderConstants.SECTION_HEIGHT, z, block);
     }
 
     public void setBlock(InChunkLocation location, Block block) {
         byte section = (byte) (location.getY() / RenderConstants.SECTION_HEIGHT);
         createSectionIfNotExists(section);
-        nibbles.get(section).setBlock(location.getChunkNibbleLocation(), block);
+        sections.get(section).setBlock(location.getInChunkSectionLocation(), block);
     }
 
     void createSectionIfNotExists(byte section) {
-        if (nibbles.get(section) == null) {
-            nibbles.put(section, new ChunkNibble());
+        if (sections.get(section) == null) {
+            sections.put(section, new ChunkSection());
         }
     }
 
@@ -64,7 +64,7 @@ public class Chunk {
         blocks.forEach(this::setBlock);
     }
 
-    public ConcurrentHashMap<Byte, ChunkNibble> getNibbles() {
-        return nibbles;
+    public ConcurrentHashMap<Byte, ChunkSection> getSections() {
+        return sections;
     }
 }

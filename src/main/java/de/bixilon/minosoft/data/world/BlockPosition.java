@@ -16,29 +16,17 @@ package de.bixilon.minosoft.data.world;
 import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
 import de.bixilon.minosoft.render.utility.Vec3;
 
-import java.util.Objects;
-
-public class BlockPosition {
-    final int x;
-    final int y;
-    final int z;
-
-    public BlockPosition(int x, int y, int z) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
+public record BlockPosition(int x, int y, int z) {
+    public BlockPosition(Vec3 vec3) {
+        this((int) vec3.x, (int) vec3.y, (int) vec3.z);
     }
 
-    public BlockPosition(Vec3 testPosition) {
-        x = (int) testPosition.x;
-        y = (short) testPosition.y;
-        z = (int) testPosition.z;
+    public BlockPosition(ChunkLocation chunkLocation, Byte height, InChunkSectionLocation sectionLocation) {
+        this((chunkLocation.getX() * RenderConstants.SECTION_WIDTH + sectionLocation.getX()), (chunkLocation.getX() * RenderConstants.SECTION_WIDTH + sectionLocation.getX()), (chunkLocation.getZ() * RenderConstants.SECTION_WIDTH + sectionLocation.getZ()));
     }
 
-    public BlockPosition(ChunkLocation chunkLocation, Byte height, ChunkNibbleLocation nibbleLocation) {
-        this.x = chunkLocation.getX() * RenderConstants.SECTION_WIDTH + nibbleLocation.getX();
-        this.y = height * RenderConstants.SECTION_HEIGHT + nibbleLocation.getY();
-        this.z = chunkLocation.getZ() * RenderConstants.SECTION_WIDTH + nibbleLocation.getZ();
+    public ChunkLocation getChunkLocation() {
+        return new ChunkLocation(x / 16, z / 16);
     }
 
     public int getX() {
@@ -53,48 +41,21 @@ public class BlockPosition {
         return z;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(x, y, z);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (super.equals(obj)) {
-            return true;
+    public InChunkLocation getInChunkLocation() {
+        int x = this.x % RenderConstants.SECTION_WIDTH;
+        if (x < 0) {
+            x += RenderConstants.SECTION_WIDTH;
         }
-        BlockPosition pos = (BlockPosition) obj;
-        return pos.getX() == getX() && pos.getY() == getY() && pos.getZ() == getZ();
-    }
-
-    public ChunkLocation getChunkLocation() {
-        int x = getX() / RenderConstants.SECTION_WIDTH;
-        int z = getZ() / RenderConstants.SECTION_WIDTH;
-        //ToDo
-        if (getX() < 0) {
-            x--;
+        int z = this.z % RenderConstants.SECTION_WIDTH;
+        if (z < 0) {
+            z += RenderConstants.SECTION_WIDTH;
         }
-        if (getZ() < 0) {
-            z--;
-        }
-        return new ChunkLocation(x, z);
+        return new InChunkLocation(x, this.y, z);
     }
 
     @Override
     public String toString() {
-        return String.format("%d %d %d", getX(), getY(), getZ());
-    }
-
-    public InChunkLocation getInChunkLocation() {
-        int x = getX() % RenderConstants.SECTION_WIDTH;
-        if (x < 0) {
-            x += RenderConstants.SECTION_WIDTH;
-        }
-        int z = getZ() % RenderConstants.SECTION_WIDTH;
-        if (z < 0) {
-            z += RenderConstants.SECTION_WIDTH;
-        }
-        return new InChunkLocation(x, getY(), z);
+        return String.format("%d %d %d", x, y, z);
     }
 
     public BlockPosition add(int[] ints) {

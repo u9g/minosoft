@@ -15,31 +15,14 @@ package de.bixilon.minosoft.data.world;
 
 import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
 
-import java.util.Objects;
-
-public class InChunkLocation {
-    final int x;
-    final int y;
-    final int z;
-
-    public InChunkLocation(int x, int y, int z) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(x, y, z);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (super.equals(obj)) {
-            return true;
+/**
+ * Chunk X, Y and Z location (max 16x255x16)
+ */
+public record InChunkLocation(int x, int y, int z) {
+    public InChunkLocation {
+        if (x > 15 || y > 255 || z > 15 || x < 0 || y < 0 || z < 0) {
+            throw new IllegalArgumentException(String.format("Invalid chunk location %s %s %s", x, y, z));
         }
-        InChunkLocation that = (InChunkLocation) obj;
-        return getX() == that.getX() && getY() == that.getY() && getZ() == that.getZ();
     }
 
     public int getX() {
@@ -50,16 +33,16 @@ public class InChunkLocation {
         return y;
     }
 
-    public ChunkNibbleLocation getChunkNibbleLocation() {
-        return new ChunkNibbleLocation(getX(), getY() % RenderConstants.SECTION_HEIGHT, getZ());
+    public int getZ() {
+        return z;
+    }
+
+    public InChunkSectionLocation getInChunkSectionLocation() {
+        return new InChunkSectionLocation(x, y % RenderConstants.SECTION_HEIGHT, z);
     }
 
     @Override
     public String toString() {
-        return String.format("%d %d %d", getX(), getY(), getZ());
-    }
-
-    public int getZ() {
-        return z;
+        return String.format("%d %d %d", x, y, z);
     }
 }

@@ -16,8 +16,8 @@ package de.bixilon.minosoft.util;
 import de.bixilon.minosoft.data.mappings.blocks.Block;
 import de.bixilon.minosoft.data.mappings.blocks.Blocks;
 import de.bixilon.minosoft.data.world.Chunk;
-import de.bixilon.minosoft.data.world.ChunkNibble;
-import de.bixilon.minosoft.data.world.ChunkNibbleLocation;
+import de.bixilon.minosoft.data.world.ChunkSection;
+import de.bixilon.minosoft.data.world.InChunkSectionLocation;
 import de.bixilon.minosoft.data.world.palette.Palette;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
@@ -52,11 +52,11 @@ public final class ChunkUtil {
 
             //parse data
             int arrayPos = 0;
-            ConcurrentHashMap<Byte, ChunkNibble> nibbleMap = new ConcurrentHashMap<>();
+            ConcurrentHashMap<Byte, ChunkSection> sectionMap = new ConcurrentHashMap<>();
             for (byte c = 0; c < RenderConstants.SECTIONS_PER_CHUNK; c++) { // max sections per chunks in chunk column
                 if (BitByte.isBitSet(sectionBitMask, c)) {
 
-                    ConcurrentHashMap<ChunkNibbleLocation, Block> blockMap = new ConcurrentHashMap<>();
+                    ConcurrentHashMap<InChunkSectionLocation, Block> blockMap = new ConcurrentHashMap<>();
 
                     for (int nibbleY = 0; nibbleY < RenderConstants.SECTION_HEIGHT; nibbleY++) {
                         for (int nibbleZ = 0; nibbleZ < RenderConstants.SECTION_WIDTH; nibbleZ++) {
@@ -84,15 +84,15 @@ public final class ChunkUtil {
                                     arrayPos++;
                                     continue;
                                 }
-                                blockMap.put(new ChunkNibbleLocation(nibbleX, nibbleY, nibbleZ), block);
+                                blockMap.put(new InChunkSectionLocation(nibbleX, nibbleY, nibbleZ), block);
                                 arrayPos++;
                             }
                         }
                     }
-                    nibbleMap.put(c, new ChunkNibble(blockMap));
+                    sectionMap.put(c, new ChunkSection(blockMap));
                 }
             }
-            return new Chunk(nibbleMap);
+            return new Chunk(sectionMap);
         }
         if (buffer.getVersionId() < 62) { // ToDo: was this really changed in 62?
             if (sectionBitMask == 0x00 && groundUpContinuous) {
@@ -116,12 +116,12 @@ public final class ChunkUtil {
             }
 
             int arrayPos = 0;
-            ConcurrentHashMap<Byte, ChunkNibble> nibbleMap = new ConcurrentHashMap<>();
+            ConcurrentHashMap<Byte, ChunkSection> sectionMap = new ConcurrentHashMap<>();
             for (byte c = 0; c < RenderConstants.SECTIONS_PER_CHUNK; c++) { // max sections per chunks in chunk column
                 if (!BitByte.isBitSet(sectionBitMask, c)) {
                     continue;
                 }
-                ConcurrentHashMap<ChunkNibbleLocation, Block> blockMap = new ConcurrentHashMap<>();
+                ConcurrentHashMap<InChunkSectionLocation, Block> blockMap = new ConcurrentHashMap<>();
 
                 for (int nibbleY = 0; nibbleY < RenderConstants.SECTION_HEIGHT; nibbleY++) {
                     for (int nibbleZ = 0; nibbleZ < RenderConstants.SECTION_WIDTH; nibbleZ++) {
@@ -132,17 +132,17 @@ public final class ChunkUtil {
                                 arrayPos++;
                                 continue;
                             }
-                            blockMap.put(new ChunkNibbleLocation(nibbleX, nibbleY, nibbleZ), block);
+                            blockMap.put(new InChunkSectionLocation(nibbleX, nibbleY, nibbleZ), block);
                             arrayPos++;
                         }
                     }
                 }
-                nibbleMap.put(c, new ChunkNibble(blockMap));
+                sectionMap.put(c, new ChunkSection(blockMap));
             }
-            return new Chunk(nibbleMap);
+            return new Chunk(sectionMap);
         }
         // really big thanks to: https://wiki.vg/index.php?title=Chunk_Format&oldid=13712
-        ConcurrentHashMap<Byte, ChunkNibble> nibbleMap = new ConcurrentHashMap<>();
+        ConcurrentHashMap<Byte, ChunkSection> sectionMap = new ConcurrentHashMap<>();
         for (byte c = 0; c < RenderConstants.SECTIONS_PER_CHUNK; c++) { // max sections per chunks in chunk column
             if (!BitByte.isBitSet(sectionBitMask, c)) {
                 continue;
@@ -156,7 +156,7 @@ public final class ChunkUtil {
 
             long[] data = buffer.readLongArray(buffer.readVarInt());
 
-            ConcurrentHashMap<ChunkNibbleLocation, Block> blockMap = new ConcurrentHashMap<>();
+            ConcurrentHashMap<InChunkSectionLocation, Block> blockMap = new ConcurrentHashMap<>();
             for (int nibbleY = 0; nibbleY < RenderConstants.SECTION_HEIGHT; nibbleY++) {
                 for (int nibbleZ = 0; nibbleZ < RenderConstants.SECTION_WIDTH; nibbleZ++) {
                     for (int nibbleX = 0; nibbleX < RenderConstants.SECTION_WIDTH; nibbleX++) {
@@ -188,7 +188,7 @@ public final class ChunkUtil {
                         if (block.equals(Blocks.nullBlock)) {
                             continue;
                         }
-                        blockMap.put(new ChunkNibbleLocation(nibbleX, nibbleY, nibbleZ), block);
+                        blockMap.put(new InChunkSectionLocation(nibbleX, nibbleY, nibbleZ), block);
                     }
                 }
             }
@@ -200,12 +200,12 @@ public final class ChunkUtil {
                 }
             }
 
-            nibbleMap.put(c, new ChunkNibble(blockMap));
+            sectionMap.put(c, new ChunkSection(blockMap));
         }
         if (buffer.getVersionId() < 552) {
             byte[] biomes = buffer.readBytes(RenderConstants.SECTION_WIDTH * RenderConstants.SECTION_WIDTH);
         }
-        return new Chunk(nibbleMap);
+        return new Chunk(sectionMap);
     }
 
     public static void readSkyLightPacket(InByteBuffer buffer, int skyLightMask, int blockLightMask, int emptyBlockLightMask, int emptySkyLightMask) {

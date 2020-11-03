@@ -55,8 +55,8 @@ public class WorldRenderer {
         queuedMapData.add(() -> prepareChunk(location, chunk));
     }
 
-    public void queueChunkNibble(ChunkLocation location, byte sectionHeight, ChunkNibble nibble) {
-        queuedMapData.add(() -> prepareChunkNibble(location, sectionHeight, nibble));
+    public void queueChunkNibble(ChunkLocation location, byte sectionHeight, ChunkSection section) {
+        queuedMapData.add(() -> prepareChunkNibble(location, sectionHeight, section));
     }
 
     public void queueBlock(BlockPosition position, Block block) {
@@ -69,20 +69,20 @@ public class WorldRenderer {
     private void prepareChunk(ChunkLocation location, Chunk chunk) {
         // clear or create current chunk
         ConcurrentHashMap<Byte, ArrayFloatList> chunkFaces = new ConcurrentHashMap<>();
-        chunk.getNibbles().forEach(((height, chunkNibble) -> chunkFaces.put(height, getFacesForChunkNibble(location, height, chunkNibble))));
+        chunk.getSections().forEach(((height, chunkNibble) -> chunkFaces.put(height, getFacesForChunkNibble(location, height, chunkNibble))));
         faces.put(location, chunkFaces);
     }
 
-    private void prepareChunkNibble(ChunkLocation chunkLocation, byte sectionHeight, ChunkNibble nibble) {
-        faces.get(chunkLocation).put(sectionHeight, getFacesForChunkNibble(chunkLocation, sectionHeight, nibble));
+    private void prepareChunkNibble(ChunkLocation chunkLocation, byte sectionHeight, ChunkSection section) {
+        faces.get(chunkLocation).put(sectionHeight, getFacesForChunkNibble(chunkLocation, sectionHeight, section));
     }
 
-    private ArrayFloatList getFacesForChunkNibble(ChunkLocation chunkLocation, byte sectionHeight, ChunkNibble nibble) {
+    private ArrayFloatList getFacesForChunkNibble(ChunkLocation chunkLocation, byte sectionHeight, ChunkSection section) {
         ConcurrentHashMap<ChunkLocation, Chunk> world = connection.getPlayer().getWorld().getAllChunks();
         // clear or create current chunk nibble
         ArrayFloatList nibbleMap = new ArrayFloatList();
         //faces.get(chunkLocation).put(sectionHeight, nibbleMap);
-        ConcurrentHashMap<ChunkNibbleLocation, Block> nibbleBlocks = nibble.getBlocks();
+        ConcurrentHashMap<InChunkSectionLocation, Block> nibbleBlocks = section.getBlocks();
         nibbleBlocks.forEach((location, block) -> {
             HashSet<FaceOrientation> facesToDraw = new HashSet<>();
 
@@ -97,12 +97,12 @@ public class WorldRenderer {
                             }
                             // check if block over us is a full block
                             byte bottomSection = (byte) (sectionHeight - 1);
-                            if (!world.get(chunkLocation).getNibbles().containsKey(bottomSection)) {
+                            if (!world.get(chunkLocation).getSections().containsKey(bottomSection)) {
                                 yield null;
                             }
-                            yield world.get(chunkLocation).getNibbles().get(bottomSection).getBlock(location.getX(), RenderConstants.SECTIONS_MAX_Y, location.getZ());
+                            yield world.get(chunkLocation).getSections().get(bottomSection).getBlock(location.getX(), RenderConstants.SECTIONS_MAX_Y, location.getZ());
                         }
-                        yield nibbleBlocks.get(new ChunkNibbleLocation(location.getX(), location.getY() - 1, location.getZ()));
+                        yield nibbleBlocks.get(new InChunkSectionLocation(location.getX(), location.getY() - 1, location.getZ()));
                     }
                     case UP -> {
                         if (location.getY() == RenderConstants.SECTIONS_MAX_Y) {
@@ -113,48 +113,48 @@ public class WorldRenderer {
                             }
                             // check if block over us is a full block
                             byte upperSection = (byte) (sectionHeight + 1);
-                            if (!world.get(chunkLocation).getNibbles().containsKey(upperSection)) {
+                            if (!world.get(chunkLocation).getSections().containsKey(upperSection)) {
                                 yield null;
                             }
-                            yield world.get(chunkLocation).getNibbles().get(upperSection).getBlock(location.getX(), RenderConstants.SECTIONS_MIN_Y, location.getZ());
+                            yield world.get(chunkLocation).getSections().get(upperSection).getBlock(location.getX(), RenderConstants.SECTIONS_MIN_Y, location.getZ());
                         }
-                        yield nibbleBlocks.get(new ChunkNibbleLocation(location.getX(), location.getY() + 1, location.getZ()));
+                        yield nibbleBlocks.get(new InChunkSectionLocation(location.getX(), location.getY() + 1, location.getZ()));
                     }
                     case WEST -> {
                         if (location.getX() == RenderConstants.SECTIONS_MIN_X) {
-                            ChunkNibble otherChunkNibble = getChunkNibbleOfWorld(world, new ChunkLocation(chunkLocation.getX() - 1, chunkLocation.getZ()), sectionHeight);
+                            ChunkSection otherChunkNibble = getChunkSectionOfWorld(world, new ChunkLocation(chunkLocation.getX() - 1, chunkLocation.getZ()), sectionHeight);
                             if (otherChunkNibble != null) {
                                 yield otherChunkNibble.getBlock(RenderConstants.SECTIONS_MAX_X, location.getY(), location.getZ());
                             }
                         }
-                        yield nibbleBlocks.get(new ChunkNibbleLocation(location.getX() - 1, location.getY(), location.getZ()));
+                        yield nibbleBlocks.get(new InChunkSectionLocation(location.getX() - 1, location.getY(), location.getZ()));
                     }
                     case EAST -> {
                         if (location.getX() == RenderConstants.SECTIONS_MIN_X) {
-                            ChunkNibble otherChunkNibble = getChunkNibbleOfWorld(world, new ChunkLocation(chunkLocation.getX() + 1, chunkLocation.getZ()), sectionHeight);
+                            ChunkSection otherChunkNibble = getChunkSectionOfWorld(world, new ChunkLocation(chunkLocation.getX() + 1, chunkLocation.getZ()), sectionHeight);
                             if (otherChunkNibble != null) {
                                 yield otherChunkNibble.getBlock(RenderConstants.SECTIONS_MAX_X, location.getY(), location.getZ());
                             }
                         }
-                        yield nibbleBlocks.get(new ChunkNibbleLocation(location.getX() + 1, location.getY(), location.getZ()));
+                        yield nibbleBlocks.get(new InChunkSectionLocation(location.getX() + 1, location.getY(), location.getZ()));
                     }
                     case NORTH -> {
                         if (location.getZ() == RenderConstants.SECTIONS_MIN_Z) {
-                            ChunkNibble otherChunkNibble = getChunkNibbleOfWorld(world, new ChunkLocation(chunkLocation.getX(), chunkLocation.getZ() - 1), sectionHeight);
+                            ChunkSection otherChunkNibble = getChunkSectionOfWorld(world, new ChunkLocation(chunkLocation.getX(), chunkLocation.getZ() - 1), sectionHeight);
                             if (otherChunkNibble != null) {
                                 yield otherChunkNibble.getBlock(location.getX(), location.getY(), RenderConstants.SECTIONS_MAX_Z);
                             }
                         }
-                        yield nibbleBlocks.get(new ChunkNibbleLocation(location.getX(), location.getY(), location.getZ() - 1));
+                        yield nibbleBlocks.get(new InChunkSectionLocation(location.getX(), location.getY(), location.getZ() - 1));
                     }
                     case SOUTH -> {
                         if (location.getZ() == RenderConstants.SECTIONS_MAX_Z) {
-                            ChunkNibble otherChunkNibble = getChunkNibbleOfWorld(world, new ChunkLocation(chunkLocation.getX(), chunkLocation.getZ() + 1), sectionHeight);
+                            ChunkSection otherChunkNibble = getChunkSectionOfWorld(world, new ChunkLocation(chunkLocation.getX(), chunkLocation.getZ() + 1), sectionHeight);
                             if (otherChunkNibble != null) {
                                 yield otherChunkNibble.getBlock(location.getX(), location.getY(), RenderConstants.SECTIONS_MIN_Z);
                             }
                         }
-                        yield nibbleBlocks.get(new ChunkNibbleLocation(location.getX(), location.getY(), location.getZ() + 1));
+                        yield nibbleBlocks.get(new InChunkSectionLocation(location.getX(), location.getY(), location.getZ() + 1));
                     }
                 };
                 if (dependedBlock == null || !BlockModelLoader.getInstance().isFull(dependedBlock, FaceOrientation.inverse(orientation))) {
@@ -185,9 +185,9 @@ public class WorldRenderer {
         glEnd();
     }
 
-    private ChunkNibble getChunkNibbleOfWorld(ConcurrentHashMap<ChunkLocation, Chunk> world, ChunkLocation location, byte sectionHeight) {
-        if (world.containsKey(location) && world.get(location).getNibbles().containsKey(sectionHeight)) {
-            return world.get(location).getNibbles().get(sectionHeight);
+    private ChunkSection getChunkSectionOfWorld(ConcurrentHashMap<ChunkLocation, Chunk> world, ChunkLocation location, byte sectionHeight) {
+        if (world.containsKey(location) && world.get(location).getSections().containsKey(sectionHeight)) {
+            return world.get(location).getSections().get(sectionHeight);
         }
         return null;
     }

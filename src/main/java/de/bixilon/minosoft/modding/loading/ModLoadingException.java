@@ -11,25 +11,25 @@
  *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
-package de.bixilon.minosoft.data.entities;
+package de.bixilon.minosoft.modding.loading;
 
-import de.bixilon.minosoft.data.mappings.MobEffect;
-
-public record StatusEffect(MobEffect effect, int amplifier, int duration) {
-    public int getAmplifier() {
-        return amplifier;
+public class ModLoadingException extends Exception {
+    public ModLoadingException() {
     }
 
-    public int getDuration() {
-        return duration;
+    public ModLoadingException(String message) {
+        super(message);
     }
 
-    public MobEffect getEffect() {
-        return effect;
+    public ModLoadingException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    @Override
-    public String toString() {
-        return String.format("%s (amplifier: %d, duration: %d)", effect, amplifier, duration);
+    public ModLoadingException(Throwable cause) {
+        super(cause);
+    }
+
+    public ModLoadingException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
     }
 }

@@ -21,31 +21,30 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Collection of 16x16x16 blocks
  */
-public class ChunkNibble {
-    final ConcurrentHashMap<ChunkNibbleLocation, Block> blocks;
+public class ChunkSection {
+    final ConcurrentHashMap<InChunkSectionLocation, Block> blocks;
 
-    public ChunkNibble(ConcurrentHashMap<ChunkNibbleLocation, Block> blocks) {
+    public ChunkSection(ConcurrentHashMap<InChunkSectionLocation, Block> blocks) {
         this.blocks = blocks;
     }
 
-    public ChunkNibble() {
-        // empty
+    public ChunkSection() {
         this.blocks = new ConcurrentHashMap<>();
     }
 
     public Block getBlock(int x, int y, int z) {
-        return getBlock(new ChunkNibbleLocation(x, y, z));
+        return getBlock(new InChunkSectionLocation(x, y, z));
     }
 
-    public Block getBlock(ChunkNibbleLocation loc) {
+    public Block getBlock(InChunkSectionLocation loc) {
         return blocks.get(loc);
     }
 
     public void setBlock(int x, int y, int z, Block block) {
-        setBlock(new ChunkNibbleLocation(x, y, z), block);
+        setBlock(new InChunkSectionLocation(x, y, z), block);
     }
 
-    public void setBlock(ChunkNibbleLocation location, Block block) {
+    public void setBlock(InChunkSectionLocation location, Block block) {
         if (block == null || block.equals(Blocks.nullBlock)) {
             blocks.remove(location);
             return;
@@ -53,7 +52,7 @@ public class ChunkNibble {
         blocks.put(location, block);
     }
 
-    public ConcurrentHashMap<ChunkNibbleLocation, Block> getBlocks() {
+    public ConcurrentHashMap<InChunkSectionLocation, Block> getBlocks() {
         return blocks;
     }
 }
