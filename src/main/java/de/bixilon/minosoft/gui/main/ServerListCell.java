@@ -187,10 +187,9 @@ public class ServerListCell extends ListCell<Server> implements Initializable {
                 version.setStyle("-fx-text-fill: red;");
                 optionsConnect.setDisable(true);
                 canConnect = false;
-                setErrorMotd(String.format("%s", server.getLastPing().getLastConnectionException().getLocalizedMessage()));
+                setErrorMotd(String.format("%s: %s", server.getLastPing().getLastConnectionException().getClass().getCanonicalName(), server.getLastPing().getLastConnectionException().getLocalizedMessage()));
             }
         }));
-
     }
 
     @Override

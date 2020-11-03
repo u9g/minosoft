@@ -11,23 +11,25 @@
  *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
-package de.bixilon.minosoft.config;
+package de.bixilon.minosoft.protocol.protocol;
 
-public abstract class ConfigurationPaths {
-    public enum StringPaths {
-        GENERAL_LOG_LEVEL,
-        CLIENT_TOKEN,
-        MAPPINGS_URL,
-        ACCOUNT_SELECTED,
-        GENERAL_LANGUAGE,
+public class UnknownPacketException extends Exception {
+    public UnknownPacketException() {
     }
 
-    public enum BooleanPaths {
-        NETWORK_FAKE_CLIENT_BRAND, DEBUG_VERIFY_ASSETS
+    public UnknownPacketException(String message) {
+        super(message);
     }
 
-    public enum IntegerPaths {
-        GENERAL_CONFIG_VERSION,
-        GAME_RENDER_DISTANCE
+    public UnknownPacketException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public UnknownPacketException(Throwable cause) {
+        super(cause);
+    }
+
+    public UnknownPacketException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
     }
 }

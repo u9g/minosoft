@@ -11,23 +11,25 @@
  *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
-package de.bixilon.minosoft.config;
+package de.bixilon.minosoft.data.mappings;
 
-public abstract class ConfigurationPaths {
-    public enum StringPaths {
-        GENERAL_LOG_LEVEL,
-        CLIENT_TOKEN,
-        MAPPINGS_URL,
-        ACCOUNT_SELECTED,
-        GENERAL_LANGUAGE,
+public class MappingsLoadingException extends Exception {
+    public MappingsLoadingException() {
     }
 
-    public enum BooleanPaths {
-        NETWORK_FAKE_CLIENT_BRAND, DEBUG_VERIFY_ASSETS
+    public MappingsLoadingException(String message) {
+        super(message);
     }
 
-    public enum IntegerPaths {
-        GENERAL_CONFIG_VERSION,
-        GAME_RENDER_DISTANCE
+    public MappingsLoadingException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public MappingsLoadingException(Throwable cause) {
+        super(cause);
+    }
+
+    public MappingsLoadingException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
     }
 }
