@@ -34,12 +34,14 @@ public class StartProgressWindow extends Application {
     public static Dialog<Boolean> progressDialog;
     private static boolean exit = false;
 
-    public static void show(CountUpAndDownLatch progress) {
+    public static void show(CountUpAndDownLatch progress) throws InterruptedException {
         if (exit) {
             return;
         }
+        CountDownLatch latch = new CountDownLatch(1);
         new Thread(() -> {
             if (progress.getCount() == 0) {
+                latch.countDown();
                 return;
             }
             AtomicReference<ProgressBar> progressBar = new AtomicReference<>();
@@ -59,11 +61,13 @@ public class StartProgressWindow extends Application {
                 stage.initModality(Modality.APPLICATION_MODAL);
                 stage.setOnCloseRequest((request) -> System.exit(0));
                 if (exit) {
+                    latch.countDown();
                     return;
                 }
                 progressDialog.show();
                 stage.toFront();
             });
+            latch.countDown();
             while (progress.getCount() > 0) {
                 try {
                     progress.waitForChange();
@@ -77,6 +81,7 @@ public class StartProgressWindow extends Application {
             }
             hideDialog();
         }).start();
+        latch.await();
     }
 
     public static void start() throws InterruptedException {

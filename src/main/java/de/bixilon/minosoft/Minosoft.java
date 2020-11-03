@@ -164,7 +164,7 @@ public final class Minosoft {
             GameWindow.prepare();
             progress.countDown();
 
-        }, "Game Window", "", Priorities.NORMAL, TaskImportance.REQUIRED, "Assets"));
+        }, "Game Window", "", Priorities.NORMAL, TaskImportance.REQUIRED, "Assets", "Progress Window"));
 
         taskWorker.work(startStatusLatch);
         try {
