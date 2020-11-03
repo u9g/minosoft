@@ -96,10 +96,7 @@ public class TextureLoader {
     private void combineTextures() {
         // converts all single textures into a very wide image. Improves performance in opengl
         // TEXTURE_PACK_RESxTEXTURE_PACK_RES textures only
-        int imageLength = 1;
-        while (totalTextures * RenderConstants.TEXTURE_PACK_RESOLUTION > imageLength) {
-            imageLength *= 2; //figure out the right length for the image
-        }
+        int imageLength = Integer.highestOneBit(totalTextures * RenderConstants.TEXTURE_PACK_RESOLUTION) * 2;
         BufferedImage totalImage = new BufferedImage(imageLength, RenderConstants.TEXTURE_PACK_RESOLUTION, BufferedImage.TYPE_4BYTE_ABGR);
 
         int currentPos = 0;
