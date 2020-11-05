@@ -22,7 +22,7 @@ public record BlockPosition(int x, int y, int z) {
     }
 
     public BlockPosition(ChunkLocation chunkLocation, Byte height, InChunkSectionLocation sectionLocation) {
-        this((chunkLocation.getX() * RenderConstants.SECTION_WIDTH + sectionLocation.getX()), (chunkLocation.getX() * RenderConstants.SECTION_WIDTH + sectionLocation.getX()), (chunkLocation.getZ() * RenderConstants.SECTION_WIDTH + sectionLocation.getZ()));
+        this((chunkLocation.getX() * RenderConstants.SECTION_WIDTH + sectionLocation.getX()), (height * RenderConstants.SECTION_WIDTH + sectionLocation.getY()), (chunkLocation.getZ() * RenderConstants.SECTION_WIDTH + sectionLocation.getZ()));
     }
 
     public ChunkLocation getChunkLocation() {
