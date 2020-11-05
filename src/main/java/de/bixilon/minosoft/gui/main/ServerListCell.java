@@ -4,11 +4,11 @@
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with this program.If not, see <https://www.gnu.org/licenses/>.
  *
- *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
+ * This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
 package de.bixilon.minosoft.gui.main;
@@ -182,6 +182,10 @@ public class ServerListCell extends ListCell<Server> implements Initializable {
                     server.saveToConfig();
                 }
             }
+            if (server.isReadOnly()) {
+                optionsEdit.setDisable(true);
+                optionsDelete.setDisable(true);
+            }
             if (server.getLastPing().getLastConnectionException() != null) {
                 // connection failed because of an error in minosoft, but ping was okay
                 version.setStyle("-fx-text-fill: red;");
@@ -190,11 +194,6 @@ public class ServerListCell extends ListCell<Server> implements Initializable {
                 setErrorMotd(String.format("%s: %s", server.getLastPing().getLastConnectionException().getClass().getCanonicalName(), server.getLastPing().getLastConnectionException().getLocalizedMessage()));
             }
         }));
-    }
-
-    @Override
-    public void updateSelected(boolean selected) {
-        super.updateSelected(selected);
     }
 
     private void resetCell() {
@@ -208,6 +207,8 @@ public class ServerListCell extends ListCell<Server> implements Initializable {
         version.setStyle(null);
         players.setText("");
         optionsConnect.setDisable(true);
+        optionsEdit.setDisable(false);
+        optionsDelete.setDisable(false);
     }
 
     private void setErrorMotd(String message) {
@@ -218,6 +219,9 @@ public class ServerListCell extends ListCell<Server> implements Initializable {
     }
 
     public void delete() {
+        if (server.isReadOnly()) {
+            return;
+        }
         server.getConnections().forEach(Connection::disconnect);
         server.delete();
         Log.info(String.format("Deleted server (name=\"%s\", address=\"%s\")", server.getName(), server.getAddress()));
@@ -267,6 +271,9 @@ public class ServerListCell extends ListCell<Server> implements Initializable {
     }
 
     public void edit() {
+        if (server.isReadOnly()) {
+            return;
+        }
         Dialog<?> dialog = new Dialog<>();
         dialog.setTitle(LocaleManager.translate(Strings.EDIT_SERVER_DIALOG_TITLE, server.getName()));
         dialog.setHeaderText(LocaleManager.translate(Strings.EDIT_SERVER_DIALOG_HEADER));
@@ -352,7 +359,6 @@ public class ServerListCell extends ListCell<Server> implements Initializable {
     }
 
     public void showInfo() {
-
         Dialog<?> dialog = new Dialog<>();
         dialog.setTitle("View server info: " + server.getName());
         ((Stage) dialog.getDialogPane().getScene().getWindow()).getIcons().add(GUITools.logo);

@@ -4,11 +4,11 @@
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with this program.If not, see <https://www.gnu.org/licenses/>.
  *
- *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
+ * This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
 package de.bixilon.minosoft.gui.main;
@@ -18,6 +18,7 @@ import de.bixilon.minosoft.data.locale.LocaleManager;
 import de.bixilon.minosoft.data.locale.Strings;
 import de.bixilon.minosoft.data.mappings.versions.Versions;
 import de.bixilon.minosoft.logging.Log;
+import de.bixilon.minosoft.protocol.protocol.LANServerListener;
 import de.bixilon.minosoft.util.DNSUtil;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -29,6 +30,8 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
@@ -76,6 +79,11 @@ public class MainWindow implements Initializable {
                         alert.close();
                     });
                 } else {
+                    stage.close();
+                }
+            });
+            stage.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
+                if (event.getCode() == KeyCode.ESCAPE) {
                     stage.close();
                 }
             });
@@ -172,6 +180,10 @@ public class MainWindow implements Initializable {
 
     public void refreshServers() {
         Log.info("Refreshing server list");
+        // remove all lan servers
+        ServerListCell.listView.getItems().removeAll(LANServerListener.getServers().values());
+        LANServerListener.removeAll();
+
         for (Server server : ServerListCell.listView.getItems()) {
             if (server.getLastPing() == null) {
                 // server was not pinged, don't even try, only costs memory and cpu
@@ -195,6 +207,12 @@ public class MainWindow implements Initializable {
             stage.setTitle(LocaleManager.translate(Strings.SETTINGS_TITLE));
             stage.getIcons().add(GUITools.logo);
             stage.setScene(new Scene(parent));
+            stage.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
+                if (event.getCode() == KeyCode.ESCAPE) {
+                    stage.close();
+                }
+            });
+
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();

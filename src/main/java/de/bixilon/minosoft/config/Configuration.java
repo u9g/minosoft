@@ -4,11 +4,11 @@
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with this program.If not, see <https://www.gnu.org/licenses/>.
  *
- *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
+ * This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
 package de.bixilon.minosoft.config;
@@ -99,6 +99,7 @@ public class Configuration {
     public boolean getBoolean(ConfigurationPaths.BooleanPaths path) {
         return switch (path) {
             case NETWORK_FAKE_CLIENT_BRAND -> config.getAsJsonObject("network").get("fake-network-brand").getAsBoolean();
+            case NETWORK_SHOW_LAN_SERVERS -> config.getAsJsonObject("network").get("show-lan-servers").getAsBoolean();
             case DEBUG_VERIFY_ASSETS -> config.getAsJsonObject("debug").get("verify-assets").getAsBoolean();
         };
     }
@@ -106,6 +107,7 @@ public class Configuration {
     public void putBoolean(ConfigurationPaths.BooleanPaths path, boolean value) {
         switch (path) {
             case NETWORK_FAKE_CLIENT_BRAND -> config.getAsJsonObject("network").addProperty("fake-network-brand", value);
+            case NETWORK_SHOW_LAN_SERVERS -> config.getAsJsonObject("network").addProperty("show-lan-servers", value);
             case DEBUG_VERIFY_ASSETS -> config.getAsJsonObject("debug").addProperty("verify-assets", value);
         }
     }
@@ -187,7 +189,7 @@ public class Configuration {
         return config;
     }
 
-    private void migrateConfiguration() {
+    private void migrateConfiguration() throws ConfigMigrationException {
         int configVersion = getInt(ConfigurationPaths.IntegerPaths.GENERAL_CONFIG_VERSION);
         Log.info(String.format("Migrating config from version %d to  %d", configVersion, LATEST_CONFIG_VERSION));
         for (int nextVersion = configVersion + 1; nextVersion <= LATEST_CONFIG_VERSION; nextVersion++) {
@@ -199,10 +201,10 @@ public class Configuration {
 
     }
 
-    private void migrateConfiguration(int nextVersion) {
+    private void migrateConfiguration(int nextVersion) throws ConfigMigrationException {
         switch (nextVersion) {
             // ToDo
-            default -> throw new IllegalArgumentException("Can not migrate config: Unknown config version " + nextVersion);
+            default -> throw new ConfigMigrationException("Can not migrate config: Unknown config version " + nextVersion);
         }
     }
 }

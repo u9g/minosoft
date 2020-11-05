@@ -4,11 +4,11 @@
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with this program.If not, see <https://www.gnu.org/licenses/>.
  *
- *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
+ * This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
 package de.bixilon.minosoft.data.assets;
@@ -98,6 +98,12 @@ public class AssetsManager {
                 e.printStackTrace();
             }
         });
+        // ToDo: This is strange. You will get a jvm crash without it on linux. Weired.
+        try {
+            Thread.sleep(800L);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         generateJarAssets();
         assets.putAll(parseAssetsIndex(ASSETS_CLIENT_JAR_HASH));
         latch.countDown();
@@ -252,7 +258,7 @@ public class AssetsManager {
         int length;
         while ((length = data.read(buffer, 0, 4096)) != -1) {
             crypt.update(buffer, 0, length);
-            out.write(buffer);
+            out.write(buffer, 0, length);
         }
         out.close();
         String hash = Util.byteArrayToHexString(crypt.digest());

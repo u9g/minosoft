@@ -4,11 +4,11 @@
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with this program.If not, see <https://www.gnu.org/licenses/>.
  *
- *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
+ * This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
 package de.bixilon.minosoft.util;
@@ -17,16 +17,11 @@ package de.bixilon.minosoft.util;
 public class CountUpAndDownLatch {
     private final Object lock = new Object();
     private long count;
-    private long total = 0;
+    private long total;
 
     public CountUpAndDownLatch(int count) {
         total = count;
         this.count = count;
-    }
-
-    public CountUpAndDownLatch() {
-        total = 1;
-        this.count = 1;
     }
 
     public void waitUntilZero() throws InterruptedException {

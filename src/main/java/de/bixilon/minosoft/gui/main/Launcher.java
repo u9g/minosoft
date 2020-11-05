@@ -4,11 +4,11 @@
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with this program.If not, see <https://www.gnu.org/licenses/>.
  *
- *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
+ * This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
 package de.bixilon.minosoft.gui.main;
@@ -18,6 +18,7 @@ import de.bixilon.minosoft.data.locale.LocaleManager;
 import de.bixilon.minosoft.data.locale.Strings;
 import de.bixilon.minosoft.data.mappings.versions.Version;
 import de.bixilon.minosoft.logging.Log;
+import de.bixilon.minosoft.protocol.protocol.LANServerListener;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -65,6 +66,7 @@ public class Launcher {
             ObservableList<Server> servers = FXCollections.observableArrayList();
             servers.addAll(Minosoft.serverList);
             ServerListCell.listView.setItems(servers);
+            LANServerListener.removeAll(); // remove all LAN Servers
 
             VBox root = null;
             try {

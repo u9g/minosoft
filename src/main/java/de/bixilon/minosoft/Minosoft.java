@@ -4,11 +4,11 @@
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with this program.If not, see <https://www.gnu.org/licenses/>.
  *
- *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
+ * This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
 package de.bixilon.minosoft;
@@ -27,6 +27,7 @@ import de.bixilon.minosoft.logging.LogLevels;
 import de.bixilon.minosoft.modding.event.EventManager;
 import de.bixilon.minosoft.modding.loading.ModLoader;
 import de.bixilon.minosoft.modding.loading.Priorities;
+import de.bixilon.minosoft.protocol.protocol.LANServerListener;
 import de.bixilon.minosoft.render.GameWindow;
 import de.bixilon.minosoft.util.CountUpAndDownLatch;
 import de.bixilon.minosoft.util.Util;
@@ -36,6 +37,7 @@ import de.bixilon.minosoft.util.task.Task;
 import de.bixilon.minosoft.util.task.TaskImportance;
 import javafx.application.Platform;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -45,7 +47,7 @@ import java.util.UUID;
 
 public final class Minosoft {
     public static final HashSet<EventManager> eventManagers = new HashSet<>();
-    private static final CountUpAndDownLatch startStatusLatch = new CountUpAndDownLatch();
+    private static final CountUpAndDownLatch startStatusLatch = new CountUpAndDownLatch(1);
     public static HashBiMap<String, MojangAccount> accountList;
     public static MojangAccount selectedAccount;
     public static ArrayList<Server> serverList;
@@ -57,21 +59,14 @@ public final class Minosoft {
 
         taskWorker.setFatalError((exception) -> {
             Log.fatal("Critical error occurred while preparing. Exit");
-            if (StartProgressWindow.toolkitLatch.getCount() == 2) {
-                try {
+            try {
+                if (StartProgressWindow.toolkitLatch.getCount() == 2) {
                     StartProgressWindow.start();
-                } catch (InterruptedException e2) {
-                    e2.printStackTrace();
-                    System.exit(1);
                 }
-            }
-            if (StartProgressWindow.toolkitLatch.getCount() > 0) {
-                try {
-                    StartProgressWindow.toolkitLatch.await();
-                } catch (InterruptedException e2) {
-                    e2.printStackTrace();
-                    System.exit(1);
-                }
+                StartProgressWindow.toolkitLatch.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                System.exit(1);
             }
             // hide all other gui parts
             StartProgressWindow.hideDialog();
@@ -81,7 +76,10 @@ public final class Minosoft {
                 // Do not translate this, translations might fail to load...
                 dialog.setTitle("Critical Error");
                 dialog.setHeaderText("An error occurred while starting Minosoft");
-                dialog.setContentText(exception.getClass().getCanonicalName() + ": " + exception.getLocalizedMessage());
+                TextArea text = new TextArea(exception.getClass().getCanonicalName() + ": " + exception.getLocalizedMessage());
+                text.setEditable(false);
+                text.setWrapText(true);
+                dialog.getDialogPane().setContent(text);
 
                 Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
                 stage.getIcons().add(GUITools.logo);
@@ -165,6 +163,15 @@ public final class Minosoft {
             progress.countDown();
 
         }, "Game Window", "", Priorities.NORMAL, TaskImportance.REQUIRED, "Assets", "Progress Window"));
+
+        taskWorker.addTask(new Task(progress -> {
+            if (!config.getBoolean(ConfigurationPaths.BooleanPaths.NETWORK_SHOW_LAN_SERVERS)) {
+                return;
+            }
+            progress.countUp();
+            LANServerListener.listen();
+            progress.countDown();
+        }, "LAN Server Listener", "Listener for LAN Servers", Priorities.LOWEST, TaskImportance.OPTIONAL, "Configuration"));
 
         taskWorker.work(startStatusLatch);
         try {
