@@ -17,7 +17,7 @@ public abstract class ConfigurationPaths {
     public enum StringPaths {
         GENERAL_LOG_LEVEL,
         CLIENT_TOKEN,
-        MAPPINGS_URL,
+        RESOURCES_URL,
         ACCOUNT_SELECTED,
         GENERAL_LANGUAGE,
     }
