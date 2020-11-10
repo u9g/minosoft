@@ -19,16 +19,17 @@ import com.google.gson.JsonObject;
 import de.bixilon.minosoft.data.mappings.blocks.Block;
 import de.bixilon.minosoft.data.world.BlockPosition;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
+import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlock;
 import org.apache.commons.collections.primitives.ArrayFloatList;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-public class ConditionalModel extends BlockModel {
-    HashMap<BlockCondition, BlockModel> conditionMap;
+public class ConditionalModel implements BlockModelInterface {
+    HashMap<BlockCondition, HashSet<SubBlock>> conditionMap;
 
-    public ConditionalModel(HashMap<String, BlockModel> blockModels, JsonArray elements) {
+    public ConditionalModel(HashMap<String, HashSet<SubBlock>> blockModels, JsonArray elements) {
         conditionMap = new HashMap<>();
         for (JsonElement element : elements) {
             JsonObject block = element.getAsJsonObject();
@@ -38,29 +39,31 @@ public class ConditionalModel extends BlockModel {
             } else {
                 condition = BlockCondition.trueCondition;
             }
-            BlockModel model = blockModels.get(block.get("model").getAsString());
-            conditionMap.put(condition, new BlockModel(model, block));
+            HashSet<SubBlock> model = blockModels.get(block.get("model").getAsString());
+            conditionMap.put(condition, model);
         }
     }
 
     @Override
     public ArrayFloatList prepare(HashSet<FaceOrientation> facesToDraw, BlockPosition position, Block block) {
         ArrayFloatList result = new ArrayFloatList();
-        for (Map.Entry<BlockCondition, BlockModel> entry : conditionMap.entrySet()) {
+        for (Map.Entry<BlockCondition, HashSet<SubBlock>> entry : conditionMap.entrySet()) {
             if (entry.getKey().contains(block)) {
-                result.addAll(entry.getValue().prepare(facesToDraw, position, block));
+                for (SubBlock subBlock : entry.getValue()) {
+                    result.addAll(subBlock.getFaces(facesToDraw, position));
+                }
             }
         }
         return result;
     }
 
     @Override
-    public boolean isFull() {
+    public boolean full(Block block, FaceOrientation orientation) {
         return false;
     }
 
     @Override
-    public boolean isFull(FaceOrientation orientation) {
+    public boolean isFull() {
         return false;
     }
 }

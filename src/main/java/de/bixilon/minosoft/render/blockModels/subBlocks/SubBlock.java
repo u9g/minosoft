@@ -1,6 +1,6 @@
 /*
  * Minosoft
- * Copyright (C) 2020 Moritz Zwerger
+ * Copyright (C) 2020 Lukas Eisenhauer
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -27,7 +27,7 @@ import java.util.Map;
 
 public class SubBlock {
     private final HashMap<FaceOrientation, Float> textureCoordinates;
-    private final HashMap<FaceOrientation, String> textures;
+    private HashMap<FaceOrientation, String> textures;
     private final HashMap<FaceOrientation, Integer> textureRotations;
     private final boolean[] full;
     private final HashMap<FaceOrientation, InFaceUV> uv;
@@ -53,6 +53,14 @@ public class SubBlock {
                 putTexture(faces.getAsJsonObject(orientation.name().toLowerCase()), orientation, variables);
             }
         }
+        full = createFull();
+    }
+
+    public SubBlock(SubBlock subBlock) {
+        textureCoordinates = subBlock.textureCoordinates;
+        textureRotations = subBlock.textureRotations;
+        uv = subBlock.uv;
+        cuboid = new Cuboid(subBlock.cuboid);
         full = createFull();
     }
 
