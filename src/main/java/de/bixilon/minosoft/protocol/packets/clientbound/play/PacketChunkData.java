@@ -72,7 +72,10 @@ public class PacketChunkData implements ClientboundPacket {
             return true;
         }
         this.location = new ChunkLocation(buffer.readInt(), buffer.readInt());
-        boolean groundUpContinuous = buffer.readBoolean();
+        boolean groundUpContinuous = true; // ToDo: how should we handle this now?
+        if (buffer.getVersionId() < 758) {
+            groundUpContinuous = buffer.readBoolean();
+        }
         if (buffer.getVersionId() >= 732 && buffer.getVersionId() < 746) {
             this.ignoreOldData = buffer.readBoolean();
         }
@@ -97,7 +100,7 @@ public class PacketChunkData implements ClientboundPacket {
 
         if (size > 0) {
             chunk = ChunkUtil.readChunkPacket(buffer, (short) sectionBitMask, (short) 0, groundUpContinuous, containsSkyLight);
-            // set position of the byte buffer, because of some reasons HyPixel makes some weired stuff and sends way to much 0 bytes. (~ 190k), thanks @pokechu22
+            // set position of the byte buffer, because of some reasons HyPixel makes some weird stuff and sends way to much 0 bytes. (~ 190k), thanks @pokechu22
             buffer.setPosition(size + lastPos);
         }
         if (buffer.getVersionId() >= 110) {

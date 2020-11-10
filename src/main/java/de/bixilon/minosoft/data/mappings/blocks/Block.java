@@ -57,17 +57,17 @@ public class Block {
         this.mod = mod;
         this.identifier = identifier;
         this.properties = new HashSet<>();
-        BlockRotations rot = BlockRotations.NONE;
+        BlockRotations rotation = BlockRotations.NONE;
         for (Map.Entry<String, JsonElement> property : properties.entrySet()) {
             String key = property.getKey();
             String value = property.getValue().getAsString();
-            if (Blocks.getPropertiesMapping().containsKey(key)) {
-                this.properties.add(Blocks.getPropertiesMapping().get(key).get(value));
-            } else if (Blocks.getRotationMapping().containsKey(key)) {
-                rot = Blocks.getRotationMapping().get(value);
+            if (BlockProperties.propertiesMapping.containsKey(key)) {
+                this.properties.add(BlockProperties.propertiesMapping.get(key).get(value));
+            } else if (BlockRotations.rotationMapping.containsKey(key)) {
+                rotation = BlockRotations.rotationMapping.get(value);
             }
         }
-        rotation = rot;
+        this.rotation = rotation;
     }
 
     public String getMod() {

@@ -65,7 +65,6 @@ public class LANServerListener {
                         servers.put(sender, server);
                         Platform.runLater(() -> ServerListCell.listView.getItems().add(server));
                         Log.debug(String.format("Discovered new LAN Server: %s", server));
-
                     } catch (Exception ignored) {
                     }
                 }
@@ -91,7 +90,6 @@ public class LANServerListener {
             }
             servers.inverse().remove(server);
         }
-
     }
 
     private static Server getServerByBroadcast(InetAddress address, byte[] broadcast) {
@@ -103,7 +101,7 @@ public class LANServerListener {
         }
         String rawAddress = Util.getStringBetween(parsed, PORT_START_STRING, PORT_END_STRING);
         if (rawAddress.contains(":")) {
-            // weired, just extract the port
+            // weird, just extract the port
             rawAddress = rawAddress.split(":")[1];
         }
         int port = Integer.parseInt(rawAddress);
