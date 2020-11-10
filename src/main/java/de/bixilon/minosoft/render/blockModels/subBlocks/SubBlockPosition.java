@@ -45,7 +45,7 @@ public class SubBlockPosition {
         vector = new Vec3(position.vector);
     }
 
-    public SubBlockPosition rotated(Axis axis, int rotation) {
+    public SubBlockPosition rotated(Axis axis, double rotation) {
         return new SubBlockRotation(middlePos, axis, rotation).apply(this);
     }
 

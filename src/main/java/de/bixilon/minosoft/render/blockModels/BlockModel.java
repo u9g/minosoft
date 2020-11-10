@@ -53,7 +53,7 @@ public class BlockModel implements BlockModelInterface {
             for (Axis axis : Axis.values()) {
                 String lowercase = axis.name().toLowerCase();
                 if (state.has(lowercase)) {
-                    BlockModelInterface.rotateModel(model, axis, state.get(lowercase).getAsInt());
+                    BlockModelInterface.rotateModel(model, axis, state.get(lowercase).getAsDouble());
                 }
             }
             stateMap.put(properties, model);

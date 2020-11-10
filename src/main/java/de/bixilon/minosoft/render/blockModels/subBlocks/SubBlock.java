@@ -155,7 +155,7 @@ public class SubBlock {
         return result;
     }
 
-    public void rotate(Axis axis, int rotation) {
+    public void rotate(Axis axis, double rotation) {
         cuboid.rotate(axis, rotation);
     }
 

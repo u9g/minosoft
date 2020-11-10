@@ -24,7 +24,7 @@ public class SubBlockRotation {
     private final double sin;
     private final double cos;
 
-    public SubBlockRotation(SubBlockPosition origin, Axis axis, float angle) {
+    public SubBlockRotation(SubBlockPosition origin, Axis axis, double angle) {
         this.origin = origin.getVector();
         this.axis = axis;
         double angleRad = Math.toRadians(angle);

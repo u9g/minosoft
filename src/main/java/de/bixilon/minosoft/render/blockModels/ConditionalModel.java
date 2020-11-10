@@ -18,6 +18,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.data.mappings.blocks.Block;
 import de.bixilon.minosoft.data.world.BlockPosition;
+import de.bixilon.minosoft.render.blockModels.Face.Axis;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlock;
 import org.apache.commons.collections.primitives.ArrayFloatList;
@@ -25,6 +26,7 @@ import org.apache.commons.collections.primitives.ArrayFloatList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ConditionalModel implements BlockModelInterface {
     HashMap<BlockCondition, HashSet<SubBlock>> conditionMap;
@@ -39,7 +41,13 @@ public class ConditionalModel implements BlockModelInterface {
             } else {
                 condition = BlockCondition.trueCondition;
             }
-            HashSet<SubBlock> model = blockModels.get(block.get("model").getAsString());
+            HashSet<SubBlock> model = blockModels.get(block.get("model").getAsString()).stream().map(SubBlock::new).collect(Collectors.toCollection(HashSet::new));
+            for (Axis axis : Axis.values()) {
+                String lowercase = axis.name().toLowerCase();
+                if (block.has(lowercase)) {
+                    BlockModelInterface.rotateModel(model, axis, block.get(lowercase).getAsDouble());
+                }
+            }
             conditionMap.put(condition, model);
         }
     }

@@ -75,7 +75,7 @@ public class Cuboid {
         };
     }
 
-    public void rotate(Axis axis, int rotation) {
+    public void rotate(Axis axis, double rotation) {
         for (int i = 0; i < positions.length; i++) {
             positions[i] = positions[i].rotated(axis, rotation);
         }

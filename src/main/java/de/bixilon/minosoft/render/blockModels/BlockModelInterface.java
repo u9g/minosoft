@@ -58,7 +58,7 @@ public interface BlockModelInterface {
         return load(json, allModels, new HashMap<>());
     }
 
-    static void rotateModel(HashSet<SubBlock> subBlocks, Axis axis, int rotation) {
+    static void rotateModel(HashSet<SubBlock> subBlocks, Axis axis, double rotation) {
         for (SubBlock subBlock : subBlocks) {
             subBlock.rotate(axis, rotation);
         }
