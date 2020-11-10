@@ -1,14 +1,14 @@
 /*
  * Minosoft
- * Copyright (C) 2020 Lukas Eisenhauer
+ * Copyright (C) 2020 Moritz Zwerger
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with this program.If not, see <https://www.gnu.org/licenses/>.
  *
- *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
+ * This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
 package de.bixilon.minosoft.render.blockModels;
@@ -19,7 +19,6 @@ import com.google.gson.JsonObject;
 import de.bixilon.minosoft.data.mappings.blocks.Block;
 import de.bixilon.minosoft.data.mappings.blocks.BlockProperties;
 import de.bixilon.minosoft.data.mappings.blocks.BlockRotations;
-import de.bixilon.minosoft.data.mappings.blocks.Blocks;
 import de.bixilon.minosoft.data.world.BlockPosition;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.render.blockModels.Face.Axis;
@@ -44,10 +43,10 @@ public class BlockModel implements BlockModelInterface {
             HashSet<SubBlock> model = blockModels.get(state.get("model").getAsString()).stream().map(SubBlock::new).collect(Collectors.toCollection(HashSet::new));
             HashSet<String> properties = new HashSet<>();
             for (Map.Entry<String, JsonElement> property : state.getAsJsonObject("properties").entrySet()) {
-                if (Blocks.getPropertiesMapping().containsKey(property.getKey())) {
-                    properties.add(Blocks.getPropertiesMapping().get(property.getKey()).get(property.getValue().getAsString()).name());
-                } else if (Blocks.getRotationMapping().containsKey(property.getValue().getAsString())) {
-                    properties.add(Blocks.getRotationMapping().get(property.getValue().getAsString()).name());
+                if (BlockProperties.PROPERTIES_MAPPING.containsKey(property.getKey())) {
+                    properties.add(BlockProperties.PROPERTIES_MAPPING.get(property.getKey()).get(property.getValue().getAsString()).name());
+                } else if (BlockRotations.ROTATION_MAPPING.containsKey(property.getValue().getAsString())) {
+                    properties.add(BlockRotations.ROTATION_MAPPING.get(property.getValue().getAsString()).name());
                 }
             }
             for (Axis axis : Axis.values()) {
