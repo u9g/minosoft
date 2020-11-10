@@ -1,6 +1,6 @@
 /*
  * Minosoft
- * Copyright (C) 2020 Moritz Zwerger
+ * Copyright (C) 2020 Moritz Zwerger, Lukas Eisenhauer
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -20,6 +20,7 @@ import de.bixilon.minosoft.data.mappings.blocks.Block;
 import de.bixilon.minosoft.data.mappings.blocks.Blocks;
 import de.bixilon.minosoft.data.world.BlockPosition;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
+import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlock;
 import de.bixilon.minosoft.render.texture.TextureLoader;
 import de.bixilon.minosoft.util.Util;
 import org.apache.commons.collections.primitives.ArrayFloatList;
@@ -29,14 +30,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-
 public class BlockModelLoader {
-    public static BlockModelLoader blockModelLoader;
-    HashMap<BlockModelBlockWrapper, BlockModel> blockMap;
     TextureLoader textureLoader;
+    public static BlockModelLoader blockModelLoader;
+    HashMap<String, HashMap<String, BlockModelInterface>> modelMap;
 
     public BlockModelLoader() {
-        blockMap = new HashMap<>();
+        modelMap = new HashMap<>();
         HashSet<JsonObject> mods = new HashSet<>();
         HashMap<String, HashMap<String, float[]>> tints = new HashMap<>();
         try {
@@ -45,10 +45,14 @@ public class BlockModelLoader {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        HashMap<String, HashMap<String, BlockModel>> blockModels = new HashMap<>();
+        HashMap<String, HashMap<String, HashSet<SubBlock>>> blockModels = new HashMap<>();
         for (JsonObject mod : mods) {
-            blockModels.put(mod.get("mod").getAsString(), loadModels(mod));
-            tints.put(mod.get("mod").getAsString(), readTints(mod));
+            String modName = mod.get("mod").getAsString();
+            if (!modelMap.containsKey(mod.get("mod").getAsString())) {
+                modelMap.put(modName, new HashMap<>());
+            }
+            blockModels.put(modName, loadModels(mod));
+            tints.put(modName, readTints(mod));
         }
         textureLoader = new TextureLoader(getTextures(blockModels), tints);
         applyTextures(blockModels);
@@ -61,47 +65,46 @@ public class BlockModelLoader {
         return blockModelLoader;
     }
 
-    private void loadBlocks(JsonObject mod, HashMap<String, BlockModel> blockModels) {
+    private void loadBlocks(JsonObject mod, HashMap<String, HashSet<SubBlock>> blockModels) {
         for (Map.Entry<String, JsonElement> blockEntry : mod.get("blockStates").getAsJsonObject().entrySet()) {
             JsonObject block = blockEntry.getValue().getAsJsonObject();
             if (block.has("states")) {
                 JsonArray states = block.get("states").getAsJsonArray();
-                for (JsonElement state : states) {
-                    BlockModel model = blockModels.get(state.getAsJsonObject().get("model").getAsString());
-                    Block wrapper = new Block(mod.get("mod").getAsString(), blockEntry.getKey(), state.getAsJsonObject().get("properties").getAsJsonObject());
-                    blockMap.put(new BlockModelBlockWrapper(wrapper), new BlockModel(model, state.getAsJsonObject()));
-                }
+                modelMap.get(mod.get("mod").getAsString()).put(blockEntry.getKey(), new BlockModel(blockModels, states));
             } else if (block.has("conditional")) {
-                Block wrapper = new Block(mod.get("mod").getAsString(), blockEntry.getKey());
-                blockMap.put(new BlockModelBlockWrapper(wrapper), new ConditionalModel(blockModels, block.get("conditional").getAsJsonArray()));
+                modelMap.get(mod.get("mod").getAsString()).put(blockEntry.getKey(), new ConditionalModel(blockModels, block.get("conditional").getAsJsonArray()));
             }
         }
     }
 
-    private HashMap<String, BlockModel> loadModels(JsonObject mod) {
-        HashMap<String, BlockModel> modMap = new HashMap<>();
-        for (Map.Entry<String, JsonElement> block : mod.get("blockModels").getAsJsonObject().entrySet()) {
-            modMap.put(block.getKey(), new BlockModel(block.getValue().getAsJsonObject(), mod.get("blockModels").getAsJsonObject()));
+    private HashMap<String, HashSet<SubBlock>> loadModels(JsonObject mod) {
+        HashMap<String, HashSet<SubBlock>> modMap = new HashMap<>();
+        for (Map.Entry<String, JsonElement> block : mod.getAsJsonObject("blockModels").entrySet()) {
+            modMap.put(block.getKey(), BlockModelInterface.load(block.getValue().getAsJsonObject(), mod.getAsJsonObject("blockModels")));
         }
         return modMap;
     }
 
-    public HashMap<String, HashSet<String>> getTextures(HashMap<String, HashMap<String, BlockModel>> blockModels) {
+    public HashMap<String, HashSet<String>> getTextures(HashMap<String, HashMap<String, HashSet<SubBlock>>> blockModels) {
         HashMap<String, HashSet<String>> textures = new HashMap<>();
-        for (Map.Entry<String, HashMap<String, BlockModel>> mod : blockModels.entrySet()) {
+        for (Map.Entry<String, HashMap<String, HashSet<SubBlock>>> mod : blockModels.entrySet()) {
             HashSet<String> modTextures = new HashSet<>();
-            for (BlockModel blockModel : mod.getValue().values()) {
-                modTextures.addAll(blockModel.getAllTextures());
+            for (HashSet<SubBlock> subBlocks : mod.getValue().values()) {
+                for (SubBlock subBlock : subBlocks) {
+                    modTextures.addAll(subBlock.getTextures());
+                }
             }
             textures.put(mod.getKey(), modTextures);
         }
         return textures;
     }
 
-    public void applyTextures(HashMap<String, HashMap<String, BlockModel>> blockModels) {
-        for (Map.Entry<String, HashMap<String, BlockModel>> mod : blockModels.entrySet()) {
-            for (Map.Entry<String, BlockModel> block : mod.getValue().entrySet()) {
-                block.getValue().applyTextures(mod.getKey(), textureLoader);
+    public void applyTextures(HashMap<String, HashMap<String, HashSet<SubBlock>>> blockModels) {
+        for (Map.Entry<String, HashMap<String, HashSet<SubBlock>>> mod : blockModels.entrySet()) {
+            for (Map.Entry<String, HashSet<SubBlock>> block : mod.getValue().entrySet()) {
+                for (SubBlock subBlock : block.getValue()) {
+                    subBlock.applyTextures(mod.getKey(), textureLoader);
+                }
             }
         }
     }
@@ -122,19 +125,19 @@ public class BlockModelLoader {
         return result;
     }
 
-    public BlockModel getBlockModel(Block block) {
-        BlockModel model = blockMap.get(new BlockModelBlockWrapper(block));
+    public BlockModelInterface getBlockModel(Block block) {
+        BlockModelInterface model = modelMap.get(block.getMod()).get(block.getIdentifier());
         if (model == null) {
             throw new RuntimeException(String.format("Block model for could not be found: %s", block));
         }
-        return blockMap.get(new BlockModelBlockWrapper(block));
+        return model;
     }
 
     public boolean isFull(Block block, FaceOrientation orientation) {
         if (block == null || block.equals(Blocks.nullBlock)) {
             return false;
         }
-        return getBlockModel(block).isFull(orientation);
+        return getBlockModel(block).full(block, orientation);
     }
 
     public boolean isFull(Block block) {

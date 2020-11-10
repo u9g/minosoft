@@ -13,7 +13,7 @@
 
 package de.bixilon.minosoft.render.blockModels.subBlocks;
 
-// a 3d object with 8 corners, 6 faces and 12 edges (example: cube, but can be deformed)
+// a 3d object with 8 corners, 6 faces and 12 edges (cube, but can be deformed)
 
 import de.bixilon.minosoft.render.blockModels.Face.Axis;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
@@ -44,6 +44,13 @@ public class Cuboid {
             for (int i = 0; i < positions.length; i++) {
                 positions[i] = rotation.apply(positions[i]);
             }
+        }
+    }
+
+    public Cuboid(Cuboid cuboid) {
+        positions = new SubBlockPosition[cuboid.positions.length];
+        for (int i = 0; i < positions.length; i++) {
+            positions[i] = new SubBlockPosition(cuboid.positions[i]);
         }
     }
 

@@ -64,6 +64,7 @@ public class PlayerController {
         applyVelocity(deltaTime);
 
         if (gameMode == GameModes.SPECTATOR) {
+            glTranslated(-playerPos.x, -(playerPos.y + playerHeight - 0.2f), -playerPos.z);
             return;
         }
         handleCollisions(connection.getPlayer().getWorld());

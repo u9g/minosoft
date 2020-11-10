@@ -1,6 +1,6 @@
 /*
  * Minosoft
- * Copyright (C) 2020 Moritz Zwerger
+ * Copyright (C) 2020 Lukas Eisenhauer
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
  *
@@ -16,73 +16,52 @@ package de.bixilon.minosoft.render.blockModels.subBlocks;
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.render.blockModels.Face.Axis;
 import de.bixilon.minosoft.render.utility.Vec3;
-
+import javafx.util.Pair;
 
 public class SubBlockRotation {
     private final Vec3 origin;
-    private final double angle;
-    private final Vec3 direction;
+    private final Axis axis;
+    private final double sin;
+    private final double cos;
 
-    public SubBlockRotation(SubBlockPosition origin, Axis direction, float angle) {
+    public SubBlockRotation(SubBlockPosition origin, Axis axis, float angle) {
         this.origin = origin.getVector();
-        this.direction = switch (direction) {
-            case X -> new Vec3(1, 0, 0);
-            case Y -> new Vec3(0, 1, 0);
-            case Z -> new Vec3(0, 0, 1);
-        };
-        this.angle = angle;
+        this.axis = axis;
+        double angleRad = Math.toRadians(angle);
+        sin = Math.sin(angleRad);
+        cos = Math.cos(angleRad);
     }
 
     public SubBlockRotation(JsonObject rotation) {
         origin = new SubBlockPosition(rotation.get("origin").getAsJsonArray()).getVector();
-        String axis = rotation.get("axis").getAsString();
-        direction = switch (axis) {
-            case "x" -> new Vec3(1, 0, 0);
-            case "y" -> new Vec3(0, 1, 0);
-            case "z" -> new Vec3(0, 0, 1);
-            default -> throw new IllegalStateException("Unexpected value: " + axis);
+        String direction = rotation.get("axis").getAsString();
+        axis = switch (direction) {
+            case "x" -> Axis.X;
+            case "y" -> Axis.Y;
+            case "z" -> Axis.Z;
+            default -> throw new IllegalStateException("Unexpected value: " + direction);
         };
-        angle = Math.toRadians(rotation.get("angle").getAsFloat());
+        double angleRad = Math.toRadians(rotation.get("angle").getAsDouble());
+        sin = Math.sin(angleRad);
+        cos = Math.cos(angleRad);
     }
 
-    public SubBlockPosition apply(SubBlockPosition position) {
-        Vec3 transformed = Vec3.add(position.getVector(), Vec3.mul(origin, -1));
-
-        Vec3 result = Vec3.mul(transformed, Math.cos(angle));
-        result.add(Vec3.mul(Vec3.cross(direction, transformed), Math.sin(angle)));
-        //result.add(Vec3.mul(direction, direction, transformed, ));
-        return new SubBlockPosition(Vec3.add(transformed, origin));
-    }
-
-    /*
-    public static Pair<Float, Float> rotate(float x, float y, float angle) {
-        float angleRad = (float) Math.toRadians(angle);
-        float newX = x * (float) StrictMath.cos(angleRad) + y * (float) StrictMath.sin(angleRad);
-        float newY = - x * (float) StrictMath.sin(angleRad) + y * (float) StrictMath.cos(angleRad);
+    private Pair<Double, Double> rotate(double x, double y) {
+        double newX = x * cos - y * sin;
+        double newY = x * sin + y * cos;
         return new Pair<>(newX, newY);
     }
 
+
     public SubBlockPosition apply(SubBlockPosition position) {
-        SubBlockPosition transformed = SubBlockPosition.subtract(position, origin);
-        Pair<Float, Float> rotated;
-        switch (direction) {
-            case X -> {
-                rotated = rotate(transformed.y, transformed.z, angle);
-                transformed.y = rotated.getKey();
-                transformed.z = rotated.getValue();
-            }
-            case Y -> {
-                rotated = rotate(transformed.x, transformed.z, angle);
-                transformed.x = rotated.getKey();
-                transformed.z = rotated.getValue();
-            }
-            case Z -> {
-                rotated = rotate(transformed.x, transformed.y, angle);
-                transformed.x = rotated.getKey();
-                transformed.y = rotated.getValue();
-            }
-        }
-        return SubBlockPosition.add(transformed, origin);
+        Vec3 transformedPosition = Vec3.add(position.getVector(), Vec3.mul(origin, -1));
+        return switch (axis) {
+            case X:
+                Pair<Double, Double> rotateX = rotate(transformedPosition.y, transformedPosition.z); transformedPosition.y = rotateX.getKey(); transformedPosition.z = rotateX.getValue(); yield new SubBlockPosition(Vec3.add(transformedPosition, origin));
+            case Y:
+                Pair<Double, Double> rotateY = rotate(transformedPosition.x, transformedPosition.z); transformedPosition.x = rotateY.getKey(); transformedPosition.z = rotateY.getValue(); yield new SubBlockPosition(Vec3.add(transformedPosition, origin));
+            case Z:
+                Pair<Double, Double> rotateZ = rotate(transformedPosition.x, transformedPosition.y); transformedPosition.x = rotateZ.getKey(); transformedPosition.y = rotateZ.getValue(); yield new SubBlockPosition(Vec3.add(transformedPosition, origin));
+        };
     }
-     */
 }
