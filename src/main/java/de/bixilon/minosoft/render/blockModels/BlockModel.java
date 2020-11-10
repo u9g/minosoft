@@ -43,10 +43,10 @@ public class BlockModel implements BlockModelInterface {
             HashSet<SubBlock> model = blockModels.get(state.get("model").getAsString()).stream().map(SubBlock::new).collect(Collectors.toCollection(HashSet::new));
             HashSet<String> properties = new HashSet<>();
             for (Map.Entry<String, JsonElement> property : state.getAsJsonObject("properties").entrySet()) {
-                if (BlockProperties.propertiesMapping.containsKey(property.getKey())) {
-                    properties.add(BlockProperties.propertiesMapping.get(property.getKey()).get(property.getValue().getAsString()).name());
-                } else if (BlockRotations.rotationMapping.containsKey(property.getValue().getAsString())) {
-                    properties.add(BlockRotations.rotationMapping.get(property.getValue().getAsString()).name());
+                if (BlockProperties.PROPERTIES_MAPPING.containsKey(property.getKey())) {
+                    properties.add(BlockProperties.PROPERTIES_MAPPING.get(property.getKey()).get(property.getValue().getAsString()).name());
+                } else if (BlockRotations.ROTATION_MAPPING.containsKey(property.getValue().getAsString())) {
+                    properties.add(BlockRotations.ROTATION_MAPPING.get(property.getValue().getAsString()).name());
                 }
             }
             for (Axis axis : Axis.values()) {

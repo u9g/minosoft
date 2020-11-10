@@ -38,11 +38,11 @@ public class BlockCondition {
         rotation = BlockRotations.NONE;
         for (Map.Entry<String, JsonElement> entry : json.entrySet()) {
             String value = entry.getValue().getAsString();
-            if (BlockProperties.propertiesMapping.containsKey(entry.getKey())) {
-                properties.add(BlockProperties.propertiesMapping.get(entry.getKey()).get(value));
+            if (BlockProperties.PROPERTIES_MAPPING.containsKey(entry.getKey())) {
+                properties.add(BlockProperties.PROPERTIES_MAPPING.get(entry.getKey()).get(value));
                 continue;
             }
-            rotation = BlockRotations.rotationMapping.get(value);
+            rotation = BlockRotations.ROTATION_MAPPING.get(value);
         }
     }
 

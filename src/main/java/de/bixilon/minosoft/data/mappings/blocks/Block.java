@@ -61,10 +61,10 @@ public class Block {
         for (Map.Entry<String, JsonElement> property : properties.entrySet()) {
             String key = property.getKey();
             String value = property.getValue().getAsString();
-            if (BlockProperties.propertiesMapping.containsKey(key)) {
-                this.properties.add(BlockProperties.propertiesMapping.get(key).get(value));
-            } else if (BlockRotations.rotationMapping.containsKey(key)) {
-                rotation = BlockRotations.rotationMapping.get(value);
+            if (BlockProperties.PROPERTIES_MAPPING.containsKey(key)) {
+                this.properties.add(BlockProperties.PROPERTIES_MAPPING.get(key).get(value));
+            } else if (BlockRotations.ROTATION_MAPPING.containsKey(key)) {
+                rotation = BlockRotations.ROTATION_MAPPING.get(value);
             }
         }
         this.rotation = rotation;
