@@ -9,14 +9,6 @@
 #
 #  This software is not affiliated with Mojang AB, the original developer of Minecraft.
 #
-#  This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License along with this program.If not, see <https://www.gnu.org/licenses/>.
-#
-#  This software is not affiliated with Mojang AB, the original developer of Minecraft.
-#
 import hashlib
 import os
 import requests
@@ -30,7 +22,7 @@ print("Minecraft mappings downloader (and generator)")
 PRE_FLATTENING_UPDATE_VERSION = "17w46a"
 DATA_FOLDER = "../data/resources/"
 TEMP_FOLDER = DATA_FOLDER + "tmp/"
-FILES_PER_VERSION = ["blocks.json", "registries.json"]
+FILES_PER_VERSION = ["blocks.json", "registries.json", "blockModels.json"]
 DOWNLOAD_BASE_URL = "https://apimon.de/mcdata/"
 manifest = requests.get('https://launchermeta.mojang.com/mc/game/version_manifest.json').json()
 failed = []
@@ -57,6 +49,7 @@ if not os.path.isdir(TEMP_FOLDER):
 for version in manifest["versions"]:
     if version["id"] == PRE_FLATTENING_UPDATE_VERSION:
         break
+    versionJson = requests.get(version['url']).json()
     versionBaseFolder = TEMP_FOLDER + version["id"] + "/"
     resourcesJsonPath = ("mappings/%s" % version["id"])
     if resourcesJsonPath in resourceMappingsIndex and os.path.isfile(DATA_FOLDER + resourceMappingsIndex[resourcesJsonPath][:2] + "/" + resourceMappingsIndex[resourcesJsonPath] + ".tar.gz"):
@@ -66,6 +59,11 @@ for version in manifest["versions"]:
         os.mkdir(versionBaseFolder)
     for fileName in FILES_PER_VERSION:
         if not os.path.isfile(versionBaseFolder + fileName):
+            if fileName == "blockModels.json":
+                # blockModelsCombiner.py will do the trick for us
+                os.popen('python3 blockModelGenerator.py %s %s' % (versionBaseFolder + "blockModels.json", versionJson['downloads']['client']['url'])).read()
+                exit()
+                continue
             print("Downloading %s for %s" % (fileName, version["id"]))
             try:
                 reformatted = requests.get(DOWNLOAD_BASE_URL + version["id"] + "/" + fileName).json()
@@ -88,12 +86,6 @@ for version in manifest["versions"]:
                     # items
                     for key in burger["items"]["item"]:
                         registries["item"]["entries"][key] = {"id": burger["items"]["item"][key]["numeric_id"]}
-
-                    # entities
-                    for key in burger["entities"]["entity"]:
-                        if key.startswith("~abstract_"):
-                            continue
-                        registries["entity_type"]["entries"][key] = {"id": burger["entities"]["entity"][key]["id"]}
 
                     # biome
                     for key in burger["biomes"]["biome"]:
