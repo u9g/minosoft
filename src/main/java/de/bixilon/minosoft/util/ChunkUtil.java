@@ -79,7 +79,7 @@ public final class ChunkUtil {
                                     }
                                 }
                                 // ToDo light, biome
-                                Block block = buffer.getConnection().getMapping().getBlockByIdAndMetaData(singeBlockId, singleMeta);
+                                Block block = buffer.getConnection().getMapping().getBlockById((singeBlockId << 4) | singleMeta);
                                 if (block.equals(Blocks.nullBlock)) {
                                     arrayPos++;
                                     continue;

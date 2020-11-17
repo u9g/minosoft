@@ -16,9 +16,9 @@ package de.bixilon.minosoft.protocol.protocol;
 import de.bixilon.minosoft.Minosoft;
 import de.bixilon.minosoft.config.ConfigurationPaths;
 import de.bixilon.minosoft.data.GameModes;
-import de.bixilon.minosoft.data.entities.Entity;
-import de.bixilon.minosoft.data.entities.meta.HumanMetaData;
-import de.bixilon.minosoft.data.entities.mob.OtherPlayer;
+import de.bixilon.minosoft.data.PlayerPropertyData;
+import de.bixilon.minosoft.data.entities.entities.Entity;
+import de.bixilon.minosoft.data.entities.entities.player.PlayerEntity;
 import de.bixilon.minosoft.data.mappings.blocks.Blocks;
 import de.bixilon.minosoft.data.mappings.recipes.Recipes;
 import de.bixilon.minosoft.data.mappings.versions.Version;
@@ -113,10 +113,10 @@ public class PacketHandler {
         }
 
         connection.getPlayer().setGameMode(pkg.getGameMode());
-        connection.getPlayer().setPlayer(new OtherPlayer(pkg.getEntityId(), connection.getPlayer().getPlayerName(), connection.getPlayer().getPlayerUUID(), null, null, 0, 0, 0, (short) 0, null));
         connection.getPlayer().getWorld().setHardcore(pkg.isHardcore());
         connection.getMapping().setDimensions(pkg.getDimensions());
         connection.getPlayer().getWorld().setDimension(pkg.getDimension());
+        connection.getPlayer().setEntity(new PlayerEntity(connection, pkg.getEntityId(), connection.getPlayer().getPlayerUUID(), null, null, connection.getPlayer().getPlayerName(), new PlayerPropertyData[]{}, null));
         connection.getSender().sendChatMessage("I am alive! ~ Minosoft");
     }
 
@@ -291,8 +291,7 @@ public class PacketHandler {
 
     public void handle(PacketEntityMovementAndRotation pkg) {
         connection.getPlayer().getWorld().getEntity(pkg.getEntityId()).setLocation(pkg.getRelativeLocation());
-        connection.getPlayer().getWorld().getEntity(pkg.getEntityId()).setYaw(pkg.getYaw());
-        connection.getPlayer().getWorld().getEntity(pkg.getEntityId()).setPitch(pkg.getPitch());
+        connection.getPlayer().getWorld().getEntity(pkg.getEntityId()).setRotation(pkg.getYaw(), pkg.getPitch());
     }
 
     public void handle(PacketEntityMovement pkg) {
@@ -300,8 +299,7 @@ public class PacketHandler {
     }
 
     public void handle(PacketEntityRotation pkg) {
-        connection.getPlayer().getWorld().getEntity(pkg.getEntityId()).setYaw(pkg.getYaw());
-        connection.getPlayer().getWorld().getEntity(pkg.getEntityId()).setPitch(pkg.getPitch());
+        connection.getPlayer().getWorld().getEntity(pkg.getEntityId()).setRotation(pkg.getYaw(), pkg.getPitch());
     }
 
     public void handle(PacketDestroyEntity pkg) {
@@ -314,9 +312,9 @@ public class PacketHandler {
 
     public void handle(PacketEntityVelocity pkg) {
         Entity entity;
-        if (pkg.getEntityId() == connection.getPlayer().getPlayer().getEntityId()) {
+        if (pkg.getEntityId() == connection.getPlayer().getEntity().getEntityId()) {
             // that's us!
-            entity = connection.getPlayer().getPlayer();
+            entity = connection.getPlayer().getEntity();
         } else {
             entity = connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
         }
@@ -332,12 +330,11 @@ public class PacketHandler {
 
     public void handle(PacketEntityTeleport pkg) {
         connection.getPlayer().getWorld().getEntity(pkg.getEntityId()).setLocation(pkg.getRelativeLocation());
-        connection.getPlayer().getWorld().getEntity(pkg.getEntityId()).setYaw(pkg.getYaw());
-        connection.getPlayer().getWorld().getEntity(pkg.getEntityId()).setPitch(pkg.getPitch());
+        connection.getPlayer().getWorld().getEntity(pkg.getEntityId()).setRotation(pkg.getYaw(), pkg.getPitch());
     }
 
     public void handle(PacketEntityHeadRotation pkg) {
-        connection.getPlayer().getWorld().getEntity(pkg.getEntityId()).setHeadYaw(pkg.getHeadYaw());
+        connection.getPlayer().getWorld().getEntity(pkg.getEntityId()).setHeadRotation(pkg.getHeadYaw());
     }
 
     public void handle(PacketWindowItems pkg) {
@@ -347,12 +344,12 @@ public class PacketHandler {
     }
 
     public void handle(PacketEntityMetadata pkg) {
-        if (pkg.getEntityId() == connection.getPlayer().getPlayer().getEntityId()) {
+        if (pkg.getEntityId() == connection.getPlayer().getEntity().getEntityId()) {
             // our own meta data...set it
-            connection.getPlayer().getPlayer().setMetaData(pkg.getEntityData(HumanMetaData.class));
+            connection.getPlayer().getEntity().setMetaData(pkg.getEntityData());
             return;
         }
-        connection.getPlayer().getWorld().getEntity(pkg.getEntityId()).setMetaData(pkg.getEntityData(connection.getPlayer().getWorld().getEntity(pkg.getEntityId()).getMetaDataClass()));
+        connection.getPlayer().getWorld().getEntity(pkg.getEntityId()).setMetaData(pkg.getEntityData());
     }
 
     public void handle(PacketEntityEquipment pkg) {
@@ -427,18 +424,18 @@ public class PacketHandler {
     }
 
     public void handle(PacketEntityEffect pkg) {
-        if (pkg.getEntityId() == connection.getPlayer().getPlayer().getEntityId()) {
+        if (pkg.getEntityId() == connection.getPlayer().getEntity().getEntityId()) {
             // that's us!
-            connection.getPlayer().getPlayer().addEffect(pkg.getEffect());
+            connection.getPlayer().getEntity().addEffect(pkg.getEffect());
             return;
         }
         connection.getPlayer().getWorld().getEntity(pkg.getEntityId()).addEffect(pkg.getEffect());
     }
 
     public void handle(PacketRemoveEntityEffect pkg) {
-        if (pkg.getEntityId() == connection.getPlayer().getPlayer().getEntityId()) {
+        if (pkg.getEntityId() == connection.getPlayer().getEntity().getEntityId()) {
             // that's us!
-            connection.getPlayer().getPlayer().removeEffect(pkg.getEffect());
+            connection.getPlayer().getEntity().removeEffect(pkg.getEffect());
             return;
         }
         connection.getPlayer().getWorld().getEntity(pkg.getEntityId()).removeEffect(pkg.getEffect());
