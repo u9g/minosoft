@@ -14,10 +14,12 @@
 package de.bixilon.minosoft.protocol.packets.clientbound.play;
 
 import de.bixilon.minosoft.data.PlayerPropertyData;
+import de.bixilon.minosoft.data.entities.EntityMetaData;
+import de.bixilon.minosoft.data.entities.EntityRotation;
 import de.bixilon.minosoft.data.entities.Location;
 import de.bixilon.minosoft.data.entities.Velocity;
-import de.bixilon.minosoft.data.entities.meta.HumanMetaData;
-import de.bixilon.minosoft.data.entities.mob.OtherPlayer;
+import de.bixilon.minosoft.data.entities.entities.player.PlayerEntity;
+import de.bixilon.minosoft.data.mappings.Item;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.packets.ClientboundPacket;
 import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
@@ -26,7 +28,7 @@ import de.bixilon.minosoft.protocol.protocol.PacketHandler;
 import java.util.UUID;
 
 public class PacketSpawnPlayer implements ClientboundPacket {
-    OtherPlayer entity;
+    PlayerEntity entity;
     Velocity velocity;
 
     @Override
@@ -54,15 +56,18 @@ public class PacketSpawnPlayer implements ClientboundPacket {
         short yaw = buffer.readAngle();
         short pitch = buffer.readAngle();
 
-        short currentItem = 0;
+        Item currentItem = null;
         if (buffer.getVersionId() < 49) {
-            currentItem = buffer.readShort();
+            currentItem = buffer.getConnection().getMapping().getItemById(buffer.readShort());
         }
-        HumanMetaData metaData = null;
+        EntityMetaData metaData = null;
         if (buffer.getVersionId() < 550) {
-            metaData = new HumanMetaData(buffer.readMetaData(), buffer.getVersionId());
+            metaData = buffer.readMetaData();
         }
-        this.entity = new OtherPlayer(entityId, name, uuid, properties, location, yaw, pitch, 0, currentItem, metaData);
+        this.entity = new PlayerEntity(buffer.getConnection(), entityId, uuid, location, new EntityRotation(yaw, pitch, 0), name, properties, currentItem);
+        if (metaData != null) {
+            entity.setMetaData(metaData);
+        }
         return true;
     }
 
@@ -73,10 +78,10 @@ public class PacketSpawnPlayer implements ClientboundPacket {
 
     @Override
     public void log() {
-        Log.protocol(String.format("Player spawned at %s (entityId=%d, name=%s, uuid=%s)", entity.getLocation().toString(), entity.getEntityId(), entity.getName(), entity.getUUID()));
+        Log.protocol(String.format("Player spawned at %s (entityId=%d, name=%s, uuid=%s)", entity.getLocation(), entity.getEntityId(), entity.getName(), entity.getUUID()));
     }
 
-    public OtherPlayer getEntity() {
+    public PlayerEntity getEntity() {
         return entity;
     }
 

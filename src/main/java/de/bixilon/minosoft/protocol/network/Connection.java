@@ -16,10 +16,10 @@ package de.bixilon.minosoft.protocol.network;
 import de.bixilon.minosoft.Minosoft;
 import de.bixilon.minosoft.data.Player;
 import de.bixilon.minosoft.data.VelocityHandler;
-import de.bixilon.minosoft.data.mappings.CustomMapping;
 import de.bixilon.minosoft.data.mappings.MappingsLoadingException;
 import de.bixilon.minosoft.data.mappings.recipes.Recipes;
 import de.bixilon.minosoft.data.mappings.versions.Version;
+import de.bixilon.minosoft.data.mappings.versions.VersionMapping;
 import de.bixilon.minosoft.data.mappings.versions.Versions;
 import de.bixilon.minosoft.gui.main.ConnectionChangeCallback;
 import de.bixilon.minosoft.logging.Log;
@@ -68,8 +68,8 @@ public class Connection {
     int desiredVersionNumber = -1;
     ServerAddress address;
     Thread handleThread;
-    Version version = Versions.getLowestVersionSupported(); // default
-    final CustomMapping customMapping = new CustomMapping(version);
+    Version version = Versions.LOWEST_VERSION_SUPPORTED; // default
+    final VersionMapping customMapping = new VersionMapping(version);
     ConnectionStates state = ConnectionStates.DISCONNECTED;
     ConnectionReasons reason;
     ConnectionReasons nextReason;
@@ -88,7 +88,6 @@ public class Connection {
         this.desiredVersionNumber = versionId;
 
         Thread resolveThread = new Thread(() -> {
-            Minosoft.waitForStartup(); // wait until mappings are loaded
             if (desiredVersionNumber != -1) {
                 setVersion(Versions.getVersionById(desiredVersionNumber));
             }
@@ -157,9 +156,10 @@ public class Connection {
         }
 
         this.version = version;
-        this.customMapping.setVersion(version);
         try {
-            Versions.loadVersionMappings(version.getVersionId());
+            Versions.loadVersionMappings(version);
+            customMapping.setVersion(version);
+            this.customMapping.setParentMapping(version.getMapping());
         } catch (Exception e) {
             Log.printException(e, LogLevels.DEBUG);
             Log.fatal(String.format("Could not load mapping for %s. This version seems to be unsupported!", version));
@@ -243,7 +243,7 @@ public class Connection {
         return connectionStatusPing;
     }
 
-    public CustomMapping getMapping() {
+    public VersionMapping getMapping() {
         return customMapping;
     }
 
