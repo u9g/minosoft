@@ -40,11 +40,11 @@ public class TextureLoader {
     private float step;
     private int totalTextures = 0;
 
-    public TextureLoader(HashMap<String, HashSet<String>> textures, HashMap<String, HashMap<String, float[]>> tints) {
+    public TextureLoader(HashMap<String, HashSet<String>> textures, HashMap<String, float[]> tints) {
         textureCoordinates = new HashMap<>();
         images = new HashMap<>();
         for (String mod : textures.keySet()) {
-            loadTextures(mod, textures.get(mod), tints.get(mod));
+            loadTextures(mod, textures.get(mod), tints);
         }
         combineTextures();
         try {

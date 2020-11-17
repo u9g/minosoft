@@ -1,0 +1,17 @@
+{
+  "block/grass_block_top": [
+    0,
+    1,
+    0
+  ],
+  "block/grass": [
+    0,
+    1,
+    0
+  ],
+  "block/water_still": [
+    0,
+    0,
+    1
+  ]
+}

@@ -22,6 +22,7 @@ import de.bixilon.minosoft.data.mappings.blocks.Blocks;
 import de.bixilon.minosoft.data.mappings.particle.Particle;
 import de.bixilon.minosoft.data.mappings.statistics.Statistic;
 import de.bixilon.minosoft.protocol.protocol.ProtocolDefinition;
+import de.bixilon.minosoft.render.blockModels.BlockModelLoader;
 
 import java.util.HashSet;
 
@@ -41,6 +42,7 @@ public class VersionMapping {
     HashBiMap<Integer, Enchantment> enchantmentMap;
     HashBiMap<Integer, Particle> particleIdMap;
     HashBiMap<Integer, Statistic> statisticIdMap;
+    BlockModelLoader blockModelLoader;
 
     public VersionMapping(Version version) {
         this.version = version;
@@ -108,6 +110,10 @@ public class VersionMapping {
 
     public int getIdByEnchantment(Enchantment enchantment) {
         return enchantmentMap.inverse().get(enchantment);
+    }
+
+    public BlockModelLoader getBlockModelLoader() {
+        return blockModelLoader;
     }
 
     public void load(Mappings type, JsonObject data) {
@@ -191,6 +197,7 @@ public class VersionMapping {
                 }
             }
             case BLOCKS -> blockMap = Blocks.load("minecraft", data, version.getVersionId() < ProtocolDefinition.FLATTING_VERSION_ID);
+            case BLOCK_MODELS -> blockModelLoader = new BlockModelLoader(data);
         }
         loaded.add(type);
     }
@@ -209,6 +216,7 @@ public class VersionMapping {
         enchantmentMap.clear();
         particleIdMap.clear();
         statisticIdMap.clear();
+        blockModelLoader.clear();
     }
 
     public boolean isFullyLoaded() {

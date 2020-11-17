@@ -15,7 +15,6 @@ package de.bixilon.minosoft.render;
 
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.network.Connection;
-import de.bixilon.minosoft.render.blockModels.BlockModelLoader;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -35,7 +34,6 @@ public class GameWindow {
         new Thread(() -> {
             openGLWindow = new OpenGLWindow();
             openGLWindow.init();
-            BlockModelLoader.blockModelLoader = new BlockModelLoader();
             Log.info("Finished loading block models");
             latch.countDown();
             mainLoop();

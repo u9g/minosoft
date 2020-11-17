@@ -18,6 +18,7 @@ import de.bixilon.minosoft.data.mappings.blocks.Block;
 import de.bixilon.minosoft.data.mappings.particle.Particle;
 import de.bixilon.minosoft.data.mappings.statistics.Statistic;
 import de.bixilon.minosoft.data.mappings.versions.Version;
+import de.bixilon.minosoft.render.blockModels.BlockModelLoader;
 
 import java.util.HashMap;
 
@@ -38,6 +39,7 @@ public class CustomMapping {
     final HashBiMap<Integer, Statistic> statisticIdMap = HashBiMap.create();
     Version version;
     HashMap<String, HashBiMap<String, Dimension>> dimensionIdentifierMap = new HashMap<>();
+    BlockModelLoader blockModelLoader;
 
     public CustomMapping(Version version) {
         this.version = version;
@@ -193,6 +195,13 @@ public class CustomMapping {
         return version.getMapping().getIdByEnchantment(enchantment);
     }
 
+    public BlockModelLoader getBlockModelLoader() {
+        if (blockModelLoader != null) { // TODO: check models
+            return blockModelLoader;
+        }
+        return version.getMapping().getBlockModelLoader();
+    }
+
     public void unload() {
         motiveIdentifierMap.clear();
         particleIdentifierMap.clear();
@@ -208,6 +217,7 @@ public class CustomMapping {
         enchantmentMap.clear();
         particleIdMap.clear();
         statisticIdMap.clear();
+        blockModelLoader.clear();
     }
 
     public void setDimensions(HashMap<String, HashBiMap<String, Dimension>> dimensions) {

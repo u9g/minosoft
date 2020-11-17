@@ -1,17 +1,13 @@
-"""
-* Minosoft
-* Copyright (C) 2020 Lukas Eisenhauer
-*
-* This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-*
-*  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-*
-*  You should have received a copy of the GNU General Public License along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*
-*  This software is not affiliated with Mojang AB, the original developer of Minecraft.
-"""
-#  Minosoft
+#  minosoft
 #  Copyright (C) 2020 Moritz Zwerger
+#
+#  This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License along with this program.If not, see <https://www.gnu.org/licenses/>.
+#
+#  This software is not affiliated with Mojang AB, the original developer of Minecraft.
 #
 #  This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 #
@@ -21,27 +17,69 @@
 #
 #   This software is not affiliated with Mojang AB, the original developer of Minecraft.
 
-import json
-import os
+import \
+    io
+import \
+    requests
+import \
+    sys
+import \
+    ujson
+import \
+    zipfile
+
+if len(
+        sys.argv) != 2:
+    print(
+        "useage: %s <jar url>".format(
+            sys.argv[
+                0]))
+    sys.exit()
 
 blockStates = {}
 blockModels = {}
 
 modName = "minecraft"
 
-blockStatesDir = modName + "/blockstates/"
-blockModelsDir = modName + "/models/block/"
+print(
+    "Downloading minecraft jar...")
 
-print("loading blockstates...")
+request = requests.get(
+    sys.argv[
+        1],
+    allow_redirects=True)
+
+print(
+    "Unpacking minecraft jar...")
+zip = zipfile.ZipFile(
+    io.BytesIO(
+        request.content),
+    "r")
+
+files = zip.namelist()
+
+print(
+    "Loading blockstates...")
 
 
-def readRotations(apply, current):
+def readRotations(
+        apply,
+        current):
     if "x" in current:
-        apply["x"] = current["x"]
+        apply[
+            "x"] = \
+        current[
+            "x"]
     if "y" in current:
-        apply["y"] = current["y"]
+        apply[
+            "y"] = \
+        current[
+            "y"]
     if "z" in current:
-        apply["z"] = current["z"]
+        apply[
+            "z"] = \
+        current[
+            "z"]
 
 
 def readPart(part):
@@ -71,19 +109,38 @@ def readPart(part):
     return result
 
 
-for blockStateFile in os.listdir(blockStatesDir):
-    with open(blockStatesDir + blockStateFile, "r") as file:
-        data = json.load(file)
+for blockStateFile in [
+    f
+    for
+    f
+    in
+    files
+    if
+    f.startswith(
+            'assets/minecraft/blockstates/')]:
+    with zip.open(
+            blockStateFile) as file:
+        data = ujson.load(
+            file)
         block = {}
         if "variants" in data:
-            variants = data["variants"]
+            variants = \
+            data[
+                "variants"]
             states = []
             for variant in variants:
                 state = {}
                 properties = {}
                 if variant != "":
-                    for part in variant.split(","):
-                        properties[part.split("=")[0]] = part.split("=")[1]
+                    for part in variant.split(
+                            ","):
+                        properties[
+                            part.split(
+                                "=")[
+                                0]] = \
+                        part.split(
+                            "=")[
+                            1]
                 state["properties"] = properties
                 current = variants[variant]
                 if type(current) == type([]):
@@ -95,36 +152,61 @@ for blockStateFile in os.listdir(blockStatesDir):
                 "states": states
             }
         elif "multipart" in data:
-            parts = data["multipart"]
+            parts = \
+            data[
+                "multipart"]
             conditional = []
             for part in parts:
-                conditional.extend(readPart(part))
+                conditional.extend(
+                    readPart(
+                        part))
             block = {
                 "conditional": conditional
             }
-    blockStates[blockStateFile.split(".")[0]] = block
+    blockStates[
+        blockStateFile.split(
+            ".")[
+            0]] = block
 
-print("loading models...")
-for blockModelFile in os.listdir(blockModelsDir):
-    with open(blockModelsDir + blockModelFile, "r") as file:
-        data = json.load(file)
+print(
+    "Loading models...")
+for blockModelFile in [
+    f
+    for
+    f
+    in
+    files
+    if
+    f.startswith(
+            'assets/minecraft/models/block/')]:
+    with zip.open(
+            blockModelFile) as file:
+        data = ujson.load(
+            file)
+    blockModels[
+        blockModelFile.split(
+            ".")[
+            0]] = data
 
-    blockModels[blockModelFile.split(".")[0]] = data
-
-print("combining files...")
+print(
+    "Combining files...")
 finalJson = {
     "mod": modName,
     "blockStates": blockStates,
     "blockModels": blockModels,
-    "tinted_textures": {
-        "block/grass_block_top": [0, 1, 0],
-        "block/grass": [0, 1, 0],
-        "block/water_still": [0, 0, 1]
-    }
 }
 
-print("saving...")
-with open("blockModels.json", "w+") as file:
-    json.dump(finalJson, file)
+print(
+    "Saving...")
+with open(
+        "../../../AppData/Roaming/Minosoft/assets/assets/blockModels.json",
+        "w+") as file:
+    finalJson = ujson.dumps(
+        finalJson)
+    file.write(
+        finalJson.replace(
+            "minecraft:",
+            ""))
 
-print("finished succesfully")
+print(
+    "Finished succesfully")

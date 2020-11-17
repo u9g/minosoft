@@ -31,17 +31,16 @@ import java.util.HashSet;
 import java.util.Map;
 
 public class BlockModelLoader {
-    TextureLoader textureLoader;
-    public static BlockModelLoader blockModelLoader;
-    HashMap<String, HashMap<String, BlockModelInterface>> modelMap;
+    private final TextureLoader textureLoader;
+    private final HashMap<String, HashMap<String, BlockModelInterface>> modelMap;
 
-    public BlockModelLoader() {
+    public BlockModelLoader(JsonObject data) {
         modelMap = new HashMap<>();
         HashSet<JsonObject> mods = new HashSet<>();
-        HashMap<String, HashMap<String, float[]>> tints = new HashMap<>();
+        mods.add(data);
+        HashMap<String, float[]> tints = null;
         try {
-            //TODO: modding
-            mods.add(Util.readJsonAsset("mapping/blockModels.json"));
+            tints = readTints(Util.readJsonAsset("mapping/tints.json"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -52,17 +51,12 @@ public class BlockModelLoader {
                 modelMap.put(modName, new HashMap<>());
             }
             blockModels.put(modName, loadModels(mod));
-            tints.put(modName, readTints(mod));
         }
         textureLoader = new TextureLoader(getTextures(blockModels), tints);
         applyTextures(blockModels);
         for (JsonObject mod : mods) {
             loadBlocks(mod, blockModels.get(mod.get("mod").getAsString()));
         }
-    }
-
-    public static BlockModelLoader getInstance() {
-        return blockModelLoader;
     }
 
     private void loadBlocks(JsonObject mod, HashMap<String, HashSet<SubBlock>> blockModels) {
@@ -150,5 +144,9 @@ public class BlockModelLoader {
 
     public TextureLoader getTextureLoader() {
         return textureLoader;
+    }
+
+    public void clear() {
+        modelMap.clear();
     }
 }

@@ -40,6 +40,7 @@ public class Versions {
     static {
         mappingsHashMap.put("registries", Mappings.REGISTRIES);
         mappingsHashMap.put("blocks", Mappings.BLOCKS);
+        mappingsHashMap.put("blockModels", Mappings.BLOCK_MODELS);
     }
 
     public static Version getVersionById(int versionId) {
