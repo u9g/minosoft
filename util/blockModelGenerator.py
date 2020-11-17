@@ -1,5 +1,5 @@
 #  minosoft
-#  Copyright (C) 2020 Moritz Zwerger
+#  Copyright (C) 2020 Lukas Eisenhauer
 #
 #  This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 #
@@ -8,32 +8,17 @@
 #  You should have received a copy of the GNU General Public License along with this program.If not, see <https://www.gnu.org/licenses/>.
 #
 #  This software is not affiliated with Mojang AB, the original developer of Minecraft.
-#
-#  This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-#
-#   This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-#
-#   You should have received a copy of the GNU General Public License along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#
-#   This software is not affiliated with Mojang AB, the original developer of Minecraft.
 
-import \
-    io
-import \
-    requests
-import \
-    sys
-import \
-    ujson
-import \
-    zipfile
+import io
+import requests
+import sys
+import ujson
+import zipfile
 
-if len(
-        sys.argv) != 2:
-    print(
-        "useage: %s <jar url>".format(
-            sys.argv[
-                0]))
+if len(sys.argv) != 3:
+    print("Usage: %s <destination path> <jar url>".format(
+        sys.argv[
+            0]))
     sys.exit()
 
 blockStates = {}
@@ -44,10 +29,7 @@ modName = "minecraft"
 print(
     "Downloading minecraft jar...")
 
-request = requests.get(
-    sys.argv[
-        1],
-    allow_redirects=True)
+request = requests.get(sys.argv[2], allow_redirects=True)
 
 print(
     "Unpacking minecraft jar...")
@@ -68,18 +50,18 @@ def readRotations(
     if "x" in current:
         apply[
             "x"] = \
-        current[
-            "x"]
+            current[
+                "x"]
     if "y" in current:
         apply[
             "y"] = \
-        current[
-            "y"]
+            current[
+                "y"]
     if "z" in current:
         apply[
             "z"] = \
-        current[
-            "z"]
+            current[
+                "z"]
 
 
 def readPart(part):
@@ -117,7 +99,7 @@ for blockStateFile in [
     files
     if
     f.startswith(
-            'assets/minecraft/blockstates/')]:
+        'assets/minecraft/blockstates/')]:
     with zip.open(
             blockStateFile) as file:
         data = ujson.load(
@@ -125,8 +107,8 @@ for blockStateFile in [
         block = {}
         if "variants" in data:
             variants = \
-            data[
-                "variants"]
+                data[
+                    "variants"]
             states = []
             for variant in variants:
                 state = {}
@@ -138,9 +120,9 @@ for blockStateFile in [
                             part.split(
                                 "=")[
                                 0]] = \
-                        part.split(
-                            "=")[
-                            1]
+                            part.split(
+                                "=")[
+                                1]
                 state["properties"] = properties
                 current = variants[variant]
                 if type(current) == type([]):
@@ -153,8 +135,8 @@ for blockStateFile in [
             }
         elif "multipart" in data:
             parts = \
-            data[
-                "multipart"]
+                data[
+                    "multipart"]
             conditional = []
             for part in parts:
                 conditional.extend(
@@ -178,7 +160,7 @@ for blockModelFile in [
     files
     if
     f.startswith(
-            'assets/minecraft/models/block/')]:
+        'assets/minecraft/models/block/')]:
     with zip.open(
             blockModelFile) as file:
         data = ujson.load(
@@ -196,17 +178,10 @@ finalJson = {
     "blockModels": blockModels,
 }
 
-print(
-    "Saving...")
-with open(
-        "../../../AppData/Roaming/Minosoft/assets/assets/blockModels.json",
-        "w+") as file:
-    finalJson = ujson.dumps(
-        finalJson)
-    file.write(
-        finalJson.replace(
-            "minecraft:",
-            ""))
+print("Saving...")
+with open(sys.argv[1], "w+") as file:
+    finalJson = ujson.dumps(finalJson)
+    file.write(finalJson.replace("minecraft:", ""))
 
 print(
-    "Finished succesfully")
+    "Finished successfully")

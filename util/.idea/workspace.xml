@@ -2,13 +2,16 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="34edf7e9-254a-4d39-b77b-418e1a3041e3" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mappingsDownloader.py" beforeDir="false" afterPath="$PROJECT_DIR$/mappingsDownloader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/de/bixilon/minosoft/data/mappings/versions/VersionMapping.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/de/bixilon/minosoft/data/mappings/versions/VersionMapping.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/de/bixilon/minosoft/render/WorldRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/de/bixilon/minosoft/render/WorldRenderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/de/bixilon/minosoft/render/blockModels/BlockModelLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/de/bixilon/minosoft/render/blockModels/BlockModelLoader.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/de/bixilon/minosoft/render/blockModels/subBlocks/SubBlock.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/de/bixilon/minosoft/render/blockModels/subBlocks/SubBlock.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/de/bixilon/minosoft/render/movement/CollisionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/de/bixilon/minosoft/render/movement/CollisionHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/de/bixilon/minosoft/render/texture/InFaceUV.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/de/bixilon/minosoft/render/texture/InFaceUV.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/main/java/de/bixilon/minosoft/render/utility/AdditionalMath.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/de/bixilon/minosoft/render/utility/AdditionalMath.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/blockModelCombinder.py" beforeDir="false" afterPath="$PROJECT_DIR$/blockModelGenerator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/version_mappings_generator.py" beforeDir="false" afterPath="$PROJECT_DIR$/version_mappings_generator.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,6 +46,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="android.sdk.path" value="/opt/AndroidSDK" />
     <property name="aspect.path.notification.shown" value="true" />
@@ -52,7 +56,7 @@
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="settings.editor.selected.configurable" value="AndroidSdkUpdater" />
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Python.version_mappings_generator">
     <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
       <option name="arquillianRunConfiguration">
         <value>
@@ -86,13 +90,38 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="version_mappings_generator" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="util" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/version_mappings_generator.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.version_mappings_generator" />
         <item itemvalue="Python.mappingsDownloader" />
       </list>
     </recent_temporary>
   </component>
-  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="SpellCheckerSettings" BundledDictionaries="0" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" Dictionaries="0" CorrectionsLimit="5" DefaultDictionary="application-level" UseSingleDictionary="true" />
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="34edf7e9-254a-4d39-b77b-418e1a3041e3" name="Default Changelist" comment="" />
@@ -107,6 +136,17 @@
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="WindowStateProjectService">
     <state x="444" y="1168" key="#Project_Structure" timestamp="1605462076420">
       <screen x="0" y="1050" width="1920" height="1080" />
@@ -116,28 +156,60 @@
       <screen x="0" y="1050" width="1920" height="1080" />
     </state>
     <state x="419" y="1248" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.40.1680.1010/0.1050.1920.1080/1680.26.1280.1024@0.1050.1920.1080" timestamp="1605462499568" />
-    <state width="1874" height="281" key="GridCell.Tab.0.bottom" timestamp="1605462580595">
-      <screen x="0" y="1050" width="1920" height="1080" />
+    <state width="1259" height="329" key="GridCell.Tab.0.bottom" timestamp="1605648137613">
+      <screen x="0" y="0" width="1280" height="994" />
     </state>
+    <state width="1259" height="329" key="GridCell.Tab.0.bottom/-1360.107.1360.738/0.0.1280.994@0.0.1280.994" timestamp="1605648137613" />
     <state width="1874" height="281" key="GridCell.Tab.0.bottom/0.40.1680.1010/0.1050.1920.1080/1680.26.1280.1024@0.1050.1920.1080" timestamp="1605462580595" />
-    <state width="1874" height="281" key="GridCell.Tab.0.center" timestamp="1605462580595">
-      <screen x="0" y="1050" width="1920" height="1080" />
+    <state width="1259" height="329" key="GridCell.Tab.0.center" timestamp="1605648137613">
+      <screen x="0" y="0" width="1280" height="994" />
     </state>
+    <state width="1259" height="329" key="GridCell.Tab.0.center/-1360.107.1360.738/0.0.1280.994@0.0.1280.994" timestamp="1605648137613" />
     <state width="1874" height="281" key="GridCell.Tab.0.center/0.40.1680.1010/0.1050.1920.1080/1680.26.1280.1024@0.1050.1920.1080" timestamp="1605462580595" />
-    <state width="1874" height="281" key="GridCell.Tab.0.left" timestamp="1605462580595">
-      <screen x="0" y="1050" width="1920" height="1080" />
+    <state width="1259" height="329" key="GridCell.Tab.0.left" timestamp="1605648137613">
+      <screen x="0" y="0" width="1280" height="994" />
     </state>
+    <state width="1259" height="329" key="GridCell.Tab.0.left/-1360.107.1360.738/0.0.1280.994@0.0.1280.994" timestamp="1605648137613" />
     <state width="1874" height="281" key="GridCell.Tab.0.left/0.40.1680.1010/0.1050.1920.1080/1680.26.1280.1024@0.1050.1920.1080" timestamp="1605462580595" />
-    <state width="1874" height="281" key="GridCell.Tab.0.right" timestamp="1605462580595">
-      <screen x="0" y="1050" width="1920" height="1080" />
+    <state width="1259" height="329" key="GridCell.Tab.0.right" timestamp="1605648137613">
+      <screen x="0" y="0" width="1280" height="994" />
     </state>
+    <state width="1259" height="329" key="GridCell.Tab.0.right/-1360.107.1360.738/0.0.1280.994@0.0.1280.994" timestamp="1605648137613" />
     <state width="1874" height="281" key="GridCell.Tab.0.right/0.40.1680.1010/0.1050.1920.1080/1680.26.1280.1024@0.1050.1920.1080" timestamp="1605462580595" />
+    <state width="1259" height="329" key="GridCell.Tab.1.bottom" timestamp="1605648130133">
+      <screen x="0" y="0" width="1280" height="994" />
+    </state>
+    <state width="1259" height="329" key="GridCell.Tab.1.bottom/-1360.107.1360.738/0.0.1280.994@0.0.1280.994" timestamp="1605648130133" />
+    <state width="1259" height="329" key="GridCell.Tab.1.center" timestamp="1605648130133">
+      <screen x="0" y="0" width="1280" height="994" />
+    </state>
+    <state width="1259" height="329" key="GridCell.Tab.1.center/-1360.107.1360.738/0.0.1280.994@0.0.1280.994" timestamp="1605648130133" />
+    <state width="1259" height="329" key="GridCell.Tab.1.left" timestamp="1605648130133">
+      <screen x="0" y="0" width="1280" height="994" />
+    </state>
+    <state width="1259" height="329" key="GridCell.Tab.1.left/-1360.107.1360.738/0.0.1280.994@0.0.1280.994" timestamp="1605648130133" />
+    <state width="1259" height="329" key="GridCell.Tab.1.right" timestamp="1605648130133">
+      <screen x="0" y="0" width="1280" height="994" />
+    </state>
+    <state width="1259" height="329" key="GridCell.Tab.1.right/-1360.107.1360.738/0.0.1280.994@0.0.1280.994" timestamp="1605648130133" />
+    <state x="177" y="226" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2" timestamp="1605647956189">
+      <screen x="0" y="0" width="1280" height="994" />
+    </state>
+    <state x="177" y="226" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2/-1360.107.1360.738/0.0.1280.994@0.0.1280.994" timestamp="1605647956189" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/version_mappings_generator.py</url>
+          <line>281</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
     <select />
-  </component>
-  <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/util$mappingsDownloader.coverage" NAME="mappingsDownloader Coverage Results" MODIFIED="1605462580588" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

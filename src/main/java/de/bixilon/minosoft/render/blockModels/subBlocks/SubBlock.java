@@ -26,7 +26,6 @@ import java.util.HashSet;
 import java.util.Map;
 
 public class SubBlock {
-    private final HashMap<FaceOrientation, Float> textureCoordinates;
     private HashMap<FaceOrientation, String> textures;
     private final HashMap<FaceOrientation, Integer> textureRotations;
     private final boolean[] full;
@@ -38,7 +37,6 @@ public class SubBlock {
         uv = new HashMap<>();
         textures = new HashMap<>();
         textureRotations = new HashMap<>();
-        textureCoordinates = new HashMap<>();
 
         SubBlockPosition from = new SubBlockPosition(json.getAsJsonArray("from"));
         SubBlockPosition to = new SubBlockPosition(json.getAsJsonArray("to"));
@@ -57,7 +55,6 @@ public class SubBlock {
     }
 
     public SubBlock(SubBlock subBlock) {
-        textureCoordinates = subBlock.textureCoordinates;
         textureRotations = subBlock.textureRotations;
         uv = subBlock.uv;
         cuboid = new Cuboid(subBlock.cuboid);
@@ -94,7 +91,7 @@ public class SubBlock {
             if (texture == -1) {
                 continue;
             }
-            textureCoordinates.put(entry.getKey(), texture);
+            uv.get(entry.getKey()).prepare(texture, loader);
         }
         // clean up
         textures.clear();
@@ -132,13 +129,12 @@ public class SubBlock {
     }
 
     private ArrayFloatList prepareFace(FaceOrientation faceDirection, BlockPosition position) {
-        if (!textureCoordinates.containsKey(faceDirection)) {
+        if (! uv.get(faceDirection).exists()) {
             return null;
         }
         ArrayFloatList result = new ArrayFloatList();
         SubBlockPosition[] positions = cuboid.getFacePositions(faceDirection);
         InFaceUV inFaceUV = uv.get(faceDirection);
-        inFaceUV.prepare(textureCoordinates.get(faceDirection));
         int rotation = textureRotations.get(faceDirection);
         for (int i = 0; i < positions.length; i++) {
             result.addAll(inFaceUV.getFloats(i + rotation));

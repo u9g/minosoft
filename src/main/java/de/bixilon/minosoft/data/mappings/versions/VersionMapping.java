@@ -27,8 +27,13 @@ import de.bixilon.minosoft.data.mappings.blocks.Block;
 import de.bixilon.minosoft.data.mappings.blocks.Blocks;
 import de.bixilon.minosoft.data.mappings.particle.Particle;
 import de.bixilon.minosoft.data.mappings.statistics.Statistic;
+import de.bixilon.minosoft.data.world.BlockPosition;
 import de.bixilon.minosoft.protocol.protocol.ProtocolDefinition;
-import javafx.util.Pair;
+import de.bixilon.minosoft.render.blockModels.BlockModelInterface;
+import de.bixilon.minosoft.render.blockModels.BlockModelLoader;
+import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
+import de.bixilon.minosoft.util.Pair;
+import org.apache.commons.collections.primitives.ArrayFloatList;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -55,6 +60,8 @@ public class VersionMapping {
     private HashMap<EntityMetaDataFields, Integer> entityMetaIndexMap;
     private HashMap<String, Pair<String, Integer>> entityMetaIndexOffsetParentMapping;
     private HashBiMap<Integer, Class<? extends Entity>> entityIdClassMap;
+    private HashMap<String, HashMap<String, BlockModelInterface>> modelMap;
+    private Integer blockTextureId; // OpenGL texture id for all block texture
 
     public VersionMapping(Version version) {
         this.version = version;
@@ -276,6 +283,45 @@ public class VersionMapping {
         return item;
     }
 
+    public BlockModelInterface getBlockModel(Block block) {
+        if (parentMapping != null) {
+            BlockModelInterface blockModelInterface = parentMapping.getBlockModel(block);
+            if (blockModelInterface != null) {
+                return blockModelInterface;
+            }
+        }
+        BlockModelInterface model = modelMap.get(block.getMod()).get(block.getIdentifier());
+        if (model == null) {
+            throw new NullPointerException(String.format("The block model for the following block could not be found: %s", block));
+        }
+        return model;
+    }
+
+    public boolean isBlockFull(Block block, FaceOrientation orientation) {
+        if (block == null || block.equals(Blocks.nullBlock)) {
+            return false;
+        }
+        return getBlockModel(block).full(block, orientation);
+    }
+
+    public boolean isBlockFull(Block block) {
+        return block != null && !block.equals(Blocks.nullBlock);
+    }
+
+    public ArrayFloatList prepareBlock(Block block, HashSet<FaceOrientation> facesToDraw, BlockPosition position) {
+        return getBlockModel(block).prepare(facesToDraw, position, block);
+    }
+
+    public Integer getBlockTextureId() {
+        if (parentMapping != null) {
+            Integer blockTextureId = parentMapping.getBlockTextureId();
+            if (blockTextureId != null) {
+                return blockTextureId;
+            }
+        }
+        return blockTextureId;
+    }
+
 
     public void load(Mappings type, @Nullable JsonObject data, Version version) {
         switch (type) {
@@ -404,6 +450,21 @@ public class VersionMapping {
                     }
                 }
             }
+            case BLOCK_MODELS -> {
+                if (!version.isFlattened() && version.getVersionId() != ProtocolDefinition.PRE_FLATTENING_VERSION_ID) {
+                    // clone all values
+                    modelMap = Versions.PRE_FLATTENING_MAPPING.modelMap;
+                    break;
+                }
+
+                if (data == null) {
+                    modelMap = new HashMap<>();
+                    break;
+                }
+                Pair<HashMap<String, HashMap<String, BlockModelInterface>>, Integer> pair = BlockModelLoader.load(data);
+                modelMap = pair.key;
+                blockTextureId = pair.value;
+            }
         }
         loaded.add(type);
     }
@@ -428,7 +489,7 @@ public class VersionMapping {
                 loadEntityMapping(mod, parent, fullModData);
             }
 
-            metaDataIndexOffset += entityMetaIndexOffsetParentMapping.get(parent).getValue();
+            metaDataIndexOffset += entityMetaIndexOffsetParentMapping.get(parent).value;
         }
         // meta data index
         if (data.has("data")) {

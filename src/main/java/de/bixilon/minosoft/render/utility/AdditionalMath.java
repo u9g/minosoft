@@ -32,10 +32,10 @@ public class AdditionalMath {
         return result;
     }
 
-    public static int betterRound(double x) {
-        if (x >= 0) {
-            return (int) x;
+    public static int betterRound(double value) {
+        if (value >= 0) {
+            return (int) value;
         }
-        return (int) x - 1;
+        return (int) value - 1;
     }
 }

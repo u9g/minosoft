@@ -21,7 +21,7 @@ import org.apache.commons.collections.primitives.ArrayFloatList;
 public class InFaceUV {
     public final int u1, v1, u2, v2;
 
-    public float realU1, realV1, realU2, realV2;
+    public float realU1 = -1, realV1, realU2, realV2;
 
     public InFaceUV(JsonArray json) {
         u1 = json.get(0).getAsInt();
@@ -35,9 +35,9 @@ public class InFaceUV {
         u2 = v2 = 16;
     }
 
-    public void prepare(float texture) {
-        realU1 = texture + u1 * BlockModelLoader.getInstance().getTextureLoader().getStep() / RenderConstants.TEXTURE_PACK_RESOLUTION;
-        realU2 = texture + u2 * BlockModelLoader.getInstance().getTextureLoader().getStep() / RenderConstants.TEXTURE_PACK_RESOLUTION;
+    public void prepare(float texture, TextureLoader textureLoader) {
+        realU1 = texture + u1 * textureLoader.getStep() / RenderConstants.TEXTURE_PACK_RESOLUTION;
+        realU2 = texture + u2 * textureLoader.getStep() / RenderConstants.TEXTURE_PACK_RESOLUTION;
         realV1 = (float) v1 / RenderConstants.TEXTURE_PACK_RESOLUTION;
         realV2 = (float) v2 / RenderConstants.TEXTURE_PACK_RESOLUTION;
     }
@@ -70,5 +70,9 @@ public class InFaceUV {
             }
         }
         return result;
+    }
+
+    public boolean exists() {
+        return realU1 == -1;
     }
 }

@@ -157,12 +157,12 @@ public class WorldRenderer {
                         yield nibbleBlocks.get(new InChunkSectionLocation(location.getX(), location.getY(), location.getZ() + 1));
                     }
                 };
-                if (dependedBlock == null || !BlockModelLoader.getInstance().isFull(dependedBlock, FaceOrientation.inverse(orientation))) {
+                if (dependedBlock == null || !connection.getMapping().isBlockFull(dependedBlock, FaceOrientation.inverse(orientation))) {
                     facesToDraw.add(orientation);
                 }
             }
             if (!facesToDraw.isEmpty()) {
-                nibbleMap.addAll(BlockModelLoader.getInstance().prepare(block, facesToDraw, new BlockPosition(chunkLocation, sectionHeight, location)));
+                nibbleMap.addAll(connection.getMapping().prepareBlock(block, facesToDraw, new BlockPosition(chunkLocation, sectionHeight, location)));
             }
         });
         return nibbleMap;
@@ -171,7 +171,7 @@ public class WorldRenderer {
 
     public void draw() {
         glPushMatrix();
-        glBindTexture(GL_TEXTURE_2D, BlockModelLoader.getInstance().getTextureLoader().getTextureID());
+        glBindTexture(GL_TEXTURE_2D, connection.getMapping().getBlockTextureId());
         glBegin(GL_QUADS);
         for (ConcurrentHashMap<Byte, ArrayFloatList> chunk : faces.values()) {
             for (ArrayFloatList nibble : chunk.values()) {

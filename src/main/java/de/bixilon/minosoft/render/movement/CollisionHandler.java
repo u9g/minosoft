@@ -13,6 +13,7 @@
 
 package de.bixilon.minosoft.render.movement;
 
+import de.bixilon.minosoft.data.mappings.versions.VersionMapping;
 import de.bixilon.minosoft.data.world.BlockPosition;
 import de.bixilon.minosoft.data.world.World;
 import de.bixilon.minosoft.protocol.network.Connection;
@@ -23,10 +24,12 @@ import de.bixilon.minosoft.render.utility.Vec3;
 public class CollisionHandler {
     private final World world;
     private final PlayerController controller;
+    private final VersionMapping versionMapping;
 
     public CollisionHandler(Connection connection) {
         world = connection.getPlayer().getWorld();
         this.controller = connection.getRenderProperties().getController();
+        this.versionMapping = connection.getMapping();
     }
 
     public void handleCollisions() {
@@ -90,16 +93,14 @@ public class CollisionHandler {
         float width = controller.getPlayerWidth();
 
         int[] xPositions = AdditionalMath.valuesBetween(AdditionalMath.betterRound(testPosition.x + width), AdditionalMath.betterRound(testPosition.x - width));
-
         int[] yPositions = AdditionalMath.valuesBetween(AdditionalMath.betterRound(testPosition.y), AdditionalMath.betterRound(testPosition.y + controller.getPlayerHeight()));
-
         int[] zPositions = AdditionalMath.valuesBetween(AdditionalMath.betterRound(testPosition.z + width), AdditionalMath.betterRound(testPosition.z - width));
 
         for (int xPos : xPositions) {
             for (int yPos : yPositions) {
                 for (int zPos : zPositions) {
                     BlockPosition pos = new BlockPosition(xPos, (short) yPos, zPos);
-                    if (BlockModelLoader.getInstance().isFull(world.getBlock(pos))) {
+                    if (versionMapping.isBlockFull(world.getBlock(pos))) {
                         return false;
                     }
                 }

@@ -22,6 +22,7 @@ import de.bixilon.minosoft.data.world.BlockPosition;
 import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlock;
 import de.bixilon.minosoft.render.texture.TextureLoader;
+import de.bixilon.minosoft.util.Pair;
 import de.bixilon.minosoft.util.Util;
 import org.apache.commons.collections.primitives.ArrayFloatList;
 
@@ -31,11 +32,13 @@ import java.util.HashSet;
 import java.util.Map;
 
 public class BlockModelLoader {
-    private final TextureLoader textureLoader;
-    private final HashMap<String, HashMap<String, BlockModelInterface>> modelMap;
-
-    public BlockModelLoader(JsonObject data) {
-        modelMap = new HashMap<>();
+    /**
+     *
+     * @param data json file which describes all block models
+     * @return blockModels, textureID
+     */
+    public static Pair<HashMap<String, HashMap<String, BlockModelInterface>>, Integer> load(JsonObject data) {
+        HashMap<String, HashMap<String, BlockModelInterface>> modelMap = new HashMap<>();
         HashSet<JsonObject> mods = new HashSet<>();
         mods.add(data);
         HashMap<String, float[]> tints = null;
@@ -52,14 +55,15 @@ public class BlockModelLoader {
             }
             blockModels.put(modName, loadModels(mod));
         }
-        textureLoader = new TextureLoader(getTextures(blockModels), tints);
-        applyTextures(blockModels);
+        TextureLoader textureLoader = new TextureLoader(getTextures(blockModels), tints);
+        applyTextures(modelMap, blockModels, textureLoader);
         for (JsonObject mod : mods) {
-            loadBlocks(mod, blockModels.get(mod.get("mod").getAsString()));
+            loadBlocks(modelMap, mod, blockModels.get(mod.get("mod").getAsString()));
         }
+        return new Pair<>(modelMap, textureLoader.getTextureID());
     }
 
-    private void loadBlocks(JsonObject mod, HashMap<String, HashSet<SubBlock>> blockModels) {
+    private static void loadBlocks(HashMap<String, HashMap<String, BlockModelInterface>> modelMap, JsonObject mod, HashMap<String, HashSet<SubBlock>> blockModels) {
         for (Map.Entry<String, JsonElement> blockEntry : mod.get("blockStates").getAsJsonObject().entrySet()) {
             JsonObject block = blockEntry.getValue().getAsJsonObject();
             if (block.has("states")) {
@@ -71,7 +75,7 @@ public class BlockModelLoader {
         }
     }
 
-    private HashMap<String, HashSet<SubBlock>> loadModels(JsonObject mod) {
+    private static HashMap<String, HashSet<SubBlock>> loadModels(JsonObject mod) {
         HashMap<String, HashSet<SubBlock>> modMap = new HashMap<>();
         for (Map.Entry<String, JsonElement> block : mod.getAsJsonObject("blockModels").entrySet()) {
             modMap.put(block.getKey(), BlockModelInterface.load(block.getValue().getAsJsonObject(), mod.getAsJsonObject("blockModels")));
@@ -79,7 +83,7 @@ public class BlockModelLoader {
         return modMap;
     }
 
-    public HashMap<String, HashSet<String>> getTextures(HashMap<String, HashMap<String, HashSet<SubBlock>>> blockModels) {
+    public static HashMap<String, HashSet<String>> getTextures(HashMap<String, HashMap<String, HashSet<SubBlock>>> blockModels) {
         HashMap<String, HashSet<String>> textures = new HashMap<>();
         for (Map.Entry<String, HashMap<String, HashSet<SubBlock>>> mod : blockModels.entrySet()) {
             HashSet<String> modTextures = new HashSet<>();
@@ -93,7 +97,7 @@ public class BlockModelLoader {
         return textures;
     }
 
-    public void applyTextures(HashMap<String, HashMap<String, HashSet<SubBlock>>> blockModels) {
+    public static void applyTextures(HashMap<String, HashMap<String, BlockModelInterface>> modelMap, HashMap<String, HashMap<String, HashSet<SubBlock>>> blockModels, TextureLoader textureLoader) {
         for (Map.Entry<String, HashMap<String, HashSet<SubBlock>>> mod : blockModels.entrySet()) {
             for (Map.Entry<String, HashSet<SubBlock>> block : mod.getValue().entrySet()) {
                 for (SubBlock subBlock : block.getValue()) {
@@ -103,7 +107,7 @@ public class BlockModelLoader {
         }
     }
 
-    private HashMap<String, float[]> readTints(JsonObject json) {
+    private static HashMap<String, float[]> readTints(JsonObject json) {
         HashMap<String, float[]> result = new HashMap<>();
         if (json.has("tinted_textures")) {
             JsonObject textures = json.get("tinted_textures").getAsJsonObject();
@@ -117,36 +121,5 @@ public class BlockModelLoader {
             }
         }
         return result;
-    }
-
-    public BlockModelInterface getBlockModel(Block block) {
-        BlockModelInterface model = modelMap.get(block.getMod()).get(block.getIdentifier());
-        if (model == null) {
-            throw new RuntimeException(String.format("Block model for could not be found: %s", block));
-        }
-        return model;
-    }
-
-    public boolean isFull(Block block, FaceOrientation orientation) {
-        if (block == null || block.equals(Blocks.nullBlock)) {
-            return false;
-        }
-        return getBlockModel(block).full(block, orientation);
-    }
-
-    public boolean isFull(Block block) {
-        return block != null && !block.equals(Blocks.nullBlock);
-    }
-
-    public ArrayFloatList prepare(Block block, HashSet<FaceOrientation> facesToDraw, BlockPosition position) {
-        return getBlockModel(block).prepare(facesToDraw, position, block);
-    }
-
-    public TextureLoader getTextureLoader() {
-        return textureLoader;
-    }
-
-    public void clear() {
-        modelMap.clear();
     }
 }
