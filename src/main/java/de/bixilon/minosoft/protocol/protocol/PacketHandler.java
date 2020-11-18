@@ -25,6 +25,7 @@ import de.bixilon.minosoft.data.mappings.versions.Version;
 import de.bixilon.minosoft.data.mappings.versions.Versions;
 import de.bixilon.minosoft.data.player.PingBars;
 import de.bixilon.minosoft.data.player.PlayerListItem;
+import de.bixilon.minosoft.data.player.PlayerListItemBulk;
 import de.bixilon.minosoft.data.scoreboard.ScoreboardObjective;
 import de.bixilon.minosoft.data.scoreboard.ScoreboardScore;
 import de.bixilon.minosoft.data.scoreboard.Team;
@@ -130,48 +131,50 @@ public class PacketHandler {
         if (connection.fireEvent(new PlayerListItemChangeEvent(connection, pkg))) {
             return;
         }
-        pkg.getPlayerList().forEach((bulk) -> {
+        for (PlayerListItemBulk bulk : pkg.getPlayerList()) {
+            PlayerListItem item = connection.getPlayer().getPlayerList().get(bulk.getUUID());
+            if (item == null && !bulk.isLegacy()) {
+                // Aaaaah. Fuck this shit. The server sends us bullshit!
+                continue;
+            }
             switch (bulk.getAction()) {
                 case ADD -> connection.getPlayer().getPlayerList().put(bulk.getUUID(), new PlayerListItem(bulk.getUUID(), bulk.getName(), bulk.getPing(), bulk.getGameMode(), bulk.getDisplayName(), bulk.getProperties()));
                 case UPDATE_LATENCY -> {
                     if (bulk.isLegacy()) {
                         //add or update
-                        PlayerListItem playerListItem = connection.getPlayer().getPlayerListItem(bulk.getName());
-                        if (playerListItem == null) {
+                        if (item == null) {
                             // create
                             UUID uuid = UUID.randomUUID();
                             connection.getPlayer().getPlayerList().put(uuid, new PlayerListItem(uuid, bulk.getName(), bulk.getPing()));
                         } else {
                             // update ping
-                            playerListItem.setPing(bulk.getPing());
+                            item.setPing(bulk.getPing());
                         }
-                        return;
+                        continue;
                     }
                     connection.getPlayer().getPlayerList().get(bulk.getUUID()).setPing(bulk.getPing());
                 }
                 case REMOVE_PLAYER -> {
                     if (bulk.isLegacy()) {
-                        PlayerListItem playerListItem = connection.getPlayer().getPlayerListItem(bulk.getName());
-                        if (playerListItem == null) {
+                        if (item == null) {
                             // not initialized yet
-                            return;
+                            continue;
                         }
                         connection.getPlayer().getPlayerList().remove(connection.getPlayer().getPlayerListItem(bulk.getName()).getUUID());
-                        return;
+                        continue;
                     }
                     connection.getPlayer().getPlayerList().remove(bulk.getUUID());
                 }
-                case UPDATE_GAMEMODE -> connection.getPlayer().getPlayerList().get(bulk.getUUID()).setGameMode(bulk.getGameMode());
-                case UPDATE_DISPLAY_NAME -> connection.getPlayer().getPlayerList().get(bulk.getUUID()).setDisplayName(bulk.getDisplayName());
+                case UPDATE_GAMEMODE -> item.setGameMode(bulk.getGameMode());
+                case UPDATE_DISPLAY_NAME -> item.setDisplayName(bulk.getDisplayName());
             }
-        });
+        }
     }
 
     public void handle(PacketTimeUpdate pkg) {
         if (connection.fireEvent(new TimeChangeEvent(connection, pkg))) {
             return;
         }
-
     }
 
     public void handle(PacketKeepAlive pkg) {
@@ -290,16 +293,31 @@ public class PacketHandler {
     }
 
     public void handle(PacketEntityMovementAndRotation pkg) {
-        connection.getPlayer().getWorld().getEntity(pkg.getEntityId()).setLocation(pkg.getRelativeLocation());
-        connection.getPlayer().getWorld().getEntity(pkg.getEntityId()).setRotation(pkg.getYaw(), pkg.getPitch());
+        Entity entity = connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
+        if(entity == null){
+            // thanks mojang
+            return;
+        }
+        entity.setLocation(pkg.getRelativeLocation());
+        entity.setRotation(pkg.getYaw(), pkg.getPitch());
     }
 
     public void handle(PacketEntityMovement pkg) {
-        connection.getPlayer().getWorld().getEntity(pkg.getEntityId()).setLocation(pkg.getRelativeLocation());
+        Entity entity = connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
+        if(entity == null){
+            // thanks mojang
+            return;
+        }
+        entity.setLocation(pkg.getRelativeLocation());
     }
 
     public void handle(PacketEntityRotation pkg) {
-        connection.getPlayer().getWorld().getEntity(pkg.getEntityId()).setRotation(pkg.getYaw(), pkg.getPitch());
+        Entity entity = connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
+        if(entity == null){
+            // thanks mojang
+            return;
+        }
+       entity.setRotation(pkg.getYaw(), pkg.getPitch());
     }
 
     public void handle(PacketDestroyEntity pkg) {
@@ -318,6 +336,10 @@ public class PacketHandler {
         } else {
             entity = connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
         }
+        if(entity == null){
+            // thanks mojang
+            return;
+        }
         connection.getVelocityHandler().handleVelocity(entity, pkg.getVelocity());
     }
 
@@ -329,12 +351,22 @@ public class PacketHandler {
     }
 
     public void handle(PacketEntityTeleport pkg) {
-        connection.getPlayer().getWorld().getEntity(pkg.getEntityId()).setLocation(pkg.getRelativeLocation());
-        connection.getPlayer().getWorld().getEntity(pkg.getEntityId()).setRotation(pkg.getYaw(), pkg.getPitch());
+        Entity entity = connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
+        if(entity == null){
+            // thanks mojang
+            return;
+        }
+        entity.setLocation(pkg.getRelativeLocation());
+        entity.setRotation(pkg.getYaw(), pkg.getPitch());
     }
 
     public void handle(PacketEntityHeadRotation pkg) {
-        connection.getPlayer().getWorld().getEntity(pkg.getEntityId()).setHeadRotation(pkg.getHeadYaw());
+        Entity entity = connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
+        if(entity == null){
+            // thanks mojang
+            return;
+        }
+        entity.setHeadRotation(pkg.getHeadYaw());
     }
 
     public void handle(PacketWindowItems pkg) {
@@ -344,31 +376,47 @@ public class PacketHandler {
     }
 
     public void handle(PacketEntityMetadata pkg) {
+        Entity entity;
         if (pkg.getEntityId() == connection.getPlayer().getEntity().getEntityId()) {
             // our own meta data...set it
-            connection.getPlayer().getEntity().setMetaData(pkg.getEntityData());
+            entity = connection.getPlayer().getEntity();
+        } else {
+            entity = connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
+        }
+        if(entity == null){
+            // thanks mojang
             return;
         }
-        connection.getPlayer().getWorld().getEntity(pkg.getEntityId()).setMetaData(pkg.getEntityData());
+        entity.setMetaData(pkg.getEntityData());
     }
 
     public void handle(PacketEntityEquipment pkg) {
         connection.fireEvent(new EntityEquipmentChangeEvent(connection, pkg));
 
-        connection.getPlayer().getWorld().getEntity(pkg.getEntityId()).setEquipment(pkg.getSlots());
+        Entity entity = connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
+        if(entity == null){
+            // thanks mojang
+            return;
+        }
+        entity.setEquipment(pkg.getSlots());
     }
 
     public void handle(PacketBlockChange pkg) {
+        Chunk chunk = connection.getPlayer().getWorld().getChunk(pkg.getPosition().getChunkLocation());
+        if(chunk == null){
+            // thanks mojang
+            return;
+        }
         connection.fireEvent(new BlockChangeEvent(connection, pkg));
 
-        connection.getPlayer().getWorld().getChunk(pkg.getPosition().getChunkLocation()).setBlock(pkg.getPosition().getInChunkLocation(), pkg.getBlock());
+        chunk.setBlock(pkg.getPosition().getInChunkLocation(), pkg.getBlock());
         connection.getRenderProperties().getRenderer().queueBlock(pkg.getPosition(), pkg.getBlock());
     }
 
     public void handle(PacketMultiBlockChange pkg) {
         Chunk chunk = connection.getPlayer().getWorld().getChunk(pkg.getLocation());
         if (chunk == null) {
-            Log.warn(String.format("Server tried to change blocks in unloaded chunks! (location=%s)", pkg.getLocation()));
+            // thanks mojang
             return;
         }
         connection.fireEvent(new MultiBlockChangeEvent(connection, pkg));
@@ -424,21 +472,33 @@ public class PacketHandler {
     }
 
     public void handle(PacketEntityEffect pkg) {
+        Entity entity;
         if (pkg.getEntityId() == connection.getPlayer().getEntity().getEntityId()) {
             // that's us!
-            connection.getPlayer().getEntity().addEffect(pkg.getEffect());
+            entity = connection.getPlayer().getEntity();
+        } else {
+            entity = connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
+        }
+        if(entity == null){
+            // thanks mojang
             return;
         }
-        connection.getPlayer().getWorld().getEntity(pkg.getEntityId()).addEffect(pkg.getEffect());
+        entity.addEffect(pkg.getEffect());
     }
 
     public void handle(PacketRemoveEntityEffect pkg) {
+        Entity entity;
         if (pkg.getEntityId() == connection.getPlayer().getEntity().getEntityId()) {
             // that's us!
-            connection.getPlayer().getEntity().removeEffect(pkg.getEffect());
+            entity = connection.getPlayer().getEntity();
+        } else {
+            entity = connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
+        }
+        if(entity == null){
+            // thanks mojang
             return;
         }
-        connection.getPlayer().getWorld().getEntity(pkg.getEntityId()).removeEffect(pkg.getEffect());
+        entity.removeEffect(pkg.getEffect());
     }
 
     public void handle(PacketUpdateSignReceiving pkg) {
@@ -454,7 +514,7 @@ public class PacketHandler {
         // ToDo
     }
 
-    public void handle(PacketEntityStatus pkg) {
+    public void handle(PacketEntityEvent pkg) {
         // ToDo
     }
 
@@ -473,8 +533,18 @@ public class PacketHandler {
     }
 
     public void handle(PacketAttachEntity pkg) {
-        // ToDo check if it is us
-        connection.getPlayer().getWorld().getEntity(pkg.getEntityId()).attachTo(pkg.getVehicleId());
+        Entity entity;
+        if (pkg.getEntityId() == connection.getPlayer().getEntity().getEntityId()) {
+            // that's us!
+            entity = connection.getPlayer().getEntity();
+        } else {
+            entity = connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
+        }
+        if(entity == null){
+            // thanks mojang
+            return;
+        }
+        entity.attachTo(pkg.getVehicleId());
         // ToDo leash support
     }
 
