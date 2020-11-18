@@ -11,15 +11,31 @@
  * This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
-package de.bixilon.minosoft.data.entities;
+package de.bixilon.minosoft.protocol.packets.clientbound.play;
 
-import de.bixilon.minosoft.data.entities.entities.Mob;
-import de.bixilon.minosoft.protocol.network.Connection;
+import de.bixilon.minosoft.logging.Log;
+import de.bixilon.minosoft.protocol.packets.ClientboundPacket;
+import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
+import de.bixilon.minosoft.protocol.protocol.PacketHandler;
 
-import java.util.UUID;
+public class PacketEntityEvent implements ClientboundPacket {
+    int entityId;
+    byte eventId;
 
-public abstract class FlyingMob extends Mob {
-    public FlyingMob(Connection connection, int entityId, UUID uuid, Location location, EntityRotation rotation) {
-        super(connection, entityId, uuid, location, rotation);
+    @Override
+    public boolean read(InByteBuffer buffer) {
+        entityId = buffer.readInt();
+        eventId = buffer.readByte();
+        return true;
+    }
+
+    @Override
+    public void handle(PacketHandler h) {
+        h.handle(this);
+    }
+
+    @Override
+    public void log() {
+        Log.protocol(String.format("Entity status: (entityId=%d, eventId=%s)", entityId, eventId));
     }
 }
