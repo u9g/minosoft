@@ -77,7 +77,10 @@ def readPart(part):
     current = part["apply"]
     if type(current) == type([]):
         current = current[0]
-    apply["model"] = current["model"].split("/")[1]
+    if "/" in current["model"]:
+        apply["model"] = current["model"].split("/")[1]
+    else:
+        apply["model"] = current["model"]
     readRotations(apply, current)
     result = []
     for item in properties:
@@ -91,87 +94,50 @@ def readPart(part):
     return result
 
 
-for blockStateFile in [
-    f
-    for
-    f
-    in
-    files
-    if
-    f.startswith(
-        'assets/minecraft/blockstates/')]:
-    with zip.open(
-            blockStateFile) as file:
-        data = ujson.load(
-            file)
+for blockStateFile in [f for f in files if f.startswith('assets/minecraft/blockstates/')]:
+    with zip.open(blockStateFile) as file:
+        data = ujson.load(file)
         block = {}
         if "variants" in data:
-            variants = \
-                data[
-                    "variants"]
+            variants = data["variants"]
             states = []
             for variant in variants:
                 state = {}
                 properties = {}
-                if variant != "":
-                    for part in variant.split(
-                            ","):
-                        properties[
-                            part.split(
-                                "=")[
-                                0]] = \
-                            part.split(
-                                "=")[
-                                1]
+                if variant != "" and variant != "normal" and variant != "map" and variant != "all":
+                    for part in variant.split(","):
+                        properties[part.split("=")[0]] = part.split("=")[1]
                 state["properties"] = properties
                 current = variants[variant]
                 if type(current) == type([]):
                     current = current[0]
-                state["model"] = current["model"].split("/")[1]
+
+                if "/" in current["model"]:
+                    state["model"] = current["model"].split("/")[1]
+                else:
+                    state["model"] = current["model"]
                 readRotations(state, current)
                 states.append(state)
             block = {
                 "states": states
             }
         elif "multipart" in data:
-            parts = \
-                data[
-                    "multipart"]
+            parts = data["multipart"]
             conditional = []
             for part in parts:
-                conditional.extend(
-                    readPart(
-                        part))
+                conditional.extend(readPart(part))
             block = {
                 "conditional": conditional
             }
-    blockStates[
-        blockStateFile.split(
-            ".")[
-            0]] = block
+    blockStates[blockStateFile.split(".")[0].split("/")[-1]] = block
 
-print(
-    "Loading models...")
-for blockModelFile in [
-    f
-    for
-    f
-    in
-    files
-    if
-    f.startswith(
-        'assets/minecraft/models/block/')]:
-    with zip.open(
-            blockModelFile) as file:
-        data = ujson.load(
-            file)
-    blockModels[
-        blockModelFile.split(
-            ".")[
-            0]] = data
+print("Loading models...")
+for blockModelFile in [f for f in files if f.startswith('assets/minecraft/models/block/')]:
+    with zip.open(blockModelFile) as file:
+        data = ujson.load(file)
+    blockModels[blockStateFile.split(".")[0].split("/")[-1]] = data
 
-print(
-    "Combining files...")
+print("Combining files...")
 finalJson = {
     "mod": modName,
     "blockStates": blockStates,
