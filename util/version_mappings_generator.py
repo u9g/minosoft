@@ -303,7 +303,7 @@ for version in VERSION_MANIFEST["versions"]:
                     file.write(ujson.dumps({"minecraft": entities}))
             elif fileName == "block_models.json":
                 # blockModelsCombiner.py will do the trick for us
-                os.popen('python blockModelGenerator.py %s %s' % (versionTempBaseFolder + "block_models.json", versionJson['downloads']['client']['url'])).read()
+                os.popen('python3 blockModelGenerator.py \"%s\" %s' % (versionTempBaseFolder + "block_models.json", versionJson['downloads']['client']['url'])).read()
             continue
         except Exception:
             traceback.print_exc()

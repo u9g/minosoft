@@ -10,10 +10,11 @@
 #  This software is not affiliated with Mojang AB, the original developer of Minecraft.
 
 import io
-import requests
 import sys
-import ujson
 import zipfile
+
+import requests
+import ujson
 
 if len(sys.argv) != 3:
     print("Usage: %s <destination path> <jar url>".format(
@@ -96,7 +97,12 @@ def readPart(part):
 
 for blockStateFile in [f for f in files if f.startswith('assets/minecraft/blockstates/')]:
     with zip.open(blockStateFile) as file:
-        data = ujson.load(file)
+        tempData = file.read().decode("utf-8")
+        if tempData.endswith("n"):
+            # why the hell are mojangs json files incorrect?
+            # in 19w02a (https://launcher.mojang.com/v1/objects/8664f5d1b428d5ba8a936ab9c097cc78821d06e6/client.jar) the json ends with a random "n"
+            tempData = tempData[:-1]
+        data = ujson.loads(tempData)
         block = {}
         if "variants" in data:
             variants = data["variants"]
