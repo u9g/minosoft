@@ -28,7 +28,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class World {
     final ConcurrentHashMap<ChunkLocation, Chunk> chunks = new ConcurrentHashMap<>();
     final ConcurrentHashMap<Integer, Entity> entities = new ConcurrentHashMap<>();
-    final HashMap<BlockPosition, BlockEntityMetaData> blockEntityMeta = new HashMap<>();
     boolean hardcore;
     boolean raining;
     Dimension dimension; // used for sky color, etc
@@ -109,16 +108,23 @@ public class World {
     }
 
     public void setBlockEntityData(BlockPosition position, BlockEntityMetaData data) {
-        // ToDo check if block is really a block entity (command block, spawner, skull, flower pot)
-        blockEntityMeta.put(position, data);
+        Chunk chunk = chunks.get(position.getChunkLocation());
+        if (chunk == null) {
+            return;
+        }
+        chunk.setBlockEntityData(position.getInChunkLocation(), data);
     }
 
     public BlockEntityMetaData getBlockEntityData(BlockPosition position) {
-        return blockEntityMeta.get(position);
+        Chunk chunk = chunks.get(position.getChunkLocation());
+        if (chunk == null) {
+            return null;
+        }
+        return chunk.getBlockEntityData(position.getInChunkLocation());
     }
 
     public void setBlockEntityData(HashMap<BlockPosition, BlockEntityMetaData> blockEntities) {
-        blockEntities.forEach(blockEntityMeta::put);
+        blockEntities.forEach(this::setBlockEntityData);
     }
 
     public Chunk getChunk(ChunkLocation chunkLocation) {

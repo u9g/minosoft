@@ -30,6 +30,7 @@ import de.bixilon.minosoft.modding.loading.Priorities;
 import de.bixilon.minosoft.protocol.protocol.LANServerListener;
 import de.bixilon.minosoft.render.GameWindow;
 import de.bixilon.minosoft.util.CountUpAndDownLatch;
+import de.bixilon.minosoft.util.MinosoftCommandLineArguments;
 import de.bixilon.minosoft.util.Util;
 import de.bixilon.minosoft.util.mojang.api.MojangAccount;
 import de.bixilon.minosoft.util.task.AsyncTaskWorker;
@@ -54,6 +55,7 @@ public final class Minosoft {
     public static Configuration config;
 
     public static void main(String[] args) {
+        MinosoftCommandLineArguments.parseCommandLineArguments(args);
         Log.info("Starting...");
         AsyncTaskWorker taskWorker = new AsyncTaskWorker("StartUp");
 

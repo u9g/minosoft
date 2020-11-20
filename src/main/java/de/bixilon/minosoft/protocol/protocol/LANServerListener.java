@@ -43,7 +43,7 @@ public class LANServerListener {
                 servers = HashBiMap.create();
                 MulticastSocket socket = new MulticastSocket(ProtocolDefinition.LAN_SERVER_BROADCAST_PORT);
                 socket.joinGroup(ProtocolDefinition.LAN_SERVER_BROADCAST_ADDRESS); // ToDo: do not use deprecated methods
-                byte[] buf = new byte[65535];
+                byte[] buf = new byte[256]; // this should be enough, if the packet is longer, it is probably invalid
                 latch.countDown();
                 while (true) {
                     try {
@@ -52,7 +52,7 @@ public class LANServerListener {
                         Log.protocol(String.format("LAN UDP Broadcast from %s:%s -> %s", packet.getAddress().getHostAddress(), packet.getPort(), new String(buf)));
                         InetAddress sender = packet.getAddress();
                         if (servers.containsKey(sender)) {
-                            // This guy sent us already a server, maybe a duplicate or a DOS attack...Skip
+                            // This guy sent us already a server, maybe just the regular 1.5 second interval, a duplicate or a DOS attack...We don't care
                             continue;
                         }
                         Server server = getServerByBroadcast(sender, packet.getData());
@@ -71,6 +71,7 @@ public class LANServerListener {
 
             } catch (Exception e) {
                 e.printStackTrace();
+                latch.countDown();
             }
             servers = null;
             Log.warn("Stopping LAN Server Listener Thread");
@@ -83,6 +84,9 @@ public class LANServerListener {
     }
 
     public static void removeAll() {
+        if (servers == null) {
+            return;
+        }
         HashSet<Server> temp = new HashSet<>(servers.values());
         for (Server server : temp) {
             if (server.isConnected()) {

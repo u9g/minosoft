@@ -117,7 +117,9 @@ public class PacketHandler {
         connection.getPlayer().getWorld().setHardcore(pkg.isHardcore());
         connection.getMapping().setDimensions(pkg.getDimensions());
         connection.getPlayer().getWorld().setDimension(pkg.getDimension());
-        connection.getPlayer().setEntity(new PlayerEntity(connection, pkg.getEntityId(), connection.getPlayer().getPlayerUUID(), null, null, connection.getPlayer().getPlayerName(), new PlayerPropertyData[]{}, null));
+        PlayerEntity entity = new PlayerEntity(connection, pkg.getEntityId(), connection.getPlayer().getPlayerUUID(), null, null, connection.getPlayer().getPlayerName(), new PlayerPropertyData[]{}, null);
+        connection.getPlayer().setEntity(entity);
+        connection.getPlayer().getWorld().addEntity(entity);
         connection.getSender().sendChatMessage("I am alive! ~ Minosoft");
     }
 
@@ -376,13 +378,7 @@ public class PacketHandler {
     }
 
     public void handle(PacketEntityMetadata pkg) {
-        Entity entity;
-        if (pkg.getEntityId() == connection.getPlayer().getEntity().getEntityId()) {
-            // our own meta data...set it
-            entity = connection.getPlayer().getEntity();
-        } else {
-            entity = connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
-        }
+        Entity entity= connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
         if(entity == null){
             // thanks mojang
             return;
@@ -472,13 +468,7 @@ public class PacketHandler {
     }
 
     public void handle(PacketEntityEffect pkg) {
-        Entity entity;
-        if (pkg.getEntityId() == connection.getPlayer().getEntity().getEntityId()) {
-            // that's us!
-            entity = connection.getPlayer().getEntity();
-        } else {
-            entity = connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
-        }
+        Entity entity= connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
         if(entity == null){
             // thanks mojang
             return;
@@ -487,13 +477,7 @@ public class PacketHandler {
     }
 
     public void handle(PacketRemoveEntityEffect pkg) {
-        Entity entity;
-        if (pkg.getEntityId() == connection.getPlayer().getEntity().getEntityId()) {
-            // that's us!
-            entity = connection.getPlayer().getEntity();
-        } else {
-            entity = connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
-        }
+        Entity entity = connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
         if(entity == null){
             // thanks mojang
             return;
@@ -533,13 +517,7 @@ public class PacketHandler {
     }
 
     public void handle(PacketAttachEntity pkg) {
-        Entity entity;
-        if (pkg.getEntityId() == connection.getPlayer().getEntity().getEntityId()) {
-            // that's us!
-            entity = connection.getPlayer().getEntity();
-        } else {
-            entity = connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
-        }
+        Entity entity = connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
         if(entity == null){
             // thanks mojang
             return;

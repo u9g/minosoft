@@ -22,9 +22,10 @@ import de.bixilon.minosoft.protocol.network.Connection;
 import java.util.UUID;
 
 public class FishingHook extends Projectile {
-    public FishingHook(Connection connection, int entityId, UUID uuid, Location location, EntityRotation rotation) {
-        super(connection, entityId, uuid, location, rotation);
-    }
+
+     public FishingHook(Connection connection, int entityId, UUID uuid, Location location, EntityRotation rotation) {
+         super(connection, entityId, uuid, location, rotation);
+     }
 
     @EntityMetaDataFunction(identifier = "hookedEntityId")
     public int getHookedEntityId() {

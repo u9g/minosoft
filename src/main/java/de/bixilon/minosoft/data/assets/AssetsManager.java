@@ -23,6 +23,7 @@ import de.bixilon.minosoft.config.ConfigurationPaths;
 import de.bixilon.minosoft.config.StaticConfiguration;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.logging.LogLevels;
+import de.bixilon.minosoft.protocol.protocol.ProtocolDefinition;
 import de.bixilon.minosoft.util.CountUpAndDownLatch;
 import de.bixilon.minosoft.util.HTTP;
 import de.bixilon.minosoft.util.Util;
@@ -75,7 +76,7 @@ public class AssetsManager {
         }
         try {
             downloadAssetsIndex();
-        } catch (IOException e) {
+        } catch (Exception e) {
             Log.printException(e, LogLevels.DEBUG);
             Log.warn("Could not download assets index. Please check your internet connection");
         }
@@ -99,7 +100,7 @@ public class AssetsManager {
         assets.keySet().parallelStream().forEach((filename) -> {
             try {
                 String hash = assets.get(filename);
-                boolean compressed = source == AssetsSource.MOJANG;
+                boolean compressed = (source == AssetsSource.MOJANG);
                 if (!verifyAssetHash(hash, compressed)) {
                     AssetsManager.downloadAsset(source, hash);
                 }
@@ -272,9 +273,9 @@ public class AssetsManager {
             throw new RuntimeException(e);
         }
 
-        byte[] buffer = new byte[4096];
+        byte[] buffer = new byte[ProtocolDefinition.DEFAULT_BUFFER_SIZE];
         int length;
-        while ((length = data.read(buffer, 0, 4096)) != -1) {
+        while ((length = data.read(buffer, 0, buffer.length)) != -1) {
             crypt.update(buffer, 0, length);
             out.write(buffer, 0, length);
         }
@@ -308,6 +309,6 @@ public class AssetsManager {
         if (hash == null) {
             throw new FileNotFoundException("Could not find asset with hash: null");
         }
-        return StaticConfiguration.HOME_DIR + String.format("assets/objects/%s/%s.gz", hash.substring(0, 2), hash);
+        return StaticConfiguration.HOME_DIRECTORY + String.format("assets/objects/%s/%s.gz", hash.substring(0, 2), hash);
     }
 }

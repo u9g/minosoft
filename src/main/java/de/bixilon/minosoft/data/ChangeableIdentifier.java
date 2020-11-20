@@ -19,7 +19,7 @@ import de.bixilon.minosoft.protocol.protocol.ProtocolDefinition;
 import java.util.TreeMap;
 
 public class ChangeableIdentifier extends VersionValueMap<String> {
-    String mod = "minecraft";
+    String mod = ProtocolDefinition.DEFAULT_MOD;
 
     public ChangeableIdentifier(String legacy, String water) {
         values.put(Versions.LOWEST_VERSION_SUPPORTED.getVersionId(), legacy);
@@ -47,12 +47,12 @@ public class ChangeableIdentifier extends VersionValueMap<String> {
     public boolean isValidName(String name, int versionId) {
         name = name.toLowerCase();
         if (name.indexOf(":") != 0) {
-            String[] splittedName = name.split(":", 2);
-            if (!mod.equals(splittedName[0])) {
+            String[] splitName = name.split(":", 2);
+            if (!mod.equals(splitName[0])) {
                 // mod is not correct
                 return false;
             }
-            name = splittedName[1];
+            name = splitName[1];
             // split and check mod
         }
 

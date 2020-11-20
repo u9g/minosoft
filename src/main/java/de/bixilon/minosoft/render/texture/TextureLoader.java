@@ -48,7 +48,7 @@ public class TextureLoader {
         }
         combineTextures();
         try {
-            PNGDecoder decoder = new PNGDecoder(new FileInputStream(StaticConfiguration.HOME_DIR + "assets/allTextures.png"));
+            PNGDecoder decoder = new PNGDecoder(new FileInputStream(StaticConfiguration.HOME_DIRECTORY + "assets/allTextures.png"));
             ByteBuffer buf = ByteBuffer.allocateDirect(decoder.getWidth() * decoder.getHeight() * 4);
             decoder.decode(buf, decoder.getWidth() * 4, PNGDecoder.Format.RGBA);
             textureID = bindTexture(buf, decoder.getWidth(), decoder.getHeight());
@@ -115,7 +115,7 @@ public class TextureLoader {
         }
 
         try {
-            File outputFile = new File(StaticConfiguration.HOME_DIR + "assets/allTextures.png");
+            File outputFile = new File(StaticConfiguration.HOME_DIRECTORY + "assets/allTextures.png");
             ImageIO.write(totalImage, "png", outputFile);
         } catch (IOException e) {
             e.printStackTrace();

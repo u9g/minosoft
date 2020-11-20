@@ -13,6 +13,7 @@
 
 package de.bixilon.minosoft.data.world;
 
+import de.bixilon.minosoft.data.entities.block.BlockEntityMetaData;
 import de.bixilon.minosoft.data.mappings.blocks.Block;
 import de.bixilon.minosoft.data.mappings.blocks.Blocks;
 
@@ -22,14 +23,23 @@ import java.util.concurrent.ConcurrentHashMap;
  * Collection of 16x16x16 blocks
  */
 public class ChunkSection {
-    final ConcurrentHashMap<InChunkSectionLocation, Block> blocks;
+    private final ConcurrentHashMap<InChunkSectionLocation, Block> blocks;
+    private final ConcurrentHashMap<InChunkSectionLocation, BlockEntityMetaData> blockEntityMeta = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<InChunkSectionLocation, Byte> light;
+    private final ConcurrentHashMap<InChunkSectionLocation, Byte> skyLight;
 
     public ChunkSection(ConcurrentHashMap<InChunkSectionLocation, Block> blocks) {
+        this(blocks, new ConcurrentHashMap<>(), new ConcurrentHashMap<>());
+    }
+
+    public ChunkSection(ConcurrentHashMap<InChunkSectionLocation, Block> blocks, ConcurrentHashMap<InChunkSectionLocation, Byte> light, ConcurrentHashMap<InChunkSectionLocation, Byte> skyLight) {
         this.blocks = blocks;
+        this.light = light;
+        this.skyLight = skyLight;
     }
 
     public ChunkSection() {
-        this.blocks = new ConcurrentHashMap<>();
+        this(new ConcurrentHashMap<>());
     }
 
     public Block getBlock(int x, int y, int z) {
@@ -45,14 +55,43 @@ public class ChunkSection {
     }
 
     public void setBlock(InChunkSectionLocation location, Block block) {
+        if (blocks.get(location).equals(block)) {
+            return;
+        }
         if (block == null || block.equals(Blocks.nullBlock)) {
             blocks.remove(location);
             return;
         }
         blocks.put(location, block);
+        blockEntityMeta.remove(location);
+    }
+
+    public void setBlockEntityData(InChunkSectionLocation position, BlockEntityMetaData data) {
+        // ToDo check if block is really a block entity (command block, spawner, skull, flower pot)
+        blockEntityMeta.put(position, data);
     }
 
     public ConcurrentHashMap<InChunkSectionLocation, Block> getBlocks() {
         return blocks;
+    }
+
+    public ConcurrentHashMap<InChunkSectionLocation, BlockEntityMetaData> getBlockEntityMeta() {
+        return blockEntityMeta;
+    }
+
+    public ConcurrentHashMap<InChunkSectionLocation, Byte> getLight() {
+        return light;
+    }
+
+    public ConcurrentHashMap<InChunkSectionLocation, Byte> getSkyLight() {
+        return skyLight;
+    }
+
+    public BlockEntityMetaData getBlockEntityData(InChunkSectionLocation position) {
+        return blockEntityMeta.get(position);
+    }
+
+    public void setBlockEntityData(ConcurrentHashMap<InChunkSectionLocation, BlockEntityMetaData> blockEntities) {
+        blockEntities.forEach(blockEntityMeta::put);
     }
 }

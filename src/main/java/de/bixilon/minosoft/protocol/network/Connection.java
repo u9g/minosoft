@@ -21,21 +21,16 @@ import de.bixilon.minosoft.data.mappings.recipes.Recipes;
 import de.bixilon.minosoft.data.mappings.versions.Version;
 import de.bixilon.minosoft.data.mappings.versions.VersionMapping;
 import de.bixilon.minosoft.data.mappings.versions.Versions;
-import de.bixilon.minosoft.gui.main.ConnectionChangeCallback;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.logging.LogLevels;
-import de.bixilon.minosoft.modding.event.EventMethod;
-import de.bixilon.minosoft.modding.event.events.CancelableEvent;
-import de.bixilon.minosoft.modding.event.events.ConnectionEvent;
-import de.bixilon.minosoft.modding.event.events.PacketReceiveEvent;
-import de.bixilon.minosoft.modding.event.events.PacketSendEvent;
+import de.bixilon.minosoft.modding.event.EventInvoker;
+import de.bixilon.minosoft.modding.event.events.*;
 import de.bixilon.minosoft.protocol.packets.ClientboundPacket;
 import de.bixilon.minosoft.protocol.packets.ServerboundPacket;
 import de.bixilon.minosoft.protocol.packets.serverbound.handshaking.PacketHandshake;
 import de.bixilon.minosoft.protocol.packets.serverbound.login.PacketLoginStart;
 import de.bixilon.minosoft.protocol.packets.serverbound.status.PacketStatusPing;
 import de.bixilon.minosoft.protocol.packets.serverbound.status.PacketStatusRequest;
-import de.bixilon.minosoft.protocol.ping.PingCallback;
 import de.bixilon.minosoft.protocol.ping.ServerListPing;
 import de.bixilon.minosoft.protocol.protocol.*;
 import de.bixilon.minosoft.render.GameWindow;
@@ -45,7 +40,6 @@ import de.bixilon.minosoft.util.ServerAddress;
 import org.xbill.DNS.TextParseException;
 
 import javax.annotation.Nullable;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -57,14 +51,11 @@ public class Connection {
     private final PacketSender sender = new PacketSender(this);
     private final LinkedBlockingQueue<ClientboundPacket> handlingQueue = new LinkedBlockingQueue<>();
     private final VelocityHandler velocityHandler = new VelocityHandler(this);
-    private final HashSet<PingCallback> pingCallbacks = new HashSet<>();
-    private final HashSet<ConnectionChangeCallback> connectionChangeCallbacks = new HashSet<>();
-    private final LinkedList<EventMethod> eventListeners = new LinkedList<>();
+    private final LinkedList<EventInvoker> eventListeners = new LinkedList<>();
     private final int connectionId;
     private final Player player;
     private final String hostname;
-    private RenderProperties renderProperties;
-    LinkedList<ServerAddress> addresses;
+    private RenderProperties renderProperties;    LinkedList<ServerAddress> addresses;
     int desiredVersionNumber = -1;
     ServerAddress address;
     Thread handleThread;
@@ -285,15 +276,6 @@ public class Connection {
         return connectionId;
     }
 
-    public void addPingCallback(PingCallback callback) {
-        if (getConnectionState() == ConnectionStates.FAILED || getConnectionState() == ConnectionStates.FAILED_NO_RETRY || lastPing != null) {
-            // ping done
-            callback.handle(lastPing);
-            return;
-        }
-        pingCallbacks.add(callback);
-    }
-
     public ConnectionStates getConnectionState() {
         return state;
     }
@@ -302,7 +284,7 @@ public class Connection {
         if (this.state == state) {
             return;
         }
-        Log.verbose("ConnectionStatus changed: " + state);
+        Log.verbose("ConnectionState changed: " + state);
         ConnectionStates previousState = this.state;
         this.state = state;
         switch (state) {
@@ -323,7 +305,7 @@ public class Connection {
                     if (a == null || b == null) {
                         return 0;
                     }
-                    return -(b.getAnnotation().priority().ordinal() - a.getAnnotation().priority().ordinal());
+                    return -(b.getPriority().ordinal() - a.getPriority().ordinal());
                 });
                 // connection established, starting threads and logging in
                 startHandlingThread();
@@ -377,11 +359,7 @@ public class Connection {
             }
         }
         // handle callbacks
-        connectionChangeCallbacks.forEach((callback -> callback.handle(this)));
-    }
-
-    public HashSet<PingCallback> getPingCallbacks() {
-        return pingCallbacks;
+        fireEvent(new ConnectionStateChangeEvent(this, previousState, state));
     }
 
     public int getDesiredVersionNumber() {
@@ -394,19 +372,21 @@ public class Connection {
 
     public void handlePingCallbacks(@Nullable ServerListPing ping) {
         this.lastPing = ping;
-        pingCallbacks.forEach((callback -> callback.handle(ping)));
+        fireEvent(new ServerListPingArriveEvent(this, ping));
+    }
+
+    public void registerEvent(EventInvoker method) {
+        eventListeners.add(method);
+        if (method.getEventType() == ServerListPingArriveEvent.class) {
+            if (getConnectionState() == ConnectionStates.FAILED || getConnectionState() == ConnectionStates.FAILED_NO_RETRY || lastPing != null) {
+                // ping done
+                method.invoke(new ServerListPingArriveEvent(this, lastPing));
+            }
+        }
     }
 
     public Exception getLastConnectionException() {
         return (lastException != null) ? lastException : network.getLastException();
-    }
-
-    public void addConnectionChangeCallback(ConnectionChangeCallback callback) {
-        connectionChangeCallbacks.add(callback);
-    }
-
-    public HashSet<ConnectionChangeCallback> getConnectionChangeCallbacks() {
-        return connectionChangeCallbacks;
     }
 
     public ServerListPing getLastPing() {
