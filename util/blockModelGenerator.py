@@ -10,11 +10,10 @@
 #  This software is not affiliated with Mojang AB, the original developer of Minecraft.
 
 import io
-import sys
-import zipfile
-
 import requests
+import sys
 import ujson
+import zipfile
 
 if len(sys.argv) != 3:
     print("Usage: %s <destination path> <jar url>".format(
@@ -145,9 +144,10 @@ for blockModelFile in [f for f in files if f.startswith('assets/minecraft/models
 
 print("Combining files...")
 finalJson = {
-    "mod": modName,
-    "blockStates": blockStates,
-    "blockModels": blockModels,
+    modName: {
+        "blockStates": blockStates,
+        "blockModels": blockModels
+    }
 }
 
 print("Saving...")
