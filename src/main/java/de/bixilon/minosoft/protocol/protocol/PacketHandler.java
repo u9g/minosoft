@@ -40,7 +40,9 @@ import de.bixilon.minosoft.protocol.packets.clientbound.play.*;
 import de.bixilon.minosoft.protocol.packets.clientbound.status.PacketStatusPong;
 import de.bixilon.minosoft.protocol.packets.clientbound.status.PacketStatusResponse;
 import de.bixilon.minosoft.protocol.packets.serverbound.login.PacketEncryptionResponse;
+import de.bixilon.minosoft.protocol.packets.serverbound.play.PacketConfirmTeleport;
 import de.bixilon.minosoft.protocol.packets.serverbound.play.PacketKeepAliveResponse;
+import de.bixilon.minosoft.protocol.packets.serverbound.play.PacketPlayerPositionAndRotationSending;
 import de.bixilon.minosoft.render.utility.Vec3;
 import de.bixilon.minosoft.util.nbt.tag.CompoundTag;
 import de.bixilon.minosoft.util.nbt.tag.StringTag;
@@ -296,7 +298,7 @@ public class PacketHandler {
 
     public void handle(PacketEntityMovementAndRotation pkg) {
         Entity entity = connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
-        if(entity == null){
+        if (entity == null) {
             // thanks mojang
             return;
         }
@@ -306,7 +308,7 @@ public class PacketHandler {
 
     public void handle(PacketEntityMovement pkg) {
         Entity entity = connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
-        if(entity == null){
+        if (entity == null) {
             // thanks mojang
             return;
         }
@@ -315,11 +317,11 @@ public class PacketHandler {
 
     public void handle(PacketEntityRotation pkg) {
         Entity entity = connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
-        if(entity == null){
+        if (entity == null) {
             // thanks mojang
             return;
         }
-       entity.setRotation(pkg.getYaw(), pkg.getPitch());
+        entity.setRotation(pkg.getYaw(), pkg.getPitch());
     }
 
     public void handle(PacketDestroyEntity pkg) {
@@ -338,7 +340,7 @@ public class PacketHandler {
         } else {
             entity = connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
         }
-        if(entity == null){
+        if (entity == null) {
             // thanks mojang
             return;
         }
@@ -354,7 +356,7 @@ public class PacketHandler {
 
     public void handle(PacketEntityTeleport pkg) {
         Entity entity = connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
-        if(entity == null){
+        if (entity == null) {
             // thanks mojang
             return;
         }
@@ -364,7 +366,7 @@ public class PacketHandler {
 
     public void handle(PacketEntityHeadRotation pkg) {
         Entity entity = connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
-        if(entity == null){
+        if (entity == null) {
             // thanks mojang
             return;
         }
@@ -378,8 +380,8 @@ public class PacketHandler {
     }
 
     public void handle(PacketEntityMetadata pkg) {
-        Entity entity= connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
-        if(entity == null){
+        Entity entity = connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
+        if (entity == null) {
             // thanks mojang
             return;
         }
@@ -390,7 +392,7 @@ public class PacketHandler {
         connection.fireEvent(new EntityEquipmentChangeEvent(connection, pkg));
 
         Entity entity = connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
-        if(entity == null){
+        if (entity == null) {
             // thanks mojang
             return;
         }
@@ -399,7 +401,7 @@ public class PacketHandler {
 
     public void handle(PacketBlockChange pkg) {
         Chunk chunk = connection.getPlayer().getWorld().getChunk(pkg.getPosition().getChunkLocation());
-        if(chunk == null){
+        if (chunk == null) {
             // thanks mojang
             return;
         }
@@ -468,8 +470,8 @@ public class PacketHandler {
     }
 
     public void handle(PacketEntityEffect pkg) {
-        Entity entity= connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
-        if(entity == null){
+        Entity entity = connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
+        if (entity == null) {
             // thanks mojang
             return;
         }
@@ -478,7 +480,7 @@ public class PacketHandler {
 
     public void handle(PacketRemoveEntityEffect pkg) {
         Entity entity = connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
-        if(entity == null){
+        if (entity == null) {
             // thanks mojang
             return;
         }
@@ -511,6 +513,12 @@ public class PacketHandler {
     }
 
     public void handle(PacketPlayerPositionAndRotation pkg) {
+        // ToDo: GUI should do this
+        if (connection.getVersion().getVersionId() >= 79) {
+            connection.sendPacket(new PacketConfirmTeleport(pkg.getTeleportId()));
+        } else {
+            connection.sendPacket(new PacketPlayerPositionAndRotationSending(pkg.getLocation(), pkg.getYaw(), pkg.getPitch(), pkg.isOnGround()));
+        }
         connection.getPlayer().setSpawnConfirmed(true);
         connection.getRenderProperties().getController().getCameraMovement().setRotation(pkg.getPitch(), pkg.getYaw());
         connection.getRenderProperties().getController().setPlayerPos(new Vec3(pkg.getLocation()));
@@ -518,7 +526,7 @@ public class PacketHandler {
 
     public void handle(PacketAttachEntity pkg) {
         Entity entity = connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
-        if(entity == null){
+        if (entity == null) {
             // thanks mojang
             return;
         }
