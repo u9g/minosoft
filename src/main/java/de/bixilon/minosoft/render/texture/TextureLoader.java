@@ -34,18 +34,15 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 
 public class TextureLoader {
-    private final HashMap<String, HashMap<String, Integer>> textureCoordinates;
-    private final HashMap<String, HashMap<String, BufferedImage>> images;
+    private final HashMap<String, Integer> textureCoordinates;
+    private HashMap<String, BufferedImage> images;
     private int textureID;
     private float step;
     private int totalTextures = 0;
 
-    public TextureLoader(HashMap<String, HashSet<String>> textures, HashMap<String, float[]> tints) {
+    public TextureLoader(HashSet<String> textures, HashMap<String, float[]> tints) {
         textureCoordinates = new HashMap<>();
-        images = new HashMap<>();
-        for (String mod : textures.keySet()) {
-            loadTextures(mod, textures.get(mod), tints);
-        }
+        loadTextures(textures, tints);
         combineTextures();
         try {
             PNGDecoder decoder = new PNGDecoder(new FileInputStream(StaticConfiguration.HOME_DIRECTORY + "assets/allTextures.png"));
@@ -71,14 +68,14 @@ public class TextureLoader {
         }
     }
 
-    private void loadTextures(String mod, HashSet<String> textureNames, HashMap<String, float[]> tint) {
+    private void loadTextures(HashSet<String> textureNames, HashMap<String, float[]> tint) {
         HashMap<String, BufferedImage> modTextureMap = new HashMap<>();
         for (String textureName : textureNames) {
             if (textureName.contains("overlay") || textureName.isBlank()) {
                 continue;
             }
             try {
-                BufferedImage image = ImageIO.read(AssetsManager.readAssetAsStream(String.format("%s/textures/%s.png", mod, textureName)));
+                BufferedImage image = ImageIO.read(AssetsManager.readAssetAsStream(String.format("minecraft/textures/%s.png", textureName))); // TODO: modding
                 if (tint != null && tint.containsKey(textureName)) {
                     tintImage(image, tint.get(textureName));
                 }
@@ -90,7 +87,7 @@ public class TextureLoader {
             }
             totalTextures++;
         }
-        images.put(mod, modTextureMap);
+        images = modTextureMap;
     }
 
     private void combineTextures() {
@@ -100,18 +97,14 @@ public class TextureLoader {
         BufferedImage totalImage = new BufferedImage(imageLength, RenderConstants.TEXTURE_PACK_RESOLUTION, BufferedImage.TYPE_4BYTE_ABGR);
 
         int currentPos = 0;
-        for (Map.Entry<String, HashMap<String, BufferedImage>> mod : images.entrySet()) {
-            HashMap<String, Integer> modMap = new HashMap<>();
-            for (Map.Entry<String, BufferedImage> texture : mod.getValue().entrySet()) {
-                for (int y = 0; y < RenderConstants.TEXTURE_PACK_RESOLUTION; y++) {
-                    for (int xPixel = 0; xPixel < RenderConstants.TEXTURE_PACK_RESOLUTION; xPixel++) {
-                        int rgb = texture.getValue().getRGB(xPixel, y);
-                        totalImage.setRGB(currentPos * RenderConstants.TEXTURE_PACK_RESOLUTION + xPixel, y, rgb);
-                    }
+        for (Map.Entry<String, BufferedImage> texture : images.entrySet()) {
+            for (int y = 0; y < RenderConstants.TEXTURE_PACK_RESOLUTION; y++) {
+                for (int xPixel = 0; xPixel < RenderConstants.TEXTURE_PACK_RESOLUTION; xPixel++) {
+                    int rgb = texture.getValue().getRGB(xPixel, y);
+                    totalImage.setRGB(currentPos * RenderConstants.TEXTURE_PACK_RESOLUTION + xPixel, y, rgb);
                 }
-                modMap.put(texture.getKey(), currentPos++);
             }
-            textureCoordinates.put(mod.getKey(), modMap);
+            textureCoordinates.put(texture.getKey(), currentPos++);
         }
 
         try {
@@ -136,19 +129,12 @@ public class TextureLoader {
         return textureID;
     }
 
-    public float getTexture(String mod, String textureName) {
+    public float getTexture(String textureName) {
         if (textureName.contains("overlay") || textureName.isBlank()) {
             return -1;
         }
-
         // returns the start and end u-coordinate of a specific texture to access it
-        HashMap<String, Integer> modMap = textureCoordinates.get(mod);
-        if (modMap == null) {
-            Log.fatal(String.format("Could not load texture for mod %s", mod));
-            System.exit(9);
-        }
-        Integer pos = modMap.get(textureName);
-
+        Integer pos = textureCoordinates.get(textureName);
         return pos * step;
     }
 

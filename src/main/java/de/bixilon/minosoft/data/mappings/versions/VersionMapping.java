@@ -60,7 +60,7 @@ public class VersionMapping {
     private HashMap<EntityMetaDataFields, Integer> entityMetaIndexMap;
     private HashMap<String, Pair<String, Integer>> entityMetaIndexOffsetParentMapping;
     private HashBiMap<Integer, Class<? extends Entity>> entityIdClassMap;
-    private HashMap<String, HashMap<String, BlockModelInterface>> modelMap;
+    private HashMap<String, HashMap<String, BlockModelInterface>> modelMap = new HashMap<>();
     private Integer blockTextureId; // OpenGL texture id for all block texture
 
     public VersionMapping(Version version) {
@@ -458,9 +458,9 @@ public class VersionMapping {
                     modelMap = new HashMap<>();
                     break;
                 }
-                Pair<HashMap<String, HashMap<String, BlockModelInterface>>, Integer> pair = BlockModelLoader.load(data);
-                modelMap = pair.key;
-                blockTextureId = pair.value;
+                Pair<HashMap<String, BlockModelInterface>, Integer> pair = BlockModelLoader.load(mod, data);
+                modelMap.put(mod, pair.key);
+                blockTextureId = pair.value; // TODO
             }
         }
         loaded.add(type);

@@ -85,9 +85,9 @@ public class SubBlock {
         return new boolean[]{cuboid.isFull(FaceOrientation.EAST), cuboid.isFull(FaceOrientation.WEST), cuboid.isFull(FaceOrientation.UP), cuboid.isFull(FaceOrientation.DOWN), cuboid.isFull(FaceOrientation.NORTH), cuboid.isFull(FaceOrientation.SOUTH)};
     }
 
-    public void applyTextures(String mod, TextureLoader loader) {
+    public void applyTextures(TextureLoader loader) {
         for (Map.Entry<FaceOrientation, String> entry : textures.entrySet()) {
-            float texture = loader.getTexture(mod, entry.getValue());
+            float texture = loader.getTexture(entry.getValue());
             if (texture == -1) {
                 continue;
             }

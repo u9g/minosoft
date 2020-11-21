@@ -140,7 +140,7 @@ print("Loading models...")
 for blockModelFile in [f for f in files if f.startswith('assets/minecraft/models/block/')]:
     with zip.open(blockModelFile) as file:
         data = ujson.load(file)
-    blockModels[blockStateFile.split(".")[0].split("/")[-1]] = data
+    blockModels[blockModelFile.split(".")[0].split("/")[-1]] = data
 
 print("Combining files...")
 finalJson = {
