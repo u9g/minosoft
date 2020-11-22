@@ -11,28 +11,23 @@
  * This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
-package de.bixilon.minosoft.util;
+package de.bixilon.minosoft.data.mappings.blocks.actions;
 
-public final class OSUtil {
-    public static final OSs OS;
+import com.sun.javafx.scene.traversal.Direction;
 
-    static {
-        String name = System.getProperty("os.name");
-        if (name.startsWith("Windows")) {
-            OS = OSs.WINDOWS;
-        } else if (name.startsWith("Linux")) {
-            OS = OSs.LINUX;
-        } else if (name.startsWith("Mac")) {
-            OS = OSs.MAC;
-        } else {
-            OS = OSs.OTHER;
-        }
+public class BellAction implements BlockAction {
+    private final Direction direction;
+
+    public BellAction(short unused, short direction) {
+        this.direction = Direction.values()[direction];
     }
 
-    public enum OSs {
-        WINDOWS,
-        LINUX,
-        MAC,
-        OTHER
+    public Direction getDirection() {
+        return direction;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("BELL_HIT_%s", direction);
     }
 }

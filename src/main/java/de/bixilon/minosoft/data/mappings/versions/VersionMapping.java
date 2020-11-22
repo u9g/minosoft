@@ -41,7 +41,6 @@ import java.util.HashSet;
 
 public class VersionMapping {
     private final HashSet<Mappings> loaded = new HashSet<>();
-    HashMap<String, HashBiMap<String, Dimension>> dimensionIdentifierMap = new HashMap<>();
     private Version version;
     private VersionMapping parentMapping;
     private HashBiMap<String, Motive> motiveIdentifierMap;
@@ -51,6 +50,7 @@ public class VersionMapping {
     private HashBiMap<Integer, Motive> motiveIdMap;
     private HashBiMap<Integer, MobEffect> mobEffectMap;
     private HashBiMap<Integer, Dimension> dimensionMap;
+    private HashMap<String, HashBiMap<String, Dimension>> dimensionIdentifierMap = new HashMap<>();
     private HashBiMap<Integer, Block> blockMap;
     private HashBiMap<Integer, BlockId> blockIdMap;
     private HashBiMap<Integer, Enchantment> enchantmentMap;
