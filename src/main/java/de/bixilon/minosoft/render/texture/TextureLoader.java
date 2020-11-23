@@ -37,11 +37,11 @@ import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 
 public class TextureLoader {
     private final HashMap<String, Integer> textureCoordinates;
+    private final CountDownLatch countDownLatch;
     private HashMap<String, BufferedImage> images;
     private int textureID;
     private float step;
     private int totalTextures = 0;
-    private final CountDownLatch countDownLatch;
 
     public TextureLoader(HashSet<String> textures, HashMap<String, float[]> tints) {
         countDownLatch = new CountDownLatch(1);
@@ -78,14 +78,18 @@ public class TextureLoader {
             if (textureName.contains("overlay") || textureName.isBlank()) {
                 continue;
             }
+            String fileName = textureName;
+            if (fileName.startsWith("blocks")) {
+                fileName = "block" + fileName.substring("blocks".length());
+            }
             try {
-                BufferedImage image = ImageIO.read(AssetsManager.readAssetAsStream(String.format("minecraft/textures/%s.png", textureName))); // TODO: modding
+                BufferedImage image = ImageIO.read(AssetsManager.readAssetAsStream(String.format("minecraft/textures/%s.png", fileName))); // TODO: modding
                 if (tint != null && tint.containsKey(textureName)) {
                     tintImage(image, tint.get(textureName));
                 }
                 modTextureMap.put(textureName, image);
             } catch (IOException e) {
-                Log.fatal(String.format("An error occurred while loading texture %s: %s", textureName, e.getLocalizedMessage()));
+                Log.fatal(String.format("An error occurred while loading texture %s (fileName=%s): %s", textureName, fileName, e.getLocalizedMessage()));
                 e.printStackTrace();
                 System.exit(6);
             }
