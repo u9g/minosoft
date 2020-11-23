@@ -71,6 +71,13 @@ public class AssetsManager {
         return ret;
     }
 
+    private static void initAssetsAliases(JsonObject json) {
+        for (String key : json.keySet()) {
+            String value = json.get(key).getAsString();
+            assets.put(key, assets.get(value));
+        }
+    }
+
     public static void downloadAllAssets(CountUpAndDownLatch latch) throws IOException {
         if (assets.size() > 0) {
             return;
@@ -83,6 +90,8 @@ public class AssetsManager {
         }
         assets.putAll(verifyAssets(AssetsSource.MOJANG, latch, parseAssetsIndex(ASSETS_INDEX_HASH)));
         assets.putAll(verifyAssets(AssetsSource.MINOSOFT_GIT, latch, parseAssetsIndex(Util.readJsonAsset("mapping/resources.json"))));
+        // aliases
+        initAssetsAliases(Util.readJsonAsset("mapping/assetsAliases.json"));
         latch.addCount(1); // client jar
         // download assets
         generateJarAssets();

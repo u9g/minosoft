@@ -203,8 +203,13 @@ public final class Util {
         return json;
     }
 
-    public static InputStreamReader readAsset(String path, Class<?> clazz) {
-        return new InputStreamReader(clazz.getResourceAsStream("/assets/" + path));
+    public static InputStreamReader readAsset(String path, Class<?> clazz) throws FileNotFoundException {
+        path = "/assets/" + path;
+        InputStream stream = clazz.getResourceAsStream(path);
+        if (stream == null) {
+            throw new FileNotFoundException(String.format("Could not load asset %s", path));
+        }
+        return new InputStreamReader(stream);
     }
 
     public static JsonObject readJsonFromZip(String fileName, ZipFile zipFile) throws IOException {
