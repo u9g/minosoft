@@ -54,17 +54,17 @@ public final class ChatColors {
         return getColorById(Character.digit(c, 16));
     }
 
-    public static ChatFormattingCode getFormattingById(int id) {
+    public static ChatCode getFormattingById(int id) {
         if (id <= 15) {
             return getColorById(id);
         }
         return switch (id) {
-            case 16 -> ChatFormattingCodes.OBFUSCATED;
-            case 17 -> ChatFormattingCodes.BOLD;
-            case 18 -> ChatFormattingCodes.STRIKETHROUGH;
-            case 19 -> ChatFormattingCodes.UNDERLINED;
-            case 20 -> ChatFormattingCodes.ITALIC;
-            case 21 -> ChatFormattingCodes.RESET;
+            case 16 -> PreChatFormattingCodes.OBFUSCATED;
+            case 17 -> PreChatFormattingCodes.BOLD;
+            case 18 -> PreChatFormattingCodes.STRIKETHROUGH;
+            case 19 -> PreChatFormattingCodes.UNDERLINED;
+            case 20 -> PreChatFormattingCodes.ITALIC;
+            case 21 -> PostChatFormattingCodes.RESET;
             default -> null;
         };
     }
@@ -81,6 +81,10 @@ public final class ChatColors {
 
     public static Integer getColorId(RGBColor color) {
         return colorIntMap.get(color);
+    }
+
+    public static String getColorChar(RGBColor color) {
+        return String.format("%x", colorIntMap.get(color));
     }
 
     public static RGBColor getColorByName(String name) {
@@ -100,7 +104,7 @@ public final class ChatColors {
             case "red" -> RED;
             case "light_purple" -> LIGHT_PURPLE;
             case "yellow" -> YELLOW;
-            case "white" -> WHITE;
+            case "white", "reset" -> WHITE;
             default -> throw new IllegalStateException("Unexpected value: " + name);
         };
     }
