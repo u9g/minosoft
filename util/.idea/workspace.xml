@@ -1,17 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="34edf7e9-254a-4d39-b77b-418e1a3041e3" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../src/main/java/de/bixilon/minosoft/data/mappings/versions/VersionMapping.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/de/bixilon/minosoft/data/mappings/versions/VersionMapping.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/main/java/de/bixilon/minosoft/render/WorldRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/de/bixilon/minosoft/render/WorldRenderer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/main/java/de/bixilon/minosoft/render/blockModels/BlockModelLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/de/bixilon/minosoft/render/blockModels/BlockModelLoader.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/main/java/de/bixilon/minosoft/render/blockModels/subBlocks/SubBlock.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/de/bixilon/minosoft/render/blockModels/subBlocks/SubBlock.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/main/java/de/bixilon/minosoft/render/movement/CollisionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/de/bixilon/minosoft/render/movement/CollisionHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/main/java/de/bixilon/minosoft/render/texture/InFaceUV.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/de/bixilon/minosoft/render/texture/InFaceUV.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/main/java/de/bixilon/minosoft/render/utility/AdditionalMath.java" beforeDir="false" afterPath="$PROJECT_DIR$/../src/main/java/de/bixilon/minosoft/render/utility/AdditionalMath.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/blockModelCombinder.py" beforeDir="false" afterPath="$PROJECT_DIR$/blockModelGenerator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/version_mappings_generator.py" beforeDir="false" afterPath="$PROJECT_DIR$/version_mappings_generator.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -47,6 +56,7 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="TERMINAL_CUSTOM_COMMANDS_GOT_IT" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="android.sdk.path" value="/opt/AndroidSDK" />
     <property name="aspect.path.notification.shown" value="true" />
@@ -146,6 +156,7 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
     <state x="444" y="1168" key="#Project_Structure" timestamp="1605462076420">
@@ -156,25 +167,25 @@
       <screen x="0" y="1050" width="1920" height="1080" />
     </state>
     <state x="419" y="1248" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.40.1680.1010/0.1050.1920.1080/1680.26.1280.1024@0.1050.1920.1080" timestamp="1605462499568" />
-    <state width="1259" height="329" key="GridCell.Tab.0.bottom" timestamp="1605648137613">
+    <state width="1259" height="267" key="GridCell.Tab.0.bottom" timestamp="1605907262411">
       <screen x="0" y="0" width="1280" height="994" />
     </state>
-    <state width="1259" height="329" key="GridCell.Tab.0.bottom/-1360.107.1360.738/0.0.1280.994@0.0.1280.994" timestamp="1605648137613" />
+    <state width="1259" height="267" key="GridCell.Tab.0.bottom/-1360.107.1360.738/0.0.1280.994@0.0.1280.994" timestamp="1605907262411" />
     <state width="1874" height="281" key="GridCell.Tab.0.bottom/0.40.1680.1010/0.1050.1920.1080/1680.26.1280.1024@0.1050.1920.1080" timestamp="1605462580595" />
-    <state width="1259" height="329" key="GridCell.Tab.0.center" timestamp="1605648137613">
+    <state width="1259" height="267" key="GridCell.Tab.0.center" timestamp="1605907262411">
       <screen x="0" y="0" width="1280" height="994" />
     </state>
-    <state width="1259" height="329" key="GridCell.Tab.0.center/-1360.107.1360.738/0.0.1280.994@0.0.1280.994" timestamp="1605648137613" />
+    <state width="1259" height="267" key="GridCell.Tab.0.center/-1360.107.1360.738/0.0.1280.994@0.0.1280.994" timestamp="1605907262411" />
     <state width="1874" height="281" key="GridCell.Tab.0.center/0.40.1680.1010/0.1050.1920.1080/1680.26.1280.1024@0.1050.1920.1080" timestamp="1605462580595" />
-    <state width="1259" height="329" key="GridCell.Tab.0.left" timestamp="1605648137613">
+    <state width="1259" height="267" key="GridCell.Tab.0.left" timestamp="1605907262410">
       <screen x="0" y="0" width="1280" height="994" />
     </state>
-    <state width="1259" height="329" key="GridCell.Tab.0.left/-1360.107.1360.738/0.0.1280.994@0.0.1280.994" timestamp="1605648137613" />
+    <state width="1259" height="267" key="GridCell.Tab.0.left/-1360.107.1360.738/0.0.1280.994@0.0.1280.994" timestamp="1605907262410" />
     <state width="1874" height="281" key="GridCell.Tab.0.left/0.40.1680.1010/0.1050.1920.1080/1680.26.1280.1024@0.1050.1920.1080" timestamp="1605462580595" />
-    <state width="1259" height="329" key="GridCell.Tab.0.right" timestamp="1605648137613">
+    <state width="1259" height="267" key="GridCell.Tab.0.right" timestamp="1605907262411">
       <screen x="0" y="0" width="1280" height="994" />
     </state>
-    <state width="1259" height="329" key="GridCell.Tab.0.right/-1360.107.1360.738/0.0.1280.994@0.0.1280.994" timestamp="1605648137613" />
+    <state width="1259" height="267" key="GridCell.Tab.0.right/-1360.107.1360.738/0.0.1280.994@0.0.1280.994" timestamp="1605907262411" />
     <state width="1874" height="281" key="GridCell.Tab.0.right/0.40.1680.1010/0.1050.1920.1080/1680.26.1280.1024@0.1050.1920.1080" timestamp="1605462580595" />
     <state width="1259" height="329" key="GridCell.Tab.1.bottom" timestamp="1605648130133">
       <screen x="0" y="0" width="1280" height="994" />
@@ -202,7 +213,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/version_mappings_generator.py</url>
-          <line>281</line>
+          <line>305</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
       </breakpoints>

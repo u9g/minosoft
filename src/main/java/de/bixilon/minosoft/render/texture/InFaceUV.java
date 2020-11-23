@@ -14,7 +14,6 @@
 package de.bixilon.minosoft.render.texture;
 
 import com.google.gson.JsonArray;
-import de.bixilon.minosoft.render.blockModels.BlockModelLoader;
 import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
 import org.apache.commons.collections.primitives.ArrayFloatList;
 
@@ -73,6 +72,6 @@ public class InFaceUV {
     }
 
     public boolean exists() {
-        return realU1 == -1;
+        return realU1 >= 0;
     }
 }

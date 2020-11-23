@@ -16,6 +16,7 @@ package de.bixilon.minosoft.render.texture;
 import de.bixilon.minosoft.config.StaticConfiguration;
 import de.bixilon.minosoft.data.assets.AssetsManager;
 import de.bixilon.minosoft.logging.Log;
+import de.bixilon.minosoft.render.GameWindow;
 import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
 import de.matthiasmann.twl.utils.PNGDecoder;
 
@@ -29,6 +30,7 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL30.glGenerateMipmap;
@@ -39,8 +41,10 @@ public class TextureLoader {
     private int textureID;
     private float step;
     private int totalTextures = 0;
+    private final CountDownLatch countDownLatch;
 
     public TextureLoader(HashSet<String> textures, HashMap<String, float[]> tints) {
+        countDownLatch = new CountDownLatch(1);
         textureCoordinates = new HashMap<>();
         loadTextures(textures, tints);
         combineTextures();
@@ -48,7 +52,7 @@ public class TextureLoader {
             PNGDecoder decoder = new PNGDecoder(new FileInputStream(StaticConfiguration.HOME_DIRECTORY + "assets/allTextures.png"));
             ByteBuffer buf = ByteBuffer.allocateDirect(decoder.getWidth() * decoder.getHeight() * 4);
             decoder.decode(buf, decoder.getWidth() * 4, PNGDecoder.Format.RGBA);
-            textureID = bindTexture(buf, decoder.getWidth(), decoder.getHeight());
+            bindTexture(buf, decoder.getWidth(), decoder.getHeight());
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(5);
@@ -116,17 +120,25 @@ public class TextureLoader {
         step = (float) 1 / (float) imageLength * RenderConstants.TEXTURE_PACK_RESOLUTION;
     }
 
-    private int bindTexture(ByteBuffer buf, int width, int height) {
+    private void bindTexture(ByteBuffer buf, int width, int height) {
         buf.flip();
-        int textureID = glGenTextures();
-        glBindTexture(GL_TEXTURE_2D, textureID);
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buf);
-        glGenerateMipmap(GL_TEXTURE_2D);
-        //disable smoothing out of textures
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        return textureID;
+        GameWindow.queue(() -> {
+            int textureID = glGenTextures();
+            glBindTexture(GL_TEXTURE_2D, textureID);
+            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buf);
+            glGenerateMipmap(GL_TEXTURE_2D);
+            //disable smoothing out of textures
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            this.textureID = textureID;
+            countDownLatch.countDown();
+        });
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public float getTexture(String textureName) {

@@ -28,6 +28,7 @@ public class GameWindow {
     private static final Object waiter = new Object();
     private static final LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
     private static Connection currentConnection;
+    private static boolean running;
 
     public static void prepare() {
         CountDownLatch latch = new CountDownLatch(1);
@@ -46,12 +47,21 @@ public class GameWindow {
     }
 
     private static void mainLoop() {
-        try {
-            queue.take().run();
-        } catch (Exception e) {
-            e.printStackTrace();
+        while (!running) {
+            try {
+                queue.take().run();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         while (!glfwWindowShouldClose(openGLWindow.getWindowId())) {
+            if (queue.size() > 0) {
+                try {
+                    queue.take().run();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glLoadIdentity();
             glfwPollEvents();
@@ -77,18 +87,21 @@ public class GameWindow {
         return openGLWindow;
     }
 
-    public static Connection getCurrentConnection() {
-        return currentConnection;
-    }
-
     public static void setCurrentConnection(Connection currentConnection) {
         if (GameWindow.currentConnection == null) {
-            queue.add(openGLWindow::start);
+            queue.add(() -> {
+                running = true;
+                openGLWindow.start();
+            });
         }
         openGLWindow.setCurrentConnection(currentConnection);
         GameWindow.currentConnection = currentConnection;
         synchronized (waiter) {
             waiter.notifyAll();
         }
+    }
+
+    public static void queue(Runnable runnable) {
+        queue.add(runnable);
     }
 }

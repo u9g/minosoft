@@ -129,7 +129,7 @@ public class SubBlock {
     }
 
     private ArrayFloatList prepareFace(FaceOrientation faceDirection, BlockPosition position) {
-        if (! uv.get(faceDirection).exists()) {
+        if (!uv.containsKey(faceDirection) || !uv.get(faceDirection).exists()) {
             return null;
         }
         ArrayFloatList result = new ArrayFloatList();

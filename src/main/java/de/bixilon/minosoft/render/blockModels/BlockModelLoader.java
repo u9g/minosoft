@@ -46,7 +46,7 @@ public class BlockModelLoader {
 
         TextureLoader textureLoader = new TextureLoader(getTextures(blockModels), tints);
 
-        applyTextures( blockModels, textureLoader);
+        applyTextures(blockModels, textureLoader);
         HashMap<String, BlockModelInterface> modelMap = loadBlocks(data, blockModels);
         return new Pair<>(modelMap, textureLoader.getTextureID());
     }
@@ -92,18 +92,15 @@ public class BlockModelLoader {
         }
     }
 
-    private static HashMap<String, float[]> readTints(JsonObject json) {
+    private static HashMap<String, float[]> readTints(JsonObject textures) {
         HashMap<String, float[]> result = new HashMap<>();
-        if (json.has("tinted_textures")) {
-            JsonObject textures = json.get("tinted_textures").getAsJsonObject();
-            for (String textureName : textures.keySet()) {
-                ArrayFloatList colorValues = new ArrayFloatList();
-                for (JsonElement colorValue : textures.get(textureName).getAsJsonArray()) {
-                    colorValues.add(colorValue.getAsFloat());
-                }
-                float[] color = colorValues.toArray();
-                result.put(textureName, color);
+        for (String textureName : textures.keySet()) {
+            ArrayFloatList colorValues = new ArrayFloatList();
+            for (JsonElement colorValue : textures.get(textureName).getAsJsonArray()) {
+                colorValues.add(colorValue.getAsFloat());
             }
+            float[] color = colorValues.toArray();
+            result.put(textureName, color);
         }
         return result;
     }
