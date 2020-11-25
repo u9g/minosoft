@@ -11,29 +11,22 @@
  * This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
-package de.bixilon.minosoft.protocol.packets.clientbound.play;
+package de.bixilon.minosoft.data.entities.entities.monster;
 
-import de.bixilon.minosoft.logging.Log;
-import de.bixilon.minosoft.protocol.packets.ClientboundPacket;
-import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
-import de.bixilon.minosoft.protocol.protocol.PacketHandler;
+import de.bixilon.minosoft.data.entities.EntityRotation;
+import de.bixilon.minosoft.data.entities.Location;
+import de.bixilon.minosoft.protocol.network.Connection;
 
-public class PacketUpdateViewDistance implements ClientboundPacket {
-    int viewDistance;
+import java.util.UUID;
 
-    @Override
-    public boolean read(InByteBuffer buffer) {
-        viewDistance = buffer.readVarInt();
-        return true;
-    }
+/**
+ * This class is just for the hashmap, it is not used anywhere
+ */
+@Deprecated
+public class ZombiePigman extends ZombifiedPiglin {
 
-    @Override
-    public void handle(PacketHandler h) {
-        h.handle(this);
-    }
-
-    @Override
-    public void log() {
-        Log.protocol(String.format("[IN] Received view distance update (viewDistance=%s)", viewDistance));
+    public ZombiePigman(Connection connection, int entityId, UUID uuid, Location location, EntityRotation rotation) {
+        super(connection, entityId, uuid, location, rotation);
     }
 }
+

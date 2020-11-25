@@ -19,6 +19,7 @@ import de.bixilon.minosoft.data.entities.Location;
 import de.bixilon.minosoft.data.entities.Velocity;
 import de.bixilon.minosoft.data.entities.entities.Entity;
 import de.bixilon.minosoft.data.entities.entities.UnknownEntityException;
+import de.bixilon.minosoft.data.mappings.VersionTweaker;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.network.Connection;
 import de.bixilon.minosoft.protocol.packets.ClientboundPacket;
@@ -58,6 +59,8 @@ public class PacketSpawnMob implements ClientboundPacket {
         EntityMetaData metaData = null;
         if (buffer.getVersionId() < 550) {
             metaData = buffer.readMetaData();
+            // we have meta data, check if we need to correct the class
+            typeClass = VersionTweaker.getRealEntityClass(typeClass, metaData, buffer.getVersionId());
         }
         if (typeClass == null) {
             throw new UnknownEntityException(String.format("Unknown entity (typeId=%d)", type));
@@ -82,7 +85,7 @@ public class PacketSpawnMob implements ClientboundPacket {
 
     @Override
     public void log() {
-        Log.protocol(String.format("Mob spawned at %s (entityId=%d, type=%s)", entity.getLocation().toString(), entity.getEntityId(), entity));
+        Log.protocol(String.format("[IN] Mob spawned at %s (entityId=%d, type=%s)", entity.getLocation().toString(), entity.getEntityId(), entity));
     }
 
     public Entity getEntity() {
