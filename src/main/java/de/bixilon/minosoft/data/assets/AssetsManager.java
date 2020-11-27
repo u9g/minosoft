@@ -111,6 +111,9 @@ public class AssetsManager {
             try {
                 String hash = assets.get(filename);
                 boolean compressed = (source == AssetsSource.MOJANG);
+                if (StaticConfiguration.DEBUG_SLOW_LOADING) {
+                    Thread.sleep(100L);
+                }
                 if (!verifyAssetHash(hash, compressed)) {
                     AssetsManager.downloadAsset(source, hash);
                 }

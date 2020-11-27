@@ -27,7 +27,7 @@ import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class ChunkUtil {
-    public static Chunk readChunkPacket(InByteBuffer buffer, short sectionBitMask, short addBitMask, boolean groundUpContinuous, boolean containsSkyLight) {
+    public static Chunk readChunkPacket(InByteBuffer buffer, int sectionBitMask, int addBitMask, boolean groundUpContinuous, boolean containsSkyLight) {
         if (buffer.getVersionId() < 23) {
             if (sectionBitMask == 0x00 && groundUpContinuous) {
                 // unload chunk
@@ -95,15 +95,11 @@ public final class ChunkUtil {
             return new Chunk(sectionMap);
         }
         if (buffer.getVersionId() < 62) { // ToDo: was this really changed in 62?
-            if (sectionBitMask == 0x00 && groundUpContinuous) {
-                // unload chunk
-                return null;
-            }
             byte sections = BitByte.getBitCount(sectionBitMask);
             int totalBlocks = RenderConstants.SECTION_HEIGHT * RenderConstants.SECTION_WIDTH * RenderConstants.SECTION_WIDTH * sections;
             int halfBytes = totalBlocks / 2; // half bytes
 
-            short[] blockData = buffer.readLEShorts(totalBlocks); // blocks >>> 4, data & 0xF
+            int[] blockData = buffer.readUnsignedLEShorts(totalBlocks); // blocks >>> 4, data & 0xF
 
             byte[] light = buffer.readBytes(halfBytes);
             byte[] skyLight = null;
@@ -112,6 +108,10 @@ public final class ChunkUtil {
             }
             if (groundUpContinuous) {
                 byte[] biomes = buffer.readBytes(RenderConstants.SECTION_WIDTH * RenderConstants.SECTION_WIDTH);
+            }
+            if (sectionBitMask == 0x00 && groundUpContinuous) {
+                // unload chunk
+                return null;
             }
 
             int arrayPos = 0;
@@ -125,9 +125,9 @@ public final class ChunkUtil {
                 for (int nibbleY = 0; nibbleY < RenderConstants.SECTION_HEIGHT; nibbleY++) {
                     for (int nibbleZ = 0; nibbleZ < RenderConstants.SECTION_WIDTH; nibbleZ++) {
                         for (int nibbleX = 0; nibbleX < RenderConstants.SECTION_WIDTH; nibbleX++) {
-                            int blockId = blockData[arrayPos] & 0xFFFF;
+                            int blockId = blockData[arrayPos];
                             Block block = buffer.getConnection().getMapping().getBlockById(blockId);
-                            if (block.equals(Blocks.nullBlock)) {
+                            if (block == null || block.equals(Blocks.nullBlock)) {
                                 arrayPos++;
                                 continue;
                             }
