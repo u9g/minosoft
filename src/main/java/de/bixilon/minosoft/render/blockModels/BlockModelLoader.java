@@ -54,6 +54,9 @@ public class BlockModelLoader {
     private static HashMap<String, BlockModelInterface> loadBlocks(JsonObject data, HashMap<String, HashSet<SubBlock>> blockModels) {
         HashMap<String, BlockModelInterface> modelMap = new HashMap<>();
         for (Map.Entry<String, JsonElement> blockEntry : data.get("blockStates").getAsJsonObject().entrySet()) {
+            if (blockEntry.getKey().equals("grass_block")) {
+                int x = 0;
+            }
             JsonObject block = blockEntry.getValue().getAsJsonObject();
             if (block.has("states")) {
                 JsonArray states = block.get("states").getAsJsonArray();

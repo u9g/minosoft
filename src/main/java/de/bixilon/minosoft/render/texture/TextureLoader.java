@@ -90,8 +90,6 @@ public class TextureLoader {
                 modTextureMap.put(textureName, image);
             } catch (IOException e) {
                 Log.fatal(String.format("An error occurred while loading texture %s (fileName=%s): %s", textureName, fileName, e.getLocalizedMessage()));
-                e.printStackTrace();
-                System.exit(6);
             }
             totalTextures++;
         }

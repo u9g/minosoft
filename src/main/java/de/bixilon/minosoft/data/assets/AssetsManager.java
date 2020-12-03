@@ -33,6 +33,7 @@ import java.io.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
@@ -72,9 +73,12 @@ public class AssetsManager {
     }
 
     private static void initAssetsAliases(JsonObject json) {
-        for (String key : json.keySet()) {
-            String value = json.get(key).getAsString();
-            assets.put(key, assets.get(value));
+        for (Map.Entry<String, JsonElement> entry : json.entrySet()) {
+            String value = assets.get(entry.getValue().getAsString());
+            if (value == null) {
+                int x = 0;
+            }
+            assets.put(entry.getKey(), assets.get(entry.getValue().getAsString()));
         }
     }
 
@@ -90,12 +94,13 @@ public class AssetsManager {
         }
         assets.putAll(verifyAssets(AssetsSource.MOJANG, latch, parseAssetsIndex(ASSETS_INDEX_HASH)));
         assets.putAll(verifyAssets(AssetsSource.MINOSOFT_GIT, latch, parseAssetsIndex(Util.readJsonAsset("mapping/resources.json"))));
-        // aliases
-        initAssetsAliases(Util.readJsonAsset("mapping/assetsAliases.json"));
         latch.addCount(1); // client jar
         // download assets
         generateJarAssets();
         assets.putAll(parseAssetsIndex(ASSETS_CLIENT_JAR_HASH));
+
+        // aliases
+        initAssetsAliases(Util.readJsonAsset("mapping/assetsAliases.json"));
         // ToDo: This is strange. You will get a jvm crash without it on linux. Weired.
         try {
             Thread.sleep(800L);
@@ -227,19 +232,15 @@ public class AssetsManager {
         HashMap<String, String> clientJarAssetsHashMap = new HashMap<>();
         ZipInputStream versionJar = new ZipInputStream(readAssetAsStreamByHash(clientJarJson.get("sha1").getAsString()));
         ZipEntry currentFile;
+        zipLoop:
         while ((currentFile = versionJar.getNextEntry()) != null) {
             if (!currentFile.getName().startsWith("assets") || currentFile.isDirectory()) {
                 continue;
             }
-            boolean relevant = false;
             for (String prefix : RELEVANT_ASSETS) {
                 if (currentFile.getName().startsWith("assets/" + prefix)) {
-                    relevant = true;
-                    break;
+                    continue zipLoop;
                 }
-            }
-            if (!relevant) {
-                continue;
             }
             String hash = saveAsset(versionJar);
 
