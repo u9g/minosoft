@@ -29,22 +29,15 @@ public class PacketEntityEquipment implements ClientboundPacket {
 
     @Override
     public boolean read(InByteBuffer buffer) {
-        if (buffer.getVersionId() < 7) {
-            entityId = buffer.readInt();
-            slots.put(InventorySlots.EntityInventorySlots.byId(buffer.readShort(), buffer.getVersionId()), buffer.readSlot());
-            return true;
-        }
+        entityId = buffer.readEntityId();
         if (buffer.getVersionId() < 49) {
-            entityId = buffer.readVarInt();
             slots.put(InventorySlots.EntityInventorySlots.byId(buffer.readShort(), buffer.getVersionId()), buffer.readSlot());
             return true;
         }
         if (buffer.getVersionId() < 732) {
-            entityId = buffer.readVarInt();
             slots.put(InventorySlots.EntityInventorySlots.byId(buffer.readVarInt(), buffer.getVersionId()), buffer.readSlot());
             return true;
         }
-        entityId = buffer.readVarInt();
         boolean slotAvailable = true;
         while (slotAvailable) {
             int slotId = buffer.readByte();
@@ -67,12 +60,12 @@ public class PacketEntityEquipment implements ClientboundPacket {
         if (slots.size() == 1) {
             Map.Entry<InventorySlots.EntityInventorySlots, Slot> set = slots.entrySet().iterator().next();
             if (set.getValue() == null) {
-                Log.protocol(String.format("Entity equipment changed (entityId=%d, slot=%s): AIR", entityId, set.getKey()));
+                Log.protocol(String.format("[IN] Entity equipment changed (entityId=%d, slot=%s): AIR", entityId, set.getKey()));
                 return;
             }
-            Log.protocol(String.format("Entity equipment changed (entityId=%d, slot=%s): %dx %s", entityId, set.getKey(), set.getValue().getItemCount(), set.getValue().getDisplayName()));
+            Log.protocol(String.format("[IN] Entity equipment changed (entityId=%d, slot=%s, item=%s): %dx %s", entityId, set.getKey(), set.getValue().getItem(), set.getValue().getItemCount(), set.getValue().getDisplayName()));
         } else {
-            Log.protocol(String.format("Entity equipment changed (entityId=%d, slotCount=%d)", entityId, slots.size()));
+            Log.protocol(String.format("[IN] Entity equipment changed (entityId=%d, slotCount=%d)", entityId, slots.size()));
         }
     }
 

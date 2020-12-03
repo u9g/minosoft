@@ -335,13 +335,8 @@ public class PacketHandler {
     }
 
     public void handle(PacketEntityVelocity pkg) {
-        Entity entity;
-        if (pkg.getEntityId() == connection.getPlayer().getEntity().getEntityId()) {
-            // that's us!
-            entity = connection.getPlayer().getEntity();
-        } else {
-            entity = connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
-        }
+        Entity entity = connection.getPlayer().getWorld().getEntity(pkg.getEntityId());
+
         if (entity == null) {
             // thanks mojang
             return;
@@ -496,6 +491,7 @@ public class PacketHandler {
         for (int i = 0; i < 4; i++) {
             nbt.writeTag(String.format("Text%d", (i + 1)), new StringTag(pkg.getLines()[i].getLegacyText()));
         }
+        // ToDo: handle sign updates
     }
 
     public void handle(PacketEntityAnimation pkg) {
@@ -594,7 +590,7 @@ public class PacketHandler {
         connection.fireEvent(new SingleSlotChangeEvent(connection, pkg));
 
         if (pkg.getWindowId() == -1) {
-            // invalid window Id
+            // thanks mojang
             // ToDo: what is windowId -1
             return;
         }
@@ -648,9 +644,8 @@ public class PacketHandler {
             case CREATE_UPDATE -> connection.getPlayer().getScoreboardManager().getObjective(pkg.getScoreName()).addScore(new ScoreboardScore(pkg.getItemName(), pkg.getScoreName(), pkg.getScoreValue()));
             case REMOVE -> {
                 ScoreboardObjective objective = connection.getPlayer().getScoreboardManager().getObjective(pkg.getScoreName());
-                if (objective == null) {
-                    Log.warn(String.format("Server tried to remove score witch was not created before (itemName=\"%s\", scoreName=\"%s\")!", pkg.getItemName(), pkg.getScoreName()));
-                } else {
+                if (objective != null) {
+                    // thanks mojang
                     objective.removeScore(pkg.getItemName());
                 }
             }

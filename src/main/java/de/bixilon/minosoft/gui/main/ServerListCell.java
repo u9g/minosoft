@@ -13,12 +13,16 @@
 
 package de.bixilon.minosoft.gui.main;
 
+import com.jfoenix.controls.JFXAlert;
+import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXDialogLayout;
 import de.bixilon.minosoft.Minosoft;
 import de.bixilon.minosoft.data.Player;
 import de.bixilon.minosoft.data.locale.LocaleManager;
 import de.bixilon.minosoft.data.locale.Strings;
 import de.bixilon.minosoft.data.mappings.versions.Version;
 import de.bixilon.minosoft.data.mappings.versions.Versions;
+import de.bixilon.minosoft.data.text.BaseComponent;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.modding.event.EventInvokerCallback;
 import de.bixilon.minosoft.modding.event.events.ConnectionStateChangeEvent;
@@ -26,11 +30,9 @@ import de.bixilon.minosoft.modding.event.events.ServerListPingArriveEvent;
 import de.bixilon.minosoft.protocol.network.Connection;
 import de.bixilon.minosoft.protocol.ping.ForgeModInfo;
 import de.bixilon.minosoft.protocol.ping.ServerListPing;
-import de.bixilon.minosoft.util.DNSUtil;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -38,7 +40,6 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
@@ -54,13 +55,14 @@ import java.util.ResourceBundle;
 public class ServerListCell extends ListCell<Server> implements Initializable {
     public static final ListView<Server> listView = new ListView<>();
 
-    public ImageView icon;
-    public TextFlow motd;
-    public Label version;
-    public Label players;
-    public Label serverBrand;
-    public Label serverName;
-    public AnchorPane root;
+    public ImageView faviconField;
+    public TextFlow nameField;
+    public TextFlow motdField;
+    public Label versionField;
+    public Label playersField;
+    public Label brandField;
+
+    public GridPane root;
     public MenuItem optionsConnect;
     public MenuItem optionsShowInfo;
     public MenuItem optionsEdit;
@@ -97,10 +99,6 @@ public class ServerListCell extends ListCell<Server> implements Initializable {
         optionsDelete.setText(LocaleManager.translate(Strings.SERVER_ACTION_DELETE));
     }
 
-    public AnchorPane getRoot() {
-        return root;
-    }
-
     @Override
     protected void updateItem(Server server, boolean empty) {
         super.updateItem(server, empty);
@@ -117,16 +115,17 @@ public class ServerListCell extends ListCell<Server> implements Initializable {
         if (server.equals(this.server)) {
             return;
         }
+        server.setCell(this);
         resetCell();
 
         this.server = server;
-        serverName.setText(server.getName());
+        setName(server.getName());
 
         Image favicon = GUITools.getImage(server.getFavicon());
         if (favicon == null) {
-            favicon = GUITools.logo;
+            favicon = GUITools.MINOSOFT_LOGO;
         }
-        icon.setImage(favicon);
+        faviconField.setImage(favicon);
         if (server.isConnected()) {
             setStyle("-fx-background-color: darkseagreen;");
             optionsSessions.setDisable(false);
@@ -149,37 +148,37 @@ public class ServerListCell extends ListCell<Server> implements Initializable {
             }
             if (ping == null) {
                 // Offline
-                players.setText("");
-                version.setText(LocaleManager.translate(Strings.OFFLINE));
-                version.setStyle("-fx-text-fill: red;");
+                playersField.setText("");
+                versionField.setText(LocaleManager.translate(Strings.OFFLINE));
+                versionField.setStyle("-fx-text-fill: red;");
                 setErrorMotd(String.format("%s", server.getLastPing().getLastConnectionException()));
                 optionsConnect.setDisable(true);
                 canConnect = false;
                 return;
             }
-            players.setText(LocaleManager.translate(Strings.SERVER_INFO_SLOTS_PLAYERS_ONLINE, ping.getPlayerOnline(), ping.getMaxPlayers()));
+            playersField.setText(LocaleManager.translate(Strings.SERVER_INFO_SLOTS_PLAYERS_ONLINE, ping.getPlayerOnline(), ping.getMaxPlayers()));
             Version serverVersion;
             if (server.getDesiredVersionId() == -1) {
                 serverVersion = Versions.getVersionByProtocolId(ping.getProtocolId());
             } else {
                 serverVersion = Versions.getVersionById(server.getDesiredVersionId());
-                version.setStyle("-fx-text-fill: green;");
+                versionField.setStyle("-fx-text-fill: -secondary-light-light-color;");
             }
             if (serverVersion == null) {
-                version.setText(ping.getServerBrand());
-                version.setStyle("-fx-text-fill: red;");
+                versionField.setText(ping.getServerBrand());
+                versionField.setStyle("-fx-text-fill: red;");
                 optionsConnect.setDisable(true);
                 canConnect = false;
             } else {
-                version.setText(serverVersion.getVersionName());
+                versionField.setText(serverVersion.getVersionName());
                 optionsConnect.setDisable(false);
                 canConnect = true;
             }
-            serverBrand.setText(ping.getServerModInfo().getBrand());
-            serverBrand.setTooltip(new Tooltip(ping.getServerModInfo().getInfo()));
-            motd.getChildren().addAll(ping.getMotd().getJavaFXText());
+            brandField.setText(ping.getServerModInfo().getBrand());
+            brandField.setTooltip(new Tooltip(ping.getServerModInfo().getInfo()));
+            motdField.getChildren().setAll(ping.getMotd().getJavaFXText());
             if (ping.getFavicon() != null) {
-                icon.setImage(GUITools.getImage(ping.getFavicon()));
+                faviconField.setImage(GUITools.getImage(ping.getFavicon()));
                 if (!Arrays.equals(ping.getFavicon(), server.getFavicon())) {
                     server.setFavicon(ping.getFavicon());
                     server.saveToConfig();
@@ -191,34 +190,40 @@ public class ServerListCell extends ListCell<Server> implements Initializable {
             }
             if (server.getLastPing().getLastConnectionException() != null) {
                 // connection failed because of an error in minosoft, but ping was okay
-                version.setStyle("-fx-text-fill: red;");
+                versionField.setStyle("-fx-text-fill: red;");
                 optionsConnect.setDisable(true);
                 canConnect = false;
-                setErrorMotd(String.format("%s: %s", server.getLastPing().getLastConnectionException().getClass().getCanonicalName(), server.getLastPing().getLastConnectionException().getLocalizedMessage()));
+                setErrorMotd(String.format("%s: %s", server.getLastPing().getLastConnectionException().getClass().getCanonicalName(), server.getLastPing().getLastConnectionException().getMessage()));
             }
         })));
+    }
+
+    public void setName(BaseComponent name) {
+        nameField.getChildren().setAll(name.getJavaFXText());
+        for (Node node : nameField.getChildren()) {
+            node.setStyle("-fx-font-size: 15pt ;");
+        }
     }
 
     private void resetCell() {
         // clear all cells
         setStyle(null);
-        motd.getChildren().clear();
-        serverBrand.setText("");
-        serverBrand.setTooltip(null);
-        motd.setStyle(null);
-        version.setText(LocaleManager.translate(Strings.CONNECTING));
-        version.setStyle(null);
-        players.setText("");
+        motdField.getChildren().clear();
+        brandField.setText("");
+        brandField.setTooltip(null);
+        motdField.setStyle(null);
+        versionField.setText(LocaleManager.translate(Strings.CONNECTING));
+        versionField.setStyle(null);
+        playersField.setText("");
         optionsConnect.setDisable(true);
         optionsEdit.setDisable(false);
         optionsDelete.setDisable(false);
     }
 
     private void setErrorMotd(String message) {
-        motd.getChildren().clear();
         Text text = new Text(message);
         text.setFill(Color.RED);
-        motd.getChildren().add(text);
+        motdField.getChildren().setAll(text);
     }
 
     public void delete() {
@@ -227,12 +232,12 @@ public class ServerListCell extends ListCell<Server> implements Initializable {
         }
         server.getConnections().forEach(Connection::disconnect);
         server.delete();
-        Log.info(String.format("Deleted server (name=\"%s\", address=\"%s\")", server.getName(), server.getAddress()));
+        Log.info(String.format("Deleted server (name=\"%s\", address=\"%s\")", server.getName().getLegacyText(), server.getAddress()));
         listView.getItems().remove(server);
     }
 
     public void refresh() {
-        Log.info(String.format("Refreshing server status (serverName=\"%s\", address=\"%s\")", server.getName(), server.getAddress()));
+        Log.info(String.format("Refreshing server status (serverName=\"%s\", address=\"%s\")", server.getName().getLegacyText(), server.getAddress()));
         if (server.getLastPing() == null) {
             // server was not pinged, don't even try, only costs memory and cpu
             return;
@@ -250,7 +255,7 @@ public class ServerListCell extends ListCell<Server> implements Initializable {
             case SECONDARY -> optionsMenu.fire();
             case MIDDLE -> {
                 listView.getSelectionModel().select(server);
-                edit();
+                editServer();
             }
         }
     }
@@ -273,68 +278,8 @@ public class ServerListCell extends ListCell<Server> implements Initializable {
 
     }
 
-    public void edit() {
-        if (server.isReadOnly()) {
-            return;
-        }
-        Dialog<?> dialog = new Dialog<>();
-        dialog.setTitle(LocaleManager.translate(Strings.EDIT_SERVER_DIALOG_TITLE, server.getName()));
-        dialog.setHeaderText(LocaleManager.translate(Strings.EDIT_SERVER_DIALOG_HEADER));
-        ((Stage) dialog.getDialogPane().getScene().getWindow()).getIcons().add(GUITools.logo);
-
-        ButtonType saveButtonType = new ButtonType(LocaleManager.translate(Strings.BUTTON_SAVE), ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
-
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(20, 300, 10, 10));
-
-        TextField serverName = new TextField();
-        serverName.setPromptText(LocaleManager.translate(Strings.SERVER_NAME));
-        serverName.setText(server.getName());
-        TextField serverAddress = new TextField();
-        serverAddress.setPromptText(LocaleManager.translate(Strings.SERVER_ADDRESS));
-        serverAddress.setText(server.getAddress());
-
-        if (server.getDesiredVersionId() == -1) {
-            GUITools.versionList.getSelectionModel().select(Versions.LOWEST_VERSION_SUPPORTED);
-        } else {
-            GUITools.versionList.getSelectionModel().select(Versions.getVersionById(server.getDesiredVersionId()));
-        }
-
-        grid.add(new Label(LocaleManager.translate(Strings.SERVER_NAME) + ":"), 0, 0);
-        grid.add(serverName, 1, 0);
-        grid.add(new Label(LocaleManager.translate(Strings.SERVER_ADDRESS) + ":"), 0, 1);
-        grid.add(serverAddress, 1, 1);
-        grid.add(new Label(LocaleManager.translate(Strings.VERSION) + ":"), 0, 2);
-        grid.add(GUITools.versionList, 1, 2);
-
-        Node saveButton = dialog.getDialogPane().lookupButton(saveButtonType);
-
-        serverAddress.textProperty().addListener((observable, oldValue, newValue) -> saveButton.setDisable(newValue.trim().isEmpty()));
-
-        dialog.getDialogPane().setContent(grid);
-
-        Platform.runLater(serverName::requestFocus);
-
-        dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == saveButtonType) {
-                serverName.setText(serverName.getText());
-                server.setName(serverName.getText());
-                server.setDesiredVersionId(GUITools.versionList.getSelectionModel().getSelectedItem().getVersionId());
-                if (server.getDesiredVersionId() != -1) {
-                    version.setText(Versions.getVersionById(server.getDesiredVersionId()).getVersionName());
-                    version.setTextFill(Color.BLACK);
-                }
-                server.setAddress(DNSUtil.correctHostName(serverAddress.getText()));
-                server.saveToConfig();
-                Log.info(String.format("Edited and saved server (serverName=%s, serverAddress=%s, version=%d)", server.getName(), server.getAddress(), server.getDesiredVersionId()));
-            }
-            return null;
-        });
-
-        dialog.showAndWait();
+    public void editServer() {
+        MainWindow.addOrEditServer(server);
     }
 
     private void handleConnectionCallback(ConnectionStateChangeEvent event) {
@@ -363,19 +308,24 @@ public class ServerListCell extends ListCell<Server> implements Initializable {
     }
 
     public void showInfo() {
-        Dialog<?> dialog = new Dialog<>();
-        dialog.setTitle("View server info: " + server.getName());
-        ((Stage) dialog.getDialogPane().getScene().getWindow()).getIcons().add(GUITools.logo);
+        JFXAlert<?> dialog = new JFXAlert<>();
+        dialog.setTitle("View server info: " + server.getName().getMessage());
+        GUITools.initializePane(dialog.getDialogPane());
 
-        ButtonType loginButtonType = ButtonType.CLOSE;
-        dialog.getDialogPane().getButtonTypes().add(loginButtonType);
+        JFXDialogLayout layout = new JFXDialogLayout();
+
+
+        JFXButton closeButton = new JFXButton(ButtonType.CLOSE.getText());
+        closeButton.setOnAction((actionEvent -> dialog.hide()));
+        closeButton.setButtonType(JFXButton.ButtonType.RAISED);
+        layout.setActions(closeButton);
 
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
-        grid.setPadding(new Insets(20, 300, 10, 10));
 
-        Label serverNameLabel = new Label(server.getName());
+        TextFlow serverNameLabel = new TextFlow();
+        serverNameLabel.getChildren().setAll(server.getName().getJavaFXText());
         Label serverAddressLabel = new Label(server.getAddress());
         Label forcedVersionLabel = new Label();
 
@@ -386,7 +336,9 @@ public class ServerListCell extends ListCell<Server> implements Initializable {
         }
 
         int column = -1;
-        grid.add(new Label(LocaleManager.translate(Strings.SERVER_NAME) + ":"), 0, ++column);
+        Label a = new Label(LocaleManager.translate(Strings.SERVER_NAME) + ":");
+        a.setWrapText(false);
+        grid.add(a, 0, ++column);
         grid.add(serverNameLabel, 1, column);
         grid.add(new Label(LocaleManager.translate(Strings.SERVER_ADDRESS) + ":"), 0, ++column);
         grid.add(serverAddressLabel, 1, column);
@@ -415,7 +367,7 @@ public class ServerListCell extends ListCell<Server> implements Initializable {
                 Label serverBrandLabel = new Label(lastPing.getServerBrand());
                 Label playersOnlineMaxLabel = new Label(LocaleManager.translate(Strings.SERVER_INFO_SLOTS_PLAYERS_ONLINE, lastPing.getPlayerOnline(), lastPing.getMaxPlayers()));
                 TextFlow motdLabel = new TextFlow();
-                motdLabel.getChildren().addAll(lastPing.getMotd().getJavaFXText());
+                motdLabel.getChildren().setAll(lastPing.getMotd().getJavaFXText());
                 Label moddedBrandLabel = new Label(lastPing.getServerModInfo().getBrand());
 
                 grid.add(new Label(LocaleManager.translate(Strings.SERVER_INFO_REAL_SERVER_ADDRESS) + ":"), 0, ++column);
@@ -440,9 +392,9 @@ public class ServerListCell extends ListCell<Server> implements Initializable {
                 }
             }
         }
-
-        dialog.getDialogPane().setContent(grid);
-
+        // ToDo: size probably
+        layout.setBody(grid);
+        dialog.setContent(layout);
         dialog.showAndWait();
     }
 
@@ -454,8 +406,8 @@ public class ServerListCell extends ListCell<Server> implements Initializable {
             Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setTitle(LocaleManager.translate(Strings.SESSIONS_DIALOG_TITLE, server.getName()));
-            stage.getIcons().add(GUITools.logo);
             stage.setScene(new Scene(parent));
+            GUITools.initializeScene(stage.getScene());
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
