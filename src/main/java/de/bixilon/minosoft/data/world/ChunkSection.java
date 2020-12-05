@@ -15,7 +15,6 @@ package de.bixilon.minosoft.data.world;
 
 import de.bixilon.minosoft.data.entities.block.BlockEntityMetaData;
 import de.bixilon.minosoft.data.mappings.blocks.Block;
-import de.bixilon.minosoft.data.mappings.blocks.Blocks;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -55,15 +54,16 @@ public class ChunkSection {
     }
 
     public void setBlock(InChunkSectionLocation location, Block block) {
-        if (blocks.get(location).equals(block)) {
-            return;
-        }
-        if (block == null || block.equals(Blocks.nullBlock)) {
+        blockEntityMeta.remove(location);
+        Block current = blocks.get(location);
+        if (block == null) {
             blocks.remove(location);
             return;
         }
+        if (current.equals(block)) {
+            return;
+        }
         blocks.put(location, block);
-        blockEntityMeta.remove(location);
     }
 
     public void setBlockEntityData(InChunkSectionLocation position, BlockEntityMetaData data) {

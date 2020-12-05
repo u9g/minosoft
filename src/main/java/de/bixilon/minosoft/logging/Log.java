@@ -39,6 +39,7 @@ public class Log {
                     continue;
                 }
                 System.out.println(message);
+                System.out.flush();
 
                 // ToDo: log to file
             }
@@ -61,7 +62,9 @@ public class Log {
             if (string.isBlank()) {
                 return;
             }
-            message = String.format(string, format);
+            if (format.length > 0) {
+                message = String.format(string, format);
+            }
         }
         StringBuilder builder = new StringBuilder();
         builder.append("[");

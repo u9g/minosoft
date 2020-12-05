@@ -11,28 +11,33 @@
  * This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
-package de.bixilon.minosoft.data.entities;
+package de.bixilon.minosoft.util.nbt.tag;
 
-import de.bixilon.minosoft.data.mappings.MobEffect;
+public abstract class NumberTag extends NBTTag {
 
-public record StatusEffect(MobEffect effect, int amplifier, int duration) {
-    @Deprecated
-    public int getAmplifier() {
-        return amplifier;
+    public byte getAsByte() {
+        return (byte) getAsLong();
     }
 
-    @Deprecated
-    public int getDuration() {
-        return duration;
+    public short getAsShort() {
+        return (short) getAsLong();
     }
 
-    @Deprecated
-    public MobEffect getEffect() {
-        return effect;
+    public int getAsInt() {
+        return (int) getAsLong();
     }
 
-    @Override
-    public String toString() {
-        return String.format("%s (amplifier: %d, duration: %d)", effect, amplifier, duration);
+    public abstract long getAsLong();
+
+    public int getAsUnsignedByte() {
+        return getAsShort();
+    }
+
+    public int getAsUnsignedShort() {
+        return getAsShort();
+    }
+
+    public long getAsUnsignedInt() {
+        return getAsInt();
     }
 }

@@ -18,7 +18,6 @@ import de.bixilon.minosoft.config.ConfigurationPaths;
 import de.bixilon.minosoft.data.GameModes;
 import de.bixilon.minosoft.data.entities.entities.Entity;
 import de.bixilon.minosoft.data.entities.entities.player.PlayerEntity;
-import de.bixilon.minosoft.data.mappings.blocks.Blocks;
 import de.bixilon.minosoft.data.mappings.recipes.Recipes;
 import de.bixilon.minosoft.data.mappings.versions.Version;
 import de.bixilon.minosoft.data.mappings.versions.Versions;
@@ -42,6 +41,7 @@ import de.bixilon.minosoft.protocol.packets.serverbound.login.PacketEncryptionRe
 import de.bixilon.minosoft.protocol.packets.serverbound.play.PacketConfirmTeleport;
 import de.bixilon.minosoft.protocol.packets.serverbound.play.PacketKeepAliveResponse;
 import de.bixilon.minosoft.protocol.packets.serverbound.play.PacketPlayerPositionAndRotationSending;
+import de.bixilon.minosoft.protocol.packets.serverbound.status.PacketStatusPing;
 import de.bixilon.minosoft.render.utility.Vec3;
 import de.bixilon.minosoft.util.nbt.tag.CompoundTag;
 import de.bixilon.minosoft.util.nbt.tag.StringTag;
@@ -79,6 +79,8 @@ public class PacketHandler {
         }
         Log.info(String.format("Status response received: %s/%s online. MotD: '%s'", pkg.getResponse().getPlayerOnline(), pkg.getResponse().getMaxPlayers(), pkg.getResponse().getMotd().getANSIColoredMessage()));
         connection.handlePingCallbacks(pkg.getResponse());
+        connection.connectionStatusPing = new ConnectionPing();
+        connection.sendPacket(new PacketStatusPing(connection.connectionStatusPing));
     }
 
     public void handle(PacketStatusPong pkg) {
@@ -147,7 +149,7 @@ public class PacketHandler {
                 case ADD -> connection.getPlayer().getPlayerList().put(bulk.getUUID(), new PlayerListItem(bulk.getUUID(), bulk.getName(), bulk.getPing(), bulk.getGameMode(), bulk.getDisplayName(), bulk.getProperties()));
                 case UPDATE_LATENCY -> {
                     if (bulk.isLegacy()) {
-                        //add or update
+                        // add or update
                         if (item == null) {
                             // create
                             UUID uuid = UUID.randomUUID();
@@ -249,7 +251,11 @@ public class PacketHandler {
         if (connection.fireEvent(event)) {
             return;
         }
-        Log.game("[CHAT] " + event.getMessage());
+        Log.game(switch (pkg.getPosition()) {
+            case SYSTEM_MESSAGE -> "[SYSTEM] ";
+            case ABOVE_HOTBAR -> "[HOTBAR] ";
+            default -> "[CHAT] ";
+        } + event.getMessage());
     }
 
     public void handle(PacketDisconnect pkg) {
@@ -512,13 +518,14 @@ public class PacketHandler {
 
     public void handle(PacketPlayerPositionAndRotation pkg) {
         // ToDo: GUI should do this
+        connection.getPlayer().getEntity().setLocation(pkg.getLocation());
         if (connection.getVersion().getVersionId() >= 79) {
             connection.sendPacket(new PacketConfirmTeleport(pkg.getTeleportId()));
         } else {
-            connection.sendPacket(new PacketPlayerPositionAndRotationSending(pkg.getLocation(), pkg.getYaw(), pkg.getPitch(), pkg.isOnGround()));
+            connection.sendPacket(new PacketPlayerPositionAndRotationSending(pkg.getLocation(), pkg.getRotation(), pkg.isOnGround()));
         }
         connection.getPlayer().setSpawnConfirmed(true);
-        connection.getRenderProperties().getController().getCameraMovement().setRotation(pkg.getPitch(), pkg.getYaw());
+        connection.getRenderProperties().getController().getCameraMovement().setRotation(pkg.getRotation());
         connection.getRenderProperties().getController().setPlayerPos(new Vec3(pkg.getLocation()));
     }
 
@@ -561,7 +568,7 @@ public class PacketHandler {
             int y = ((int) pkg.getLocation().getY()) + record[1];
             int z = ((int) pkg.getLocation().getZ()) + record[2];
             BlockPosition blockPosition = new BlockPosition(x, (short) y, z);
-            connection.getPlayer().getWorld().setBlock(blockPosition, Blocks.nullBlock);
+            connection.getPlayer().getWorld().setBlock(blockPosition, null);
         }
         // ToDo: motion support
     }
@@ -756,7 +763,7 @@ public class PacketHandler {
     }
 
     public void handle(PacketTags pkg) {
-        //ToDo
+        // ToDo
     }
 
     public void handle(PacketDeclareRecipes pkg) {

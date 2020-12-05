@@ -36,6 +36,7 @@ public class OutByteBuffer {
         this.versionId = connection.getVersion().getVersionId();
     }
 
+    @SuppressWarnings("unchecked")
     public OutByteBuffer(OutByteBuffer buffer) {
         this.bytes = (ArrayList<Byte>) buffer.getBytes().clone();
         this.connection = buffer.getConnection();
@@ -76,7 +77,7 @@ public class OutByteBuffer {
     }
 
     public void writeTextComponent(ChatComponent chatComponent) {
-        writeString(chatComponent.getMessage()); //ToDo: test if this should not be json
+        writeString(chatComponent.getMessage()); // ToDo: test if this should not be json
     }
 
     public void writeJSON(JsonObject j) {
@@ -84,6 +85,9 @@ public class OutByteBuffer {
     }
 
     public void writeString(String string) {
+        if (string.length() > ProtocolDefinition.STRING_MAX_LEN) {
+            throw new IllegalArgumentException(String.format("String max string length exceeded %d > %d", string.length(), ProtocolDefinition.STRING_MAX_LEN));
+        }
         writeVarInt(string.length());
         writeBytes(string.getBytes(StandardCharsets.UTF_8));
     }
@@ -146,7 +150,8 @@ public class OutByteBuffer {
 
     public void writeVarInt(int value) {
         // thanks https://wiki.vg/Protocol#VarInt_and_VarLong
-        do {
+        do
+        {
             byte temp = (byte) (value & 0x7F);
             value >>>= 7;
             if (value != 0) {
@@ -159,7 +164,8 @@ public class OutByteBuffer {
     public void prefixVarInt(int value) {
         int count = 0;
         // thanks https://wiki.vg/Protocol#VarInt_and_VarLong
-        do {
+        do
+        {
             byte temp = (byte) (value & 0x7F);
             value >>>= 7;
             if (value != 0) {

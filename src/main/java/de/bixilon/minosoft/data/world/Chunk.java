@@ -15,7 +15,6 @@ package de.bixilon.minosoft.data.world;
 
 import de.bixilon.minosoft.data.entities.block.BlockEntityMetaData;
 import de.bixilon.minosoft.data.mappings.blocks.Block;
-import de.bixilon.minosoft.data.mappings.blocks.Blocks;
 import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
 
 import java.util.HashMap;
@@ -38,7 +37,7 @@ public class Chunk {
     public Block getBlock(int x, int y, int z) {
         byte section = (byte) (y / RenderConstants.SECTION_HEIGHT);
         if (!sections.containsKey(section)) {
-            return Blocks.nullBlock;
+            return null;
         }
         return sections.get(section).getBlock(x, y % RenderConstants.SECTION_HEIGHT, z);
     }

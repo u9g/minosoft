@@ -50,7 +50,7 @@ public class BaseComponent extends ChatComponent {
             char nextFormattingChar = iterator.current();
             iterator.next();
             RGBColor nextColor = ChatColors.getColorByFormattingChar(nextFormattingChar);
-            if (nextColor != null && nextColor != color) {
+            if (nextColor != null) {
                 // color change, add text part
                 if (currentText.length() > 0) {
                     parts.add(new TextComponent(currentText.toString(), color, formattingCodes));
@@ -90,6 +90,7 @@ public class BaseComponent extends ChatComponent {
         this(null, json);
     }
 
+    @SuppressWarnings("unchecked")
     public BaseComponent(@Nullable TextComponent parent, JsonObject json) {
         TextComponent thisTextComponent = null;
         if (json.has("text")) {

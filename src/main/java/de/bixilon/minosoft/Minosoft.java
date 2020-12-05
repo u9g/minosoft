@@ -14,6 +14,8 @@
 package de.bixilon.minosoft;
 
 import com.google.common.collect.HashBiMap;
+import com.jfoenix.controls.JFXAlert;
+import com.jfoenix.controls.JFXDialogLayout;
 import de.bixilon.minosoft.config.Configuration;
 import de.bixilon.minosoft.config.ConfigurationPaths;
 import de.bixilon.minosoft.config.StaticConfiguration;
@@ -37,8 +39,8 @@ import de.bixilon.minosoft.util.task.AsyncTaskWorker;
 import de.bixilon.minosoft.util.task.Task;
 import de.bixilon.minosoft.util.task.TaskImportance;
 import javafx.application.Platform;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.TextArea;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -49,9 +51,7 @@ import java.util.UUID;
 public final class Minosoft {
     public static final HashSet<EventManager> eventManagers = new HashSet<>();
     private static final CountUpAndDownLatch startStatusLatch = new CountUpAndDownLatch(1);
-    public static HashBiMap<String, MojangAccount> accountList;
     public static MojangAccount selectedAccount;
-    public static ArrayList<Server> serverList;
     public static Configuration config;
 
     public static void main(String[] args) {
@@ -74,18 +74,19 @@ public final class Minosoft {
             StartProgressWindow.hideDialog();
             Launcher.exit();
             Platform.runLater(() -> {
-                Dialog<Boolean> dialog = new Dialog<>();
+                JFXAlert<Boolean> dialog = new JFXAlert<>();
                 GUITools.initializePane(dialog.getDialogPane());
                 // Do not translate this, translations might fail to load...
                 dialog.setTitle("Critical Error");
-                dialog.setHeaderText("An error occurred while starting Minosoft");
+                JFXDialogLayout layout = new JFXDialogLayout();
+                layout.setHeading(new Text("A fatal error occurred while starting Minosoft"));
                 TextArea text = new TextArea(exception.getClass().getCanonicalName() + ": " + exception.getMessage());
                 text.setEditable(false);
                 text.setWrapText(true);
-                dialog.getDialogPane().setContent(text);
+                layout.setBody(text);
+                dialog.getDialogPane().setContent(layout);
 
                 Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
-                stage.setAlwaysOnTop(true);
                 stage.toFront();
                 stage.setOnCloseRequest(dialogEvent -> {
                     dialog.setResult(Boolean.TRUE);
@@ -110,8 +111,6 @@ public final class Minosoft {
             // set log level from config
             Log.setLevel(LogLevels.valueOf(config.getString(ConfigurationPaths.StringPaths.GENERAL_LOG_LEVEL)));
             Log.info(String.format("Logging info with level: %s", Log.getLevel()));
-
-            serverList = config.getServers();
             progress.countDown();
         }, "Configuration", String.format("Load config file (%s)", StaticConfiguration.CONFIG_FILENAME), Priorities.HIGHEST, TaskImportance.REQUIRED));
 
@@ -137,8 +136,7 @@ public final class Minosoft {
         taskWorker.addTask(new Task(progress -> {
             Log.debug("Refreshing account token...");
             checkClientToken();
-            accountList = config.getMojangAccounts();
-            selectAccount(accountList.get(config.getString(ConfigurationPaths.StringPaths.ACCOUNT_SELECTED)));
+            selectAccount(config.getAccountList().get(config.getString(ConfigurationPaths.StringPaths.ACCOUNT_SELECTED)));
         }, "Token refresh", "Refresh selected account token", Priorities.LOW, TaskImportance.OPTIONAL, "Configuration"));
 
         taskWorker.addTask(new Task(progress -> {
@@ -200,7 +198,6 @@ public final class Minosoft {
         }
         MojangAccount.RefreshStates refreshState = account.refreshToken();
         if (refreshState == MojangAccount.RefreshStates.ERROR) {
-            accountList.remove(account.getUserId());
             account.delete();
             AccountListCell.listView.getItems().remove(account);
             selectedAccount = null;
@@ -214,14 +211,6 @@ public final class Minosoft {
 
     public static Configuration getConfig() {
         return config;
-    }
-
-    public static ArrayList<Server> getServerList() {
-        return serverList;
-    }
-
-    public static HashBiMap<String, MojangAccount> getAccountList() {
-        return accountList;
     }
 
     public static MojangAccount getSelectedAccount() {

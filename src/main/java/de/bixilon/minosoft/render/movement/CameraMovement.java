@@ -13,6 +13,7 @@
 
 package de.bixilon.minosoft.render.movement;
 
+import de.bixilon.minosoft.data.entities.EntityRotation;
 import de.bixilon.minosoft.protocol.network.Connection;
 import de.bixilon.minosoft.render.GameWindow;
 import de.bixilon.minosoft.render.utility.Vec3;
@@ -76,9 +77,9 @@ public class CameraMovement {
         glRotatef(yaw, 0, 1, 0);
     }
 
-    public void setRotation(float pitch, float yaw) {
-        this.pitch = pitch;
-        this.yaw = yaw;
+    public void setRotation(EntityRotation rotation) {
+        this.pitch = rotation.pitch();
+        this.yaw = rotation.yaw();
     }
 
     public Vec3 getCameraFront() {

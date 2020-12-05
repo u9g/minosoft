@@ -11,28 +11,20 @@
  * This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
-package de.bixilon.minosoft.data.entities;
+package de.bixilon.minosoft.modding.loading;
 
-import de.bixilon.minosoft.data.mappings.MobEffect;
+import com.google.gson.JsonObject;
+import de.bixilon.minosoft.util.Util;
 
-public record StatusEffect(MobEffect effect, int amplifier, int duration) {
-    @Deprecated
-    public int getAmplifier() {
-        return amplifier;
-    }
+import java.util.UUID;
 
-    @Deprecated
-    public int getDuration() {
-        return duration;
-    }
-
-    @Deprecated
-    public MobEffect getEffect() {
-        return effect;
+public record ModIdentifier(UUID uuid, int versionId) {
+    public static ModIdentifier serialize(JsonObject json) {
+        return new ModIdentifier(Util.getUUIDFromString(json.get("uuid").getAsString()), json.get("versionId").getAsInt());
     }
 
     @Override
     public String toString() {
-        return String.format("%s (amplifier: %d, duration: %d)", effect, amplifier, duration);
+        return String.format("uuid=%s, versionId=%d", uuid, versionId);
     }
 }

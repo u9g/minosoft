@@ -192,7 +192,7 @@ public class SocketNetwork implements Network {
                         packet = connection.getPacketByCommand(connection.getConnectionState(), inPacketBuffer.getCommand());
                         if (packet == null) {
                             disconnect();
-                            lastException = new UnknownPacketException(String.format("Invalid packet 0x%x", inPacketBuffer.getCommand()));
+                            lastException = new UnknownPacketException(String.format("Server sent us a invalid packet (id=0x%x, length=%d, data=%s)", inPacketBuffer.getCommand(), length, inPacketBuffer.getBase64()));
                             throw lastException;
                         }
                         Class<? extends ClientboundPacket> clazz = packet.getClazz();
@@ -207,7 +207,7 @@ public class SocketNetwork implements Network {
                                 throw new PacketParseException(String.format("Could not parse packet %s (used=%d, available=%d, total=%d, success=%s)", packet, inPacketBuffer.getPosition(), inPacketBuffer.getBytesLeft(), inPacketBuffer.getLength(), success));
                             }
 
-                            //set special settings to avoid miss timing issues
+                            // set special settings to avoid miss timing issues
                             if (packetInstance instanceof PacketLoginSuccess) {
                                 connection.setConnectionState(ConnectionStates.PLAY);
                             } else if (packetInstance instanceof PacketCompressionInterface compressionPacket) {
@@ -228,7 +228,7 @@ public class SocketNetwork implements Network {
                         }
                     } catch (Exception e) {
                         Log.printException(e, LogLevels.DEBUG);
-                        Log.protocol(String.format("An error occurred while parsing an packet (%s): %s", packet, e));
+                        Log.protocol(String.format("An error occurred while parsing a packet (%s): %s", packet, e));
                     }
                 }
                 disconnect();

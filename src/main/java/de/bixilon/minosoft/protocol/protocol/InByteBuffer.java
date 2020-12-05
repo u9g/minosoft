@@ -60,7 +60,7 @@ public class InByteBuffer {
     public byte[] readByteArray() {
         int count;
         if (versionId < 19) {
-            count = readShort();
+            count = readUnsignedShort();
         } else {
             count = readVarInt();
         }
@@ -101,7 +101,11 @@ public class InByteBuffer {
     }
 
     public String readString() {
-        return new String(readBytes(readVarInt()), StandardCharsets.UTF_8);
+        byte[] data = readBytes(readVarInt());
+        if (data.length > ProtocolDefinition.STRING_MAX_LEN) {
+            throw new IllegalArgumentException(String.format("String max string length exceeded %d > %d", data.length, ProtocolDefinition.STRING_MAX_LEN));
+        }
+        return new String(data, StandardCharsets.UTF_8);
     }
 
     public long readVarLong() {
@@ -110,7 +114,7 @@ public class InByteBuffer {
         byte read;
         do {
             read = readByte();
-            result |= (read & 0x7F) << (7 * byteCount);
+            result |= (long) (read & 0x7F) << (7 * byteCount);
             byteCount++;
             if (byteCount > 10) {
                 throw new IllegalArgumentException("VarLong is too big");
@@ -152,7 +156,8 @@ public class InByteBuffer {
         int byteCount = 0;
         int result = 0;
         byte read;
-        do {
+        do
+        {
             read = readByte();
             result |= (read & 0x7F) << (7 * byteCount);
             byteCount++;
@@ -181,7 +186,7 @@ public class InByteBuffer {
     }
 
     public BlockPosition readPosition() {
-        //ToDo: protocol id 7
+        // ToDo: protocol id 7
         long raw = readLong();
         int x = (int) (raw >> 38);
         if (versionId < 440) {
@@ -234,7 +239,7 @@ public class InByteBuffer {
 
     public NBTTag readNBT(boolean compressed) {
         if (compressed) {
-            short length = readShort();
+            int length = readUnsignedShort();
             if (length == -1) {
                 // no nbt data here...
                 return new CompoundTag();
