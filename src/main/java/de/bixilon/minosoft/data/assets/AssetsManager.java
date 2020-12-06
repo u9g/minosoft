@@ -73,10 +73,6 @@ public class AssetsManager {
 
     private static void initAssetsAliases(JsonObject json) {
         for (Map.Entry<String, JsonElement> entry : json.entrySet()) {
-            String value = assets.get(entry.getValue().getAsString());
-            if (value == null) {
-                int x = 0;
-            }
             assets.put(entry.getKey(), assets.get(entry.getValue().getAsString()));
         }
     }
@@ -234,15 +230,19 @@ public class AssetsManager {
         HashMap<String, String> clientJarAssetsHashMap = new HashMap<>();
         ZipInputStream versionJar = new ZipInputStream(readAssetAsStreamByHash(clientJarJson.get("sha1").getAsString()));
         ZipEntry currentFile;
-        zipLoop:
         while ((currentFile = versionJar.getNextEntry()) != null) {
             if (!currentFile.getName().startsWith("assets") || currentFile.isDirectory()) {
                 continue;
             }
+            boolean relevant = false;
             for (String prefix : RELEVANT_ASSETS) {
                 if (currentFile.getName().startsWith("assets/" + prefix)) {
-                    continue zipLoop;
+                    relevant = true;
+                    break;
                 }
+            }
+            if (!relevant) {
+                continue;
             }
             String hash = saveAsset(versionJar);
 
@@ -254,6 +254,7 @@ public class AssetsManager {
         String assetHash = saveAsset(json.getBytes());
         Log.verbose(String.format("Generated jar assets in %dms (elements=%d, hash=%s)", (System.currentTimeMillis() - startTime), clientJarAssetsHashMap.size(), assetHash));
     }
+
 
     @DoNotCall
     private static String saveAsset(byte[] data) throws IOException {

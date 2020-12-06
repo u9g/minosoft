@@ -48,4 +48,8 @@ public record InChunkLocation(int x, int y, int z) {
     public String toString() {
         return String.format("%d %d %d", x, y, z);
     }
+
+    public InChunkLocation add(int x, int y, int z) {
+        return new InChunkLocation(this.x + x, this.y + y, this.z + z);
+    }
 }

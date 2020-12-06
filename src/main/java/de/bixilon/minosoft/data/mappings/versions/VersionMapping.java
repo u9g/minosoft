@@ -28,6 +28,7 @@ import de.bixilon.minosoft.data.mappings.blocks.Blocks;
 import de.bixilon.minosoft.data.mappings.particle.Particle;
 import de.bixilon.minosoft.data.mappings.statistics.Statistic;
 import de.bixilon.minosoft.data.world.BlockPosition;
+import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.protocol.ProtocolDefinition;
 import de.bixilon.minosoft.render.blockModels.BlockModelInterface;
 import de.bixilon.minosoft.render.blockModels.BlockModelLoader;
@@ -294,7 +295,8 @@ public class VersionMapping {
         }
         BlockModelInterface model = modelMap.get(block.getMod()).get(block.getIdentifier());
         if (model == null) {
-            throw new NullPointerException(String.format("The block model for the following block could not be found: %s", block));
+            Log.warn(String.format("The block model for the following block could not be found: %s", block));
+            return BlockModelInterface.EMPTY;
         }
         return model;
     }
@@ -437,6 +439,7 @@ public class VersionMapping {
                 if (!version.isFlattened() && version.getVersionId() != ProtocolDefinition.PRE_FLATTENING_VERSION_ID) {
                     // clone all values
                     modelMap = Versions.PRE_FLATTENING_MAPPING.modelMap;
+                    blockTextureId = Versions.PRE_FLATTENING_MAPPING.blockTextureId;
                     break;
                 }
 

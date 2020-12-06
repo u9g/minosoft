@@ -14,6 +14,7 @@
 package de.bixilon.minosoft.util;
 
 import de.bixilon.minosoft.data.mappings.blocks.Block;
+import de.bixilon.minosoft.data.mappings.blocks.LegacyBlockTransform;
 import de.bixilon.minosoft.data.world.Chunk;
 import de.bixilon.minosoft.data.world.ChunkSection;
 import de.bixilon.minosoft.data.world.InChunkSectionLocation;
@@ -92,7 +93,7 @@ public final class ChunkUtil {
                     sectionMap.put(c, new ChunkSection(blockMap));
                 }
             }
-            return new Chunk(sectionMap);
+            return LegacyBlockTransform.transformChunk(new Chunk(sectionMap));
         }
         if (buffer.getVersionId() < 62) { // ToDo: was this really changed in 62?
             byte sections = BitByte.getBitCount(sectionBitMask);
@@ -143,7 +144,7 @@ public final class ChunkUtil {
                 }
                 sectionMap.put(c, new ChunkSection(blockMap));
             }
-            return new Chunk(sectionMap);
+            return LegacyBlockTransform.transformChunk(new Chunk(sectionMap));
         }
         // really big thanks to: https://wiki.vg/index.php?title=Chunk_Format&oldid=13712
         ConcurrentHashMap<Byte, ChunkSection> sectionMap = new ConcurrentHashMap<>();
@@ -209,7 +210,11 @@ public final class ChunkUtil {
         if (buffer.getVersionId() < 552) {
             byte[] biomes = buffer.readBytes(RenderConstants.SECTION_WIDTH * RenderConstants.SECTION_WIDTH);
         }
-        return new Chunk(sectionMap);
+        Chunk chunk = new Chunk(sectionMap);
+        if (!buffer.getConnection().getVersion().isFlattened()) {
+            LegacyBlockTransform.transformChunk(chunk);
+        }
+        return chunk;
     }
 
     public static void readSkyLightPacket(InByteBuffer buffer, long skyLightMask, long blockLightMask, long emptyBlockLightMask, long emptySkyLightMask) {

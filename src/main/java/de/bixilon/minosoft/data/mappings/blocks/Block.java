@@ -17,6 +17,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.data.mappings.ModIdentifier;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -33,6 +34,12 @@ public class Block extends ModIdentifier {
     public Block(String mod, String identifier, HashSet<BlockProperties> properties) {
         super(mod, identifier);
         this.properties = properties;
+        this.rotation = BlockRotations.NONE;
+    }
+
+    public Block(String fullIdentifier, BlockProperties... properties) {
+        super(fullIdentifier);
+        this.properties = new HashSet<>(Arrays.asList(properties));
         this.rotation = BlockRotations.NONE;
     }
 

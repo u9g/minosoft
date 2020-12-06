@@ -13,10 +13,15 @@
 
 package de.bixilon.minosoft.data.world;
 
+import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
+
 /**
  * Chunk X, Y and Z location (max 16x16x16)
  */
-public record InChunkSectionLocation(int x, int y, int z) {
+public record InChunkSectionLocation(
+        int x,
+        int y,
+        int z) {
     @Deprecated
     public int getX() {
         return x;
@@ -35,5 +40,9 @@ public record InChunkSectionLocation(int x, int y, int z) {
     @Override
     public String toString() {
         return String.format("%d %d %d", x, y, z);
+    }
+
+    public InChunkLocation getChunkLocation(byte sectionHeight) {
+        return new InChunkLocation(x, (y + sectionHeight * RenderConstants.SECTION_HEIGHT), z);
     }
 }

@@ -98,7 +98,7 @@ public class BlockModel implements BlockModelInterface {
                 return entry.getValue()[orientation.getId()];
             }
         }
-        Log.warn(String.format("could not find a corresponding block model for block %s", block.toString()));
+        Log.warn("Could not find a corresponding block model for block %s", block);
         return false;
     }
 

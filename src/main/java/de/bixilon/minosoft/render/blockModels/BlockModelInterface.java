@@ -26,6 +26,23 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public interface BlockModelInterface {
+    BlockModelInterface EMPTY = new BlockModelInterface() {
+        @Override
+        public boolean full(Block block, FaceOrientation orientation) {
+            return false;
+        }
+
+        @Override
+        public boolean isFull() {
+            return false;
+        }
+
+        @Override
+        public ArrayFloatList prepare(HashSet<FaceOrientation> facesToDraw, BlockPosition position, Block block) {
+            return new ArrayFloatList();
+        }
+    };
+
     static HashSet<SubBlock> load(JsonObject block, JsonObject allModels, HashMap<String, String> variables) {
         HashSet<SubBlock> result = new HashSet<>();
         if (block.has("textures")) {
