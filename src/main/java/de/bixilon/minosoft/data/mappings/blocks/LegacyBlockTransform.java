@@ -13,6 +13,7 @@
 
 package de.bixilon.minosoft.data.mappings.blocks;
 
+import de.bixilon.minosoft.data.mappings.ModIdentifier;
 import de.bixilon.minosoft.data.world.Chunk;
 import de.bixilon.minosoft.data.world.ChunkSection;
 import de.bixilon.minosoft.data.world.InChunkSectionLocation;
@@ -23,8 +24,8 @@ public final class LegacyBlockTransform {
     private static final Block GRASS_BLOCK = new Block("grass");
     private static final Block GRASS_BLOCK_SNOWY = new Block("grass", BlockProperties.GRASS_SNOWY_YES);
     private static final Block GRASS_BLOCK_NOT_SNOWY = new Block("grass", BlockProperties.GRASS_SNOWY_NO);
-    private static final String SNOW_IDENTIFIER = "snow";
-    private static final String SNOW_LAYER_IDENTIFIER = "snow_layer";
+    private static final ModIdentifier SNOW_BLOCK = new ModIdentifier("snow");
+    private static final ModIdentifier SNOW_LAYER_BLOCK = new ModIdentifier("snow_layer");
 
     public static Chunk transformChunk(Chunk chunk) {
         // TODO: call at block changes
@@ -33,7 +34,7 @@ public final class LegacyBlockTransform {
                 Block blockAbove = chunk.getBlock(block.getKey().getChunkLocation(section.getKey()).add(0, 1, 0));
                 Block newBlock = null;
                 if (block.getValue().equals(GRASS_BLOCK)) {
-                    if (blockAbove == null || (!blockAbove.getIdentifier().equals(SNOW_IDENTIFIER) & !blockAbove.getIdentifier().equals(SNOW_LAYER_IDENTIFIER))) {
+                    if (blockAbove == null || (!blockAbove.identifierEquals(SNOW_BLOCK) & !blockAbove.identifierEquals(SNOW_LAYER_BLOCK))) {
                         newBlock = GRASS_BLOCK_NOT_SNOWY;
                     } else {
                         newBlock = GRASS_BLOCK_SNOWY;

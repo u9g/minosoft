@@ -55,13 +55,16 @@ public class ModIdentifier {
 
     @Override
     public boolean equals(Object obj) {
-        if (super.equals(obj)) {
+        return identifierEquals((ModIdentifier) obj);
+    }
+
+    public boolean identifierEquals(ModIdentifier their) {
+        if (super.equals(their)) {
             return true;
         }
-        if (hashCode() != obj.hashCode()) {
+        if (hashCode() != their.hashCode()) {
             return false;
         }
-        ModIdentifier their = (ModIdentifier) obj;
         return getIdentifier().equals(their.getIdentifier()) && getMod().equals(their.getMod());
     }
 }
