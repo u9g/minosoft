@@ -27,10 +27,10 @@ public class PlayerController {
     private static final float gravity = 13;
 
     private final Connection connection;
-    public Vec3 oldPos;
+    public Vec3 oldPosition;
     CameraMovement cameraMovement;
     PlayerMovement playerMovement;
-    Vec3 playerPos = new Vec3(); // the feet position of the player
+    Vec3 playerPosition = new Vec3(); // the feet position of the player
     Vec3 playerVelocity = new Vec3();
     private boolean onGround;
     private boolean enableGravity;
@@ -51,10 +51,10 @@ public class PlayerController {
         }
         if (GameWindow.paused) {
             cameraMovement.loop();
-            glTranslated(-playerPos.x, -(playerPos.y + playerHeight - 0.2f), -playerPos.z);
+            glTranslated(-playerPosition.x, -(playerPosition.y + playerHeight - 0.2f), -playerPosition.z);
             return;
         }
-        oldPos = playerPos.copy();
+        oldPosition = playerPosition.copy();
 
         GameModes gameMode = connection.getPlayer().getGameMode();
         enableGravity = gameMode != GameModes.CREATIVE && gameMode != GameModes.SPECTATOR;
@@ -64,12 +64,12 @@ public class PlayerController {
         applyVelocity(deltaTime);
 
         if (gameMode == GameModes.SPECTATOR) {
-            glTranslated(-playerPos.x, -(playerPos.y + playerHeight - 0.2f), -playerPos.z);
+            glTranslated(-playerPosition.x, -(playerPosition.y + playerHeight - 0.2f), -playerPosition.z);
             return;
         }
         handleCollisions(connection.getPlayer().getWorld());
 
-        glTranslated(-playerPos.x, -(playerPos.y + playerHeight - 0.2f), -playerPos.z);
+        glTranslated(-playerPosition.x, -(playerPosition.y + playerHeight - 0.2f), -playerPosition.z);
     }
 
     private void handleCollisions(World world) {
@@ -85,16 +85,12 @@ public class PlayerController {
         return enableGravity;
     }
 
-    public Vec3 getPlayerPos() {
-        return playerPos;
+    public Vec3 getPlayerPosition() {
+        return playerPosition;
     }
 
-    public void setPlayerPos(Vec3 playerPos) {
-        this.playerPos = playerPos;
-    }
-
-    private void applyVelocity(float deltaTime) {
-        playerPos.add(Vec3.mul(playerVelocity, deltaTime));
+    public void setPlayerPosition(Vec3 playerPosition) {
+        this.playerPosition = playerPosition;
     }
 
     private void handleGravity(float deltaTime) {
@@ -128,5 +124,9 @@ public class PlayerController {
 
     public float getPlayerHeight() {
         return playerHeight;
+    }
+
+    private void applyVelocity(float deltaTime) {
+        playerPosition.add(Vec3.mul(playerVelocity, deltaTime));
     }
 }

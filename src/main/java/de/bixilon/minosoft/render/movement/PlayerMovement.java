@@ -25,7 +25,7 @@ public class PlayerMovement {
     private final Connection connection;
 
     private Vec3 cameraFront;
-    private Vec3 playerPos;
+    private Vec3 playerPosition;
 
     public PlayerMovement(Connection connection) {
         this.connection = connection;
@@ -35,26 +35,26 @@ public class PlayerMovement {
         float cameraSpeed = FLY_SPEED / deltaTime;
 
         if (glfwGetKey(GameWindow.getOpenGLWindow().getWindowId(), GLFW_KEY_W) == GLFW_PRESS) {
-            playerPos.add(Vec3.mul(cameraFront, -cameraSpeed * deltaTime));
+            playerPosition.add(Vec3.mul(cameraFront, -cameraSpeed * deltaTime));
         }
         if (glfwGetKey(GameWindow.getOpenGLWindow().getWindowId(), GLFW_KEY_S) == GLFW_PRESS) {
-            playerPos.add(Vec3.mul(cameraFront, cameraSpeed * deltaTime));
+            playerPosition.add(Vec3.mul(cameraFront, cameraSpeed * deltaTime));
         }
         if (glfwGetKey(GameWindow.getOpenGLWindow().getWindowId(), GLFW_KEY_A) == GLFW_PRESS) {
-            playerPos.add(Vec3.mul(Vec3.cross(CAMERA_UP, cameraFront), -cameraSpeed * deltaTime));
+            playerPosition.add(Vec3.mul(Vec3.cross(CAMERA_UP, cameraFront), -cameraSpeed * deltaTime));
         }
         if (glfwGetKey(GameWindow.getOpenGLWindow().getWindowId(), GLFW_KEY_D) == GLFW_PRESS) {
-            playerPos.add(Vec3.mul(Vec3.cross(CAMERA_UP, cameraFront), cameraSpeed * deltaTime));
+            playerPosition.add(Vec3.mul(Vec3.cross(CAMERA_UP, cameraFront), cameraSpeed * deltaTime));
         }
 
         if (glfwGetKey(GameWindow.getOpenGLWindow().getWindowId(), GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
             if (!connection.getRenderProperties().getController().isGravityEnabled()) {
-                playerPos.add(0, -cameraSpeed * deltaTime, 0);
+                playerPosition.add(0, -cameraSpeed * deltaTime, 0);
             }
         }
         if (glfwGetKey(GameWindow.getOpenGLWindow().getWindowId(), GLFW_KEY_SPACE) == GLFW_PRESS) {
             if (!connection.getRenderProperties().getController().isGravityEnabled()) {
-                playerPos.add(0, cameraSpeed * deltaTime, 0);
+                playerPosition.add(0, cameraSpeed * deltaTime, 0);
             }
             if (connection.getRenderProperties().getController().isOnGround()) {
                 connection.getRenderProperties().getController().jump();
@@ -64,7 +64,11 @@ public class PlayerMovement {
 
     public void loop(float deltaTime) {
         cameraFront = connection.getRenderProperties().getController().getCameraMovement().getCameraFront();
-        playerPos = connection.getRenderProperties().getController().getPlayerPos();
+        playerPosition = connection.getRenderProperties().getController().getPlayerPosition();
         processInput(deltaTime);
+    }
+
+    public void setPlayerPosition(Vec3 playerPosition) {
+        this.playerPosition = playerPosition;
     }
 }

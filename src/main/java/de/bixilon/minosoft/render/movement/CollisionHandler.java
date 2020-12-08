@@ -17,7 +17,6 @@ import de.bixilon.minosoft.data.mappings.versions.VersionMapping;
 import de.bixilon.minosoft.data.world.BlockPosition;
 import de.bixilon.minosoft.data.world.World;
 import de.bixilon.minosoft.protocol.network.Connection;
-import de.bixilon.minosoft.render.blockModels.BlockModelLoader;
 import de.bixilon.minosoft.render.utility.AdditionalMath;
 import de.bixilon.minosoft.render.utility.Vec3;
 
@@ -33,42 +32,42 @@ public class CollisionHandler {
     }
 
     public void handleCollisions() {
-        if (isPositionValid(controller.playerPos)) {
+        if (isPositionValid(controller.playerPosition)) {
             // the player currently isn't colliding with with anything so the player Position does not have to be adjusted
             return;
         }
         xAxisCollision();
         yAxisCollision();
         zAxisCollision();
-        if (!isPositionValid(controller.playerPos)) {
-            controller.playerPos.x = controller.oldPos.x;
-            controller.playerPos.z = controller.oldPos.z;
+        if (!isPositionValid(controller.playerPosition)) {
+            controller.playerPosition.x = controller.oldPosition.x;
+            controller.playerPosition.z = controller.oldPosition.z;
         }
     }
 
     private void xAxisCollision() {
-        double deltaX = controller.playerPos.x - controller.oldPos.x;
+        double deltaX = controller.playerPosition.x - controller.oldPosition.x;
         if (deltaX == 0) {
             return;
         }
-        Vec3 testPos = controller.oldPos.copy().add(deltaX, 0, 0);
+        Vec3 testPos = controller.oldPosition.copy().add(deltaX, 0, 0);
         if (isPositionValid(testPos)) {
             return;
         }
-        controller.playerPos.x = controller.oldPos.x;
+        controller.playerPosition.x = controller.oldPosition.x;
         controller.playerVelocity.x = 0;
     }
 
     private void yAxisCollision() {
-        double deltaY = controller.playerPos.y - controller.oldPos.y;
+        double deltaY = controller.playerPosition.y - controller.oldPosition.y;
         if (deltaY == 0) {
             return;
         }
-        Vec3 testPos = controller.oldPos.copy().add(0, deltaY, 0);
+        Vec3 testPos = controller.oldPosition.copy().add(0, deltaY, 0);
         if (isPositionValid(testPos)) {
             return;
         }
-        controller.playerPos.y = controller.oldPos.y;
+        controller.playerPosition.y = controller.oldPosition.y;
         controller.playerVelocity.y = 0;
 
         if (deltaY < 0) {
@@ -77,15 +76,15 @@ public class CollisionHandler {
     }
 
     private void zAxisCollision() {
-        double deltaZ = controller.playerPos.z - controller.oldPos.z;
+        double deltaZ = controller.playerPosition.z - controller.oldPosition.z;
         if (deltaZ == 0) {
             return;
         }
-        Vec3 testPos = controller.oldPos.copy().add(0, 0, deltaZ);
+        Vec3 testPos = controller.oldPosition.copy().add(0, 0, deltaZ);
         if (isPositionValid(testPos)) {
             return;
         }
-        controller.playerPos.z = controller.oldPos.z;
+        controller.playerPosition.z = controller.oldPosition.z;
         controller.playerVelocity.z = 0;
     }
 

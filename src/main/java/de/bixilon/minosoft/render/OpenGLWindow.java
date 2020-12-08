@@ -74,7 +74,7 @@ public class OpenGLWindow {
         }
 
         try (MemoryStack stack = stackPush()) {
-            IntBuffer pWidth = stack.mallocInt(1);
+            IntBuffer pWidth  = stack.mallocInt(1);
             IntBuffer pHeight = stack.mallocInt(1);
 
             glfwGetWindowSize(windowId, pWidth, pHeight);
@@ -173,6 +173,8 @@ public class OpenGLWindow {
         lastFrame = currentFrame;
 
         setupPerspective();
+
+        glfwSetWindowTitle(windowId, String.format("Minosoft game window (%s FPS)", 1/deltaTime));
         return deltaTime;
     }
 

@@ -526,7 +526,7 @@ public class PacketHandler {
         }
         connection.getPlayer().setSpawnConfirmed(true);
         connection.getRenderProperties().getController().getCameraMovement().setRotation(pkg.getRotation());
-        connection.getRenderProperties().getController().setPlayerPos(new Vec3(pkg.getLocation()));
+        connection.getRenderProperties().getController().setPlayerPosition(new Vec3(pkg.getLocation()));
     }
 
     public void handle(PacketAttachEntity pkg) {
