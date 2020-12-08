@@ -34,7 +34,7 @@ public final class LegacyBlockTransform {
                 Block blockAbove = chunk.getBlock(block.getKey().getChunkLocation(section.getKey()).add(0, 1, 0));
                 Block newBlock = null;
                 if (block.getValue().equals(GRASS_BLOCK)) {
-                    if (blockAbove == null || (!blockAbove.identifierEquals(SNOW_BLOCK) & !blockAbove.identifierEquals(SNOW_LAYER_BLOCK))) {
+                    if (blockAbove == null || (!blockAbove.identifierEquals(SNOW_BLOCK) && !blockAbove.identifierEquals(SNOW_LAYER_BLOCK))) {
                         newBlock = GRASS_BLOCK_NOT_SNOWY;
                     } else {
                         newBlock = GRASS_BLOCK_SNOWY;

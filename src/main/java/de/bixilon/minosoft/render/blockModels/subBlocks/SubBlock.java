@@ -48,10 +48,13 @@ public class SubBlock {
         JsonObject faces = json.getAsJsonObject("faces");
         for (FaceOrientation orientation : FaceOrientation.values()) {
             if (faces.has(orientation.name().toLowerCase())) {
-                putTexture(faces.getAsJsonObject(orientation.name().toLowerCase()), orientation, variables);
+                putTexture(faces.getAsJsonObject(orientation.name().toLowerCase()), orientation, variables, from, to);
             }
         }
         full = createFull();
+        if (textures.containsValue("block/cake_side")) {
+            int unused = 0;
+        }
     }
 
     public SubBlock(SubBlock subBlock) {
@@ -94,14 +97,14 @@ public class SubBlock {
             uv.get(entry.getKey()).prepare(texture, loader);
         }
         // clean up
-        textures.clear();
+        // textures.clear();
     }
 
-    private void putTexture(JsonObject faceJson, FaceOrientation orientation, HashMap<String, String> variables) {
+    private void putTexture(JsonObject faceJson, FaceOrientation orientation, HashMap<String, String> variables, SubBlockPosition from, SubBlockPosition to) {
         if (faceJson.has("uv")) {
-            uv.put(orientation, new InFaceUV(faceJson.getAsJsonArray("uv")));
+            uv.put(orientation, new InFaceUV(faceJson.getAsJsonArray("uv"), from, to, orientation));
         } else {
-            uv.put(orientation, new InFaceUV());
+            uv.put(orientation, new InFaceUV(from, to, orientation));
         }
         if (faceJson.has("rotation")) {
             int rotation = (360 - faceJson.get("rotation").getAsInt()) / 90;

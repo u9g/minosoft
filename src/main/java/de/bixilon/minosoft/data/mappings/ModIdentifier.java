@@ -59,10 +59,10 @@ public class ModIdentifier {
     }
 
     public boolean identifierEquals(ModIdentifier their) {
-        if (super.equals(their)) {
+        if (this == their) {
             return true;
         }
-        if (hashCode() != their.hashCode()) {
+        if (identifier.hashCode() != their.getIdentifier().hashCode()) {
             return false;
         }
         return getIdentifier().equals(their.getIdentifier()) && getMod().equals(their.getMod());

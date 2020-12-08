@@ -14,31 +14,52 @@
 package de.bixilon.minosoft.render.texture;
 
 import com.google.gson.JsonArray;
+import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
+import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlockPosition;
 import org.apache.commons.collections.primitives.ArrayFloatList;
 
 public class InFaceUV {
-    public final int u1, v1, u2, v2;
+    private final int u1;
+    private final int v1;
+    private final int u2;
+    private final int v2;
 
-    public float realU1 = -1, realV1, realU2, realV2;
+    private float realU1 = -1, realV1, realU2, realV2;
 
-    public InFaceUV(JsonArray json) {
-        u1 = json.get(0).getAsInt();
-        v1 = json.get(1).getAsInt();
-        u2 = json.get(2).getAsInt();
-        v2 = json.get(3).getAsInt();
+    public InFaceUV(JsonArray json, SubBlockPosition from, SubBlockPosition to, FaceOrientation orientation) {
+        this(from, to, orientation);
     }
 
-    public InFaceUV() {
-        u1 = v1 = 0;
-        u2 = v2 = 16;
+    public InFaceUV(SubBlockPosition from, SubBlockPosition to, FaceOrientation orientation) {
+        switch (orientation) {
+            case EAST, WEST -> {
+                u1 = (int) from.getVector().getZ();
+                v1 = (int) (RenderConstants.TEXTURE_PACK_RESOLUTION - from.getVector().getY());
+                u2 = (int) to.getVector().getZ();
+                v2 = (int) (RenderConstants.TEXTURE_PACK_RESOLUTION - to.getVector().getY());
+            }
+            case UP, DOWN -> {
+                u1 = (int) from.getVector().getX();
+                v1 = (int) (RenderConstants.TEXTURE_PACK_RESOLUTION - from.getVector().getZ());
+                u2 = (int) to.getVector().getX();
+                v2 = (int) (RenderConstants.TEXTURE_PACK_RESOLUTION - to.getVector().getZ());
+            }
+            case SOUTH, NORTH -> {
+                u1 = (int) from.getVector().getX();
+                v1 = (int) (RenderConstants.TEXTURE_PACK_RESOLUTION - from.getVector().getY());
+                u2 = (int) to.getVector().getX();
+                v2 = (int) (RenderConstants.TEXTURE_PACK_RESOLUTION - to.getVector().getY());
+            }
+            default -> throw new RuntimeException();
+        }
     }
 
     public void prepare(float texture, TextureLoader textureLoader) {
-        realU1 = texture + u1 * textureLoader.getStep() / RenderConstants.TEXTURE_PACK_RESOLUTION;
-        realU2 = texture + u2 * textureLoader.getStep() / RenderConstants.TEXTURE_PACK_RESOLUTION;
-        realV1 = (float) v1 / RenderConstants.TEXTURE_PACK_RESOLUTION;
-        realV2 = (float) v2 / RenderConstants.TEXTURE_PACK_RESOLUTION;
+        realU1 = texture + textureLoader.getStep() * u1 / RenderConstants.TEXTURE_PACK_RESOLUTION;
+        realU2 = texture + textureLoader.getStep() * u2 / RenderConstants.TEXTURE_PACK_RESOLUTION;
+        realV1 = (float) v2 / RenderConstants.TEXTURE_PACK_RESOLUTION;
+        realV2 = (float) v1 / RenderConstants.TEXTURE_PACK_RESOLUTION;
     }
 
     public ArrayFloatList getFloats(int i) {

@@ -108,4 +108,16 @@ public class Vec3 {
     public void zero() {
         x = y = z = 0f;
     }
+
+    public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
+    }
+
+    public double getZ() {
+        return z;
+    }
 }
