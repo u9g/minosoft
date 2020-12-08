@@ -13,18 +13,15 @@
 
 package de.bixilon.minosoft.render.texture;
 
-import de.bixilon.minosoft.config.StaticConfiguration;
 import de.bixilon.minosoft.data.assets.AssetsManager;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.render.GameWindow;
 import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
-import de.matthiasmann.twl.utils.PNGDecoder;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
+import java.awt.image.DataBufferInt;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -42,21 +39,21 @@ public class TextureLoader {
     private int textureID;
     private float step;
     private int totalTextures = 0;
-
+    // ARGB -> RGBA
     public TextureLoader(HashSet<String> textures, HashMap<String, float[]> tints) {
         countDownLatch = new CountDownLatch(1);
         textureCoordinates = new HashMap<>();
         loadTextures(textures, tints);
-        combineTextures();
-        try {
-            PNGDecoder decoder = new PNGDecoder(new FileInputStream(StaticConfiguration.HOME_DIRECTORY + "assets/allTextures.png"));
-            ByteBuffer buf = ByteBuffer.allocateDirect(decoder.getWidth() * decoder.getHeight() * 4);
-            decoder.decode(buf, decoder.getWidth() * 4, PNGDecoder.Format.RGBA);
-            bindTexture(buf, decoder.getWidth(), decoder.getHeight());
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(5);
+        BufferedImage image = combineTextures();
+        ByteBuffer buf = ByteBuffer.allocateDirect(image.getWidth() * image.getHeight() * 4);
+        int[] imageData = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+        for (int data: imageData) {
+            buf.put((byte) (( data >> 16 ) & 0xFF)); // R
+            buf.put((byte) (( data >>  8 ) & 0xFF)); // G
+            buf.put((byte) (( data       ) & 0xFF)); // B
+            buf.put((byte) (( data >> 24 ) & 0xFF)); // A
         }
+        bindTexture(buf, image.getWidth(), image.getHeight());
     }
 
     private static void tintImage(BufferedImage image, float[] tintColor) {
@@ -96,11 +93,11 @@ public class TextureLoader {
         images = modTextureMap;
     }
 
-    private void combineTextures() {
+    private BufferedImage combineTextures() {
         // converts all single textures into a very wide image. Improves performance in opengl
         // TEXTURE_PACK_RESxTEXTURE_PACK_RES textures only
         int imageLength = Integer.highestOneBit(totalTextures * RenderConstants.TEXTURE_PACK_RESOLUTION) * 2;
-        BufferedImage totalImage = new BufferedImage(imageLength, RenderConstants.TEXTURE_PACK_RESOLUTION, BufferedImage.TYPE_4BYTE_ABGR);
+        BufferedImage totalImage = new BufferedImage(imageLength, RenderConstants.TEXTURE_PACK_RESOLUTION, BufferedImage.TYPE_INT_ARGB);
 
         int currentPos = 0;
         for (Map.Entry<String, BufferedImage> texture : images.entrySet()) {
@@ -112,14 +109,8 @@ public class TextureLoader {
             }
             textureCoordinates.put(texture.getKey(), currentPos++);
         }
-
-        try {
-            File outputFile = new File(StaticConfiguration.HOME_DIRECTORY + "assets/allTextures.png");
-            ImageIO.write(totalImage, "png", outputFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         step = (float) 1 / (float) imageLength * RenderConstants.TEXTURE_PACK_RESOLUTION;
+        return totalImage;
     }
 
     private void bindTexture(ByteBuffer buf, int width, int height) {
