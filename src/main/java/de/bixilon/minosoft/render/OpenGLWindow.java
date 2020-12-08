@@ -14,9 +14,8 @@
 package de.bixilon.minosoft.render;
 
 import de.bixilon.minosoft.protocol.network.Connection;
-import org.lwjgl.glfw.GLFWCursorPosCallback;
-import org.lwjgl.glfw.GLFWErrorCallback;
-import org.lwjgl.glfw.GLFWVidMode;
+import org.lwjgl.glfw.GLFW;
+import org.lwjgl.glfw.*;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.IntBuffer;
@@ -28,7 +27,7 @@ import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class OpenGLWindow {
-    private static final float fovY = 45f;
+    private static final float fovY = 45f; // degrees
     private static final boolean fullscreenEnabled = false;
     private static int width = 800;
     private static int height = 800;
@@ -64,6 +63,7 @@ public class OpenGLWindow {
         if (fullscreenEnabled) {
             long monitor = glfwGetPrimaryMonitor();
             GLFWVidMode mode = glfwGetVideoMode(monitor);
+            assert mode != null;
             width = mode.width();
             height = mode.height();
         }
@@ -74,17 +74,19 @@ public class OpenGLWindow {
         }
 
         try (MemoryStack stack = stackPush()) {
-            IntBuffer pWidth = stack.mallocInt(1); // int*
-            IntBuffer pHeight = stack.mallocInt(1); // int*
+            IntBuffer pWidth = stack.mallocInt(1);
+            IntBuffer pHeight = stack.mallocInt(1);
 
             glfwGetWindowSize(windowId, pWidth, pHeight);
 
-            GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+            GLFWVidMode videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 
-            glfwSetWindowPos(windowId, (vidmode.width() - pWidth.get(0)) / 2, (vidmode.height() - pHeight.get(0)) / 2);
+            assert videoMode != null;
+            glfwSetWindowPos(windowId, (videoMode.width() - pWidth.get(0)) / 2, (videoMode.height() - pHeight.get(0)) / 2);
         }
+        // the context belongs to this ond only this thread. It enables displaying anything
         glfwMakeContextCurrent(windowId);
-
+        // cursor Callback
         glfwSetCursorPosCallback(windowId, new GLFWCursorPosCallback() {
             @Override
             public void invoke(long windowId, double xPos, double yPos) {
@@ -93,11 +95,21 @@ public class OpenGLWindow {
             }
         });
 
+        // resizeable window
+        GLFW.glfwSetFramebufferSizeCallback(windowId, new GLFWFramebufferSizeCallback() {
+            @Override
+            public void invoke(long window, int width, int height) {
+                OpenGLWindow.width = width;
+                OpenGLWindow.height = height;
+                glViewport(0,0,width, height);
+            }
+        });
         // Enable v-sync
         glfwSwapInterval(1);
 
         createCapabilities();
 
+        // background color
         glClearColor(.2f, .2f, .6f, 1f);
 
         glEnableClientState(GL_VERTEX_ARRAY);
@@ -106,15 +118,21 @@ public class OpenGLWindow {
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
+        // no overlapping textures
         glEnable(GL_CULL_FACE);
         glCullFace(GL_FRONT);
 
         glEnable(GL_ALPHA_TEST);
         glAlphaFunc(GL_GREATER, 0.0f);
 
+        // if one face is behind another, don't show it
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
+
+        // mouse is captured
         mouseEnable(false);
+
+        // enable usage of textures
         glEnable(GL_TEXTURE_2D);
     }
 
@@ -147,10 +165,13 @@ public class OpenGLWindow {
         } else {
             escDown = false;
         }
+        // clear the screen
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         float currentFrame = (float) glfwGetTime();
         float deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+
         setupPerspective();
         return deltaTime;
     }
@@ -160,6 +181,7 @@ public class OpenGLWindow {
     }
 
     public void setCurrentConnection(Connection connection) {
+        // use the mouse for the new connection and not for the old one
         glfwSetCursorPosCallback(windowId, connection.getRenderProperties().getController().getCameraMovement()::mouseCallback);
     }
 
