@@ -13,7 +13,6 @@
 
 package de.bixilon.minosoft.render;
 
-import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.network.Connection;
 
 import java.util.concurrent.CountDownLatch;
@@ -35,7 +34,6 @@ public class GameWindow {
         new Thread(() -> {
             openGLWindow = new OpenGLWindow();
             openGLWindow.init();
-            Log.info("Finished loading block models");
             latch.countDown();
             mainLoop();
         }, "GameWindow").start();
@@ -76,6 +74,11 @@ public class GameWindow {
             glPopMatrix();
             glfwSwapBuffers(openGLWindow.getWindowId());
         }
+        // The window was closed, close everything
+        currentConnection.disconnect();
+        currentConnection = null;
+        running = false;
+        openGLWindow.close();
     }
 
     public static void pause() {

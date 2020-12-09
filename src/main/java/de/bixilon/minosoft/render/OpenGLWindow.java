@@ -49,6 +49,10 @@ public class OpenGLWindow {
         gluPerspective(fovY, width / (float) height, 0.1f, 500f);
     }
 
+    public void close() {
+        glfwDestroyWindow(windowId);
+    }
+
     public void init() {
         GLFWErrorCallback.createPrint(System.err).set();
 
