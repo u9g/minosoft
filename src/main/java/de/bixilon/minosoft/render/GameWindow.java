@@ -76,6 +76,11 @@ public class GameWindow {
             glPopMatrix();
             glfwSwapBuffers(openGLWindow.getWindowId());
         }
+        // The window was closed, close everything
+        currentConnection.disconnect();
+        currentConnection = null;
+        running = false;
+        openGLWindow.close();
     }
 
     public static void pause() {
