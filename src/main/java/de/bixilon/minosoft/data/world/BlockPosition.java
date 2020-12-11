@@ -13,7 +13,7 @@
 
 package de.bixilon.minosoft.data.world;
 
-import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
+import de.bixilon.minosoft.render.blockModels.face.RenderConstants;
 import de.bixilon.minosoft.render.utility.Vec3;
 
 public record BlockPosition(int x, int y, int z) {

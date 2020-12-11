@@ -15,7 +15,7 @@ package de.bixilon.minosoft.data.world;
 
 import de.bixilon.minosoft.data.entities.block.BlockEntityMetaData;
 import de.bixilon.minosoft.data.mappings.blocks.Block;
-import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
+import de.bixilon.minosoft.render.blockModels.face.RenderConstants;
 
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;

@@ -29,6 +29,17 @@ import java.util.HashSet;
 import java.util.Map;
 
 public class BlockModelLoader {
+    public static final HashMap<String, float[]> TINTS;
+
+    static {
+        try {
+            TINTS = readTints(Util.readJsonAsset("mapping/tints.json"));
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
     /**
      * @param data json file which describes all block models
      * @return blockModels, textureID
@@ -36,11 +47,7 @@ public class BlockModelLoader {
     public static Pair<HashMap<String, BlockModelInterface>, Integer> load(String modName, JsonObject data) {
         HashMap<String, float[]> tints = new HashMap<>();
         if (modName.equals(ProtocolDefinition.DEFAULT_MOD)) {
-            try {
-                tints = readTints(Util.readJsonAsset("mapping/tints.json"));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            tints = TINTS;
         }
         HashMap<String, HashSet<SubBlock>> blockModels = loadModels(data);
 

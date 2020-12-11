@@ -22,7 +22,7 @@ import de.bixilon.minosoft.data.world.palette.Palette;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.protocol.InByteBuffer;
 import de.bixilon.minosoft.protocol.protocol.ProtocolDefinition;
-import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
+import de.bixilon.minosoft.render.blockModels.face.RenderConstants;
 
 import java.util.concurrent.ConcurrentHashMap;
 

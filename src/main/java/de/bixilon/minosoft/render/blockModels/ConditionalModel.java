@@ -18,8 +18,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.data.mappings.blocks.Block;
 import de.bixilon.minosoft.data.world.BlockPosition;
-import de.bixilon.minosoft.render.blockModels.Face.Axis;
-import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
+import de.bixilon.minosoft.render.blockModels.face.Axis;
+import de.bixilon.minosoft.render.blockModels.face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlock;
 import org.apache.commons.collections.primitives.ArrayFloatList;
 
@@ -32,20 +32,19 @@ public class ConditionalModel implements BlockModelInterface {
     HashMap<BlockCondition, HashSet<SubBlock>> conditionMap;
 
     public ConditionalModel(HashMap<String, HashSet<SubBlock>> blockModels, JsonArray elements) {
-        conditionMap = new HashMap<>();
+        this.conditionMap = new HashMap<>();
         for (JsonElement element : elements) {
             JsonObject block = element.getAsJsonObject();
             BlockCondition condition;
             if (block.has("properties")) {
                 condition = new BlockCondition(block.get("properties").getAsJsonObject());
             } else {
-                condition = BlockCondition.trueCondition;
+                condition = BlockCondition.TRUE_CONDITION;
             }
             HashSet<SubBlock> model = blockModels.get(block.get("model").getAsString()).stream().map(SubBlock::new).collect(Collectors.toCollection(HashSet::new));
             for (Axis axis : Axis.values()) {
-                String lowercase = axis.name().toLowerCase();
-                if (block.has(lowercase)) {
-                    BlockModelInterface.rotateModel(model, axis, block.get(lowercase).getAsDouble());
+                if (block.has(axis.getLowerCase())) {
+                    BlockModelInterface.rotateModel(model, axis, block.get(axis.getLowerCase()).getAsDouble());
                 }
             }
             conditionMap.put(condition, model);
@@ -54,12 +53,13 @@ public class ConditionalModel implements BlockModelInterface {
 
     @Override
     public ArrayFloatList prepare(HashSet<FaceOrientation> facesToDraw, BlockPosition position, Block block) {
-        ArrayFloatList result = new ArrayFloatList();
+        ArrayFloatList result = new ArrayFloatList(5 * conditionMap.size());
         for (Map.Entry<BlockCondition, HashSet<SubBlock>> entry : conditionMap.entrySet()) {
-            if (entry.getKey().contains(block)) {
-                for (SubBlock subBlock : entry.getValue()) {
-                    result.addAll(subBlock.getFaces(facesToDraw, position));
-                }
+            if (!entry.getKey().contains(block)) {
+                continue;
+            }
+            for (SubBlock subBlock : entry.getValue()) {
+                result.addAll(subBlock.getFaces(facesToDraw, position));
             }
         }
         return result;

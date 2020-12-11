@@ -11,7 +11,7 @@
  *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
-package de.bixilon.minosoft.render.blockModels.Face;
+package de.bixilon.minosoft.render.blockModels.face;
 
 public class RenderConstants {
     public static final int TEXTURE_PACK_RESOLUTION = 16;

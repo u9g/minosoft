@@ -14,8 +14,8 @@
 package de.bixilon.minosoft.render.texture;
 
 import com.google.gson.JsonArray;
-import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
-import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
+import de.bixilon.minosoft.render.blockModels.face.FaceOrientation;
+import de.bixilon.minosoft.render.blockModels.face.RenderConstants;
 import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlockPosition;
 import org.apache.commons.collections.primitives.ArrayFloatList;
 
@@ -66,7 +66,7 @@ public class InFaceUV {
         if (i > 3) {
             i -= 4;
         }
-        ArrayFloatList result = new ArrayFloatList();
+        ArrayFloatList result = new ArrayFloatList(2);
         switch (i) {
             case 0 -> {
                 result.add(realU1);

@@ -14,7 +14,7 @@
 package de.bixilon.minosoft.render.blockModels.subBlocks;
 
 import com.google.gson.JsonObject;
-import de.bixilon.minosoft.render.blockModels.Face.Axis;
+import de.bixilon.minosoft.render.blockModels.face.Axis;
 import de.bixilon.minosoft.render.utility.Vec3;
 import javafx.util.Pair;
 

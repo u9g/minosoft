@@ -16,9 +16,8 @@ package de.bixilon.minosoft.render;
 import de.bixilon.minosoft.data.mappings.blocks.Block;
 import de.bixilon.minosoft.data.world.*;
 import de.bixilon.minosoft.protocol.network.Connection;
-import de.bixilon.minosoft.render.blockModels.BlockModelLoader;
-import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
-import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
+import de.bixilon.minosoft.render.blockModels.face.FaceOrientation;
+import de.bixilon.minosoft.render.blockModels.face.RenderConstants;
 import org.apache.commons.collections.primitives.ArrayFloatList;
 
 import java.util.HashMap;

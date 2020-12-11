@@ -21,8 +21,8 @@ import de.bixilon.minosoft.data.mappings.blocks.BlockProperties;
 import de.bixilon.minosoft.data.mappings.blocks.BlockRotations;
 import de.bixilon.minosoft.data.world.BlockPosition;
 import de.bixilon.minosoft.logging.Log;
-import de.bixilon.minosoft.render.blockModels.Face.Axis;
-import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
+import de.bixilon.minosoft.render.blockModels.face.Axis;
+import de.bixilon.minosoft.render.blockModels.face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlock;
 import org.apache.commons.collections.primitives.ArrayFloatList;
 

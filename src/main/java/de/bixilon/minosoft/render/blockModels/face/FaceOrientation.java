@@ -11,10 +11,34 @@
  *  This software is not affiliated with Mojang AB, the original developer of Minecraft.
  */
 
-package de.bixilon.minosoft.render.blockModels.Face;
+package de.bixilon.minosoft.render.blockModels.face;
 
-public enum Axis {
-    X,
-    Y,
-    Z
+public enum FaceOrientation {
+    EAST(0),
+    WEST(1),
+    UP(2),
+    DOWN(3),
+    SOUTH(4),
+    NORTH(5);
+
+    private final int id;
+
+    FaceOrientation(int id) {
+        this.id = id;
+    }
+
+    public static FaceOrientation inverse(FaceOrientation orientation) {
+        return switch (orientation) {
+            case EAST -> WEST;
+            case WEST -> EAST;
+            case UP -> DOWN;
+            case DOWN -> UP;
+            case NORTH -> SOUTH;
+            case SOUTH -> NORTH;
+        };
+    }
+
+    public int getId() {
+        return id;
+    }
 }

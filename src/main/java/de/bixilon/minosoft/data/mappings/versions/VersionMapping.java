@@ -17,6 +17,7 @@ import com.google.common.collect.HashBiMap;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import de.bixilon.minosoft.config.StaticConfiguration;
 import de.bixilon.minosoft.data.EntityClassMappings;
 import de.bixilon.minosoft.data.Mappings;
 import de.bixilon.minosoft.data.entities.EntityInformation;
@@ -32,7 +33,7 @@ import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.protocol.protocol.ProtocolDefinition;
 import de.bixilon.minosoft.render.blockModels.BlockModelInterface;
 import de.bixilon.minosoft.render.blockModels.BlockModelLoader;
-import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
+import de.bixilon.minosoft.render.blockModels.face.FaceOrientation;
 import de.bixilon.minosoft.util.Pair;
 import org.apache.commons.collections.primitives.ArrayFloatList;
 
@@ -294,7 +295,7 @@ public class VersionMapping {
             }
         }
         BlockModelInterface model = modelMap.get(block.getMod()).get(block.getIdentifier());
-        if (model == null) {
+        if (StaticConfiguration.DEBUG_MODE && model == null) {
             Log.warn(String.format("The block model for the following block could not be found: %s", block));
             return BlockModelInterface.EMPTY;
         }

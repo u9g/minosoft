@@ -15,8 +15,8 @@ package de.bixilon.minosoft.render.blockModels.subBlocks;
 
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.data.world.BlockPosition;
-import de.bixilon.minosoft.render.blockModels.Face.Axis;
-import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
+import de.bixilon.minosoft.render.blockModels.face.Axis;
+import de.bixilon.minosoft.render.blockModels.face.FaceOrientation;
 import de.bixilon.minosoft.render.texture.InFaceUV;
 import de.bixilon.minosoft.render.texture.TextureLoader;
 import org.apache.commons.collections.primitives.ArrayFloatList;
@@ -26,11 +26,11 @@ import java.util.HashSet;
 import java.util.Map;
 
 public class SubBlock {
-    private HashMap<FaceOrientation, String> textures;
     private final HashMap<FaceOrientation, Integer> textureRotations;
     private final boolean[] full;
     private final HashMap<FaceOrientation, InFaceUV> uv;
     private final Cuboid cuboid;
+    private HashMap<FaceOrientation, String> textures;
     private SubBlockRotation rotation;
 
     public SubBlock(JsonObject json, HashMap<String, String> variables) {
@@ -135,8 +135,8 @@ public class SubBlock {
         if (!uv.containsKey(faceDirection) || !uv.get(faceDirection).exists()) {
             return null;
         }
-        ArrayFloatList result = new ArrayFloatList();
         SubBlockPosition[] positions = cuboid.getFacePositions(faceDirection);
+        ArrayFloatList result = new ArrayFloatList(positions.length * 5); // 3 floats for position, 2 for uv faces
         InFaceUV inFaceUV = uv.get(faceDirection);
         int rotation = textureRotations.get(faceDirection);
         for (int i = 0; i < positions.length; i++) {
@@ -147,11 +147,7 @@ public class SubBlock {
     }
 
     public HashSet<String> getTextures() {
-        HashSet<String> result = new HashSet<>();
-        for (Map.Entry<FaceOrientation, String> texture : textures.entrySet()) {
-            result.add(texture.getValue());
-        }
-        return result;
+        return new HashSet<>(textures.values());
     }
 
     public void rotate(Axis axis, double rotation) {

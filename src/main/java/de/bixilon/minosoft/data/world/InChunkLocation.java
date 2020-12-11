@@ -13,7 +13,7 @@
 
 package de.bixilon.minosoft.data.world;
 
-import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
+import de.bixilon.minosoft.render.blockModels.face.RenderConstants;
 
 /**
  * Chunk X, Y and Z location (max 16x255x16)

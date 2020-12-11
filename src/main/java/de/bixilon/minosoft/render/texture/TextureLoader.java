@@ -16,7 +16,7 @@ package de.bixilon.minosoft.render.texture;
 import de.bixilon.minosoft.data.assets.AssetsManager;
 import de.bixilon.minosoft.logging.Log;
 import de.bixilon.minosoft.render.GameWindow;
-import de.bixilon.minosoft.render.blockModels.Face.RenderConstants;
+import de.bixilon.minosoft.render.blockModels.face.RenderConstants;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -96,7 +96,7 @@ public class TextureLoader {
     private BufferedImage combineTextures() {
         // converts all single textures into a very wide image. Improves performance in opengl
         // TEXTURE_PACK_RESxTEXTURE_PACK_RES textures only
-        int imageLength = Integer.highestOneBit(totalTextures * RenderConstants.TEXTURE_PACK_RESOLUTION) * 2;
+        int imageLength = Integer.highestOneBit(totalTextures * RenderConstants.TEXTURE_PACK_RESOLUTION) << 1;
         BufferedImage totalImage = new BufferedImage(imageLength, RenderConstants.TEXTURE_PACK_RESOLUTION, BufferedImage.TYPE_INT_ARGB);
 
         int currentPos = 0;
@@ -109,7 +109,7 @@ public class TextureLoader {
             }
             textureCoordinates.put(texture.getKey(), currentPos++);
         }
-        step = (float) 1 / (float) imageLength * RenderConstants.TEXTURE_PACK_RESOLUTION;
+        this.step = 1f / (float) imageLength * RenderConstants.TEXTURE_PACK_RESOLUTION;
         return totalImage;
     }
 
@@ -139,8 +139,7 @@ public class TextureLoader {
             return -1;
         }
         // returns the start and end u-coordinate of a specific texture to access it
-        Integer pos = textureCoordinates.get(textureName);
-        return pos * step;
+        return textureCoordinates.get(textureName) * step;
     }
 
     public int getTextureID() {

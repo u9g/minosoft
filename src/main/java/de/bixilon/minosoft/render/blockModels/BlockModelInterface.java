@@ -17,8 +17,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.bixilon.minosoft.data.mappings.blocks.Block;
 import de.bixilon.minosoft.data.world.BlockPosition;
-import de.bixilon.minosoft.render.blockModels.Face.Axis;
-import de.bixilon.minosoft.render.blockModels.Face.FaceOrientation;
+import de.bixilon.minosoft.render.blockModels.face.Axis;
+import de.bixilon.minosoft.render.blockModels.face.FaceOrientation;
 import de.bixilon.minosoft.render.blockModels.subBlocks.SubBlock;
 import org.apache.commons.collections.primitives.ArrayFloatList;
 

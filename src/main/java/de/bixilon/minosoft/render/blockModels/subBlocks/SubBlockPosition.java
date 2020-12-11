@@ -15,11 +15,11 @@ package de.bixilon.minosoft.render.blockModels.subBlocks;
 
 import com.google.gson.JsonArray;
 import de.bixilon.minosoft.data.world.BlockPosition;
-import de.bixilon.minosoft.render.blockModels.Face.Axis;
+import de.bixilon.minosoft.render.blockModels.face.Axis;
 import de.bixilon.minosoft.render.utility.Vec3;
 import org.apache.commons.collections.primitives.ArrayFloatList;
 
-import static de.bixilon.minosoft.render.blockModels.Face.RenderConstants.BLOCK_RESOLUTION;
+import static de.bixilon.minosoft.render.blockModels.face.RenderConstants.BLOCK_RESOLUTION;
 
 public class SubBlockPosition {
     public static final float e = 0.01f;

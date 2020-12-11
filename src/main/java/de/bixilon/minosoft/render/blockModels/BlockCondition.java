@@ -23,15 +23,15 @@ import java.util.HashSet;
 import java.util.Map;
 
 public class BlockCondition {
-    public static final BlockCondition trueCondition = new BlockCondition() {
+    public static final BlockCondition TRUE_CONDITION = new BlockCondition() {
         @Override
         public boolean contains(Block block) {
             return true;
         }
     };
 
-    HashSet<BlockProperties> properties;
-    BlockRotations rotation;
+    private HashSet<BlockProperties> properties;
+    private BlockRotations rotation;
 
     public BlockCondition(JsonObject json) {
         properties = new HashSet<>();
@@ -53,11 +53,6 @@ public class BlockCondition {
         if (rotation != BlockRotations.NONE && rotation != block.getRotation()) {
             return false;
         }
-        for (BlockProperties property : properties) {
-            if (!block.getProperties().contains(property)) {
-                return false;
-            }
-        }
-        return true;
+        return properties.equals(block.getProperties());
     }
 }
